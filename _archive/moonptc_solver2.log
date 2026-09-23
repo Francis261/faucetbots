@@ -1,0 +1,12 @@
+logged in
+challenge: {"session_id":"cce3b981d07bda8cac5065577771c84b","challenge":{"type":"rotation","id":"440651971a7e98888123465704852a42","image":"/api/faucet/rotation-captcha/variant/5cc90aa8754771b3064aaf3b4e414c6262475a0b8865a671","crop":{"x":0.615,"y":0.7,"radius":0.095}},"tolerance":10}
+best angles: [{"angle":65,"score":200.21506442021803},{"angle":42,"score":200.47472745292367},{"angle":66,"score":200.60455896927652},{"angle":40,"score":200.6392467789891},{"angle":41,"score":200.70366699702677},{"angle":71,"score":200.7165510406343},{"angle":70,"score":200.97224975222994},{"angle":72,"score":201.10802775024777},{"angle":44,"score":201.14767096134787},{"angle":67,"score":201.1526263627354}]
+
+=== trying angle 65 (score: 200.22) ===
+verify: {"error":"wrong","attempts_left":1}
+
+=== trying angle 42 (score: 200.47) ===
+verify: {"error":"locked","locked_until":1789654073845}
+
+=== trying angle 66 (score: 200.60) ===
+verify: {"error":"locked","locked_until":1789654073000}

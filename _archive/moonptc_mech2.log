@@ -1,0 +1,15 @@
+logged in
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.evaluate: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('input[type=range]').first()[22m
+
+    at /home/francis/adbch/moonptc_mech2.mjs:40:16 {
+  log: [ "  - waiting for locator('input[type=range]').first()" ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.14.1

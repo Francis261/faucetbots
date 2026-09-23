@@ -1,0 +1,47 @@
+logged in, url: https://moonptc.com/dashboard
+faucet url: https://moonptc.com/faucet
+
+=== turnstile check ===
+{
+  "cfIframes": [],
+  "allFrames": [
+    {
+      "src": "",
+      "w": 125,
+      "h": 125,
+      "id": "",
+      "cls": "border-0"
+    },
+    {
+      "src": "",
+      "w": 468,
+      "h": 60,
+      "id": "",
+      "cls": "border-0"
+    },
+    {
+      "src": "",
+      "w": 180,
+      "h": 150,
+      "id": "",
+      "cls": "border-0"
+    }
+  ],
+  "hasTurnstile": false,
+  "siteKey": "0x4AAAAAAEFiuCNTLp_xRBDo",
+  "widgetDiv": null
+}
+render result: {"hasTurnstile":false}
+
+=== clicking I am not a robot ===
+robot btn visible: true
+robot btn box: {
+  x: 677.8656616210938,
+  y: 337.9552307128906,
+  width: 170.7164306640625,
+  height: 57.910430908203125
+}
+element at click point: {"tag":"DIV","cls":"cc-2524ce9fed438356","id":"","html":"<div class=\"cc-2524ce9fed438356\" data-cc-id=\"2524ce9fed438356\" data-format=\"3\" style=\"position: fixed; left: 0px; bottom: 0px; width: 100%; height: 100%; z-index: 2147483647; display: block;\"></div>"}
+cf iframes after click: []
+
+screenshot saved

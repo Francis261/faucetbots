@@ -1,0 +1,903 @@
+=== step 1: homepage ===
+turnstile: true
+token: 773
+after claim url: https://freelitecoin.online/mine.php
+
+=== step 2: mine.php ===
+mine url: https://freelitecoin.online/mine.php
+mine text: shadow772@gmail.com | +0.00002 LTC | tiger@gmail.com | +0.00002 LTC | star2013@gmail.com | Premium | +0.00004 LTC | eagle@outlook.com | +0.00002 LTC | star3157@gmail.com | Premium | +0.00004 LTC | blaze8844@gmail.com | +0.00002 LTC | rider6922@gmail.com | +0.00002 LTC | fox5451@gmail.com | +0.00002 LTC | star@gmail.com | +0.00002 LTC | pro@gmail.com | +0.00002 LTC | diamond@gmail.com | +0.00002 LTC | ltc@gmail.com | Premium | +0.00004 LTC | shadow772@gmail.com | +0.00002 LTC | tiger@gmail.com | +0.00002 LTC | star2013@gmail.com | Premium | +0.00004 LTC | eagle@outlook.com | +0.00002 LTC | star3157@gmail.com | Premium | +0.00004 LTC | blaze8844@gmail.com | +0.00002 LTC | rider6922@gmail.com | +0.00002 LTC | fox5451@gmail.com | +0.00002 LTC | star@gmail.com | +0.00002 LTC | pro@gmail.com | +0.00002 LTC | diamond@gmail.com | +0.00002 LTC | diamond@gmail.com | +0.00002 LTC | Balance | 7.000260 LTC | Claims | 6/50 |  Next Reset Claims: 00:29 | ROLL RANGE	REWARD | 1-99900	0.00002 LTC | 99910-99950	0.0005 LTC | 99960-99990	0.002 LTC | 100000	7 LTC | 000000 | ROLL | DASHBOARD | FAUCET | DICE
+mine buttons: [
+ {
+  "tag": "BUTTON",
+  "text": "Confirm",
+  "id": "confirmBannerBtn",
+  "cls": "",
+  "onclick": ""
+ },
+ {
+  "tag": "BUTTON",
+  "text": "ROLL",
+  "id": "mineButton",
+  "cls": "btn-claim",
+  "onclick": "mine()"
+ },
+ {
+  "tag": "A",
+  "text": "DASHBOARD",
+  "id": "",
+  "cls": "neon-btn",
+  "onclick": ""
+ },
+ {
+  "tag": "A",
+  "text": "FAUCET",
+  "id": "",
+  "cls": "neon-btn",
+  "onclick": ""
+ },
+ {
+  "tag": "A",
+  "text": "DICE",
+  "id": "",
+  "cls": "neon-btn",
+  "onclick": ""
+ }
+]
+mine inputs: []
+mine structure: [
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "top-claims-bar",
+  "text": "shadow772@gmail.com\n+0.00002 LTC\ntiger@gmail.com\n+0.00002 LT",
+  "onclick": ""
+ },
+ {
+  "tag": "DIV",
+  "id": "claimsList",
+  "cls": "top-claims-inner",
+  "text": "shadow772@gmail.com\n+0.00002 LTC\ntiger@gmail.com\n+0.00002 LT",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "shadow772@gmail.com\n+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "shadow772@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "tiger@gmail.com\n+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "tiger@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "star2013@gmail.com\nPremium\n+0.00004 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "star2013@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "premium",
+  "text": "Premium",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00004 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "eagle@outlook.com\n+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "eagle@outlook.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "star3157@gmail.com\nPremium\n+0.00004 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "star3157@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "premium",
+  "text": "Premium",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00004 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "blaze8844@gmail.com\n+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "blaze8844@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "rider6922@gmail.com\n+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "rider6922@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "fox5451@gmail.com\n+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "fox5451@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "star@gmail.com\n+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "star@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "pro@gmail.com\n+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "pro@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "diamond@gmail.com\n+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "diamond@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "ltc@gmail.com\nPremium\n+0.00004 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "ltc@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "premium",
+  "text": "Premium",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00004 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "shadow772@gmail.com\n+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "shadow772@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "tiger@gmail.com\n+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "tiger@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "star2013@gmail.com\nPremium\n+0.00004 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "star2013@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "premium",
+  "text": "Premium",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00004 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "eagle@outlook.com\n+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "eagle@outlook.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "star3157@gmail.com\nPremium\n+0.00004 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "star3157@gmail.com",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "premium",
+  "text": "Premium",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "amount",
+  "text": "+0.00004 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "top-claim-item",
+  "text": "blaze8844@gmail.com\n+0.00002 LTC",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "blaze8844@gmail.com",
+  "onclick": ""
+ }
+]
+
+=== step 3: dashboard.php ===
+dash url: https://freelitecoin.online/dashboard.php
+dash text: DASHBOARD | FAUCET | DICE |  Referral Program |  Total Referrals: 0 |  Invite Referrals and increase your withdrawal limit for every 1 referral! |  Balance: 7.00026 LTC ($364.43) |  Daily Withdrawal Limit: 0.0005 LTC | EN ▼ | 💸 Make a Deposit to Unlock Unlimited Withdrawals | 0.0% | 💰 Deposit | Withdrawal amount | Max |  WITHDRAW | Transaction History
+dash buttons: [
+ {
+  "tag": "SPAN",
+  "text": "×",
+  "id": "",
+  "cls": "close",
+  "onclick": "closePremiumModal()"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Pay with FaucetPay",
+  "id": "",
+  "cls": "",
+  "onclick": "buyPremiumFaucetPay()"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Direct Payment",
+  "id": "",
+  "cls": "",
+  "onclick": "buyPremiumDirect()"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Previous",
+  "id": "prevPageBtn",
+  "cls": "",
+  "onclick": ""
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Next",
+  "id": "nextPageBtn",
+  "cls": "",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "text": "×",
+  "id": "",
+  "cls": "close",
+  "onclick": "closePaymentModal()"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "$0.1",
+  "id": "",
+  "cls": "quick-btn",
+  "onclick": "setQuickAmount('0.1')"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "$1",
+  "id": "",
+  "cls": "quick-btn",
+  "onclick": "setQuickAmount('1')"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "$5",
+  "id": "",
+  "cls": "quick-btn",
+  "onclick": "setQuickAmount('5')"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "$10",
+  "id": "",
+  "cls": "quick-btn",
+  "onclick": "setQuickAmount('10')"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "$20",
+  "id": "",
+  "cls": "quick-btn",
+  "onclick": "setQuickAmount('20')"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Deposit Now",
+  "id": "",
+  "cls": "btn btn-payment",
+  "onclick": ""
+ },
+ {
+  "tag": "SPAN",
+  "text": "×",
+  "id": "",
+  "cls": "close",
+  "onclick": "closeOxaPayModal()"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "$0.2",
+  "id": "",
+  "cls": "quick-btn",
+  "onclick": "setOxaPayQuickAmount('0.2')"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "$1",
+  "id": "",
+  "cls": "quick-btn",
+  "onclick": "setOxaPayQuickAmount('1')"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "$5",
+  "id": "",
+  "cls": "quick-btn",
+  "onclick": "setOxaPayQuickAmount('5')"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "$10",
+  "id": "",
+  "cls": "quick-btn",
+  "onclick": "setOxaPayQuickAmount('10')"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "$20",
+  "id": "",
+  "cls": "quick-btn",
+  "onclick": "setOxaPayQuickAmount('20')"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Create Invoice",
+  "id": "",
+  "cls": "btn btn-payment",
+  "onclick": ""
+ },
+ {
+  "tag": "A",
+  "text": "DASHBOARD",
+  "id": "",
+  "cls": "neon-btn",
+  "onclick": ""
+ },
+ {
+  "tag": "A",
+  "text": "FAUCET",
+  "id": "",
+  "cls": "neon-btn",
+  "onclick": ""
+ },
+ {
+  "tag": "A",
+  "text": "DICE",
+  "id": "",
+  "cls": "neon-btn",
+  "onclick": ""
+ },
+ {
+  "tag": "BUTTON",
+  "text": "",
+  "id": "",
+  "cls": "copy-referral-btn",
+  "onclick": "copyReferralLink()"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "EN ▼",
+  "id": "",
+  "cls": "",
+  "onclick": "toggleLangMenu(event)"
+ },
+ {
+  "tag": "A",
+  "text": "🇬🇧 English",
+  "id": "",
+  "cls": "",
+  "onclick": ""
+ }
+]
+dash structure: [
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "bottom-nav",
+  "text": "DASHBOARD\nFAUCET\nDICE"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "nav-container",
+  "text": "DASHBOARD\nFAUCET\nDICE"
+ },
+ {
+  "tag": "A",
+  "id": "",
+  "cls": "neon-btn",
+  "text": "DASHBOARD"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "DASHBOARD"
+ },
+ {
+  "tag": "A",
+  "id": "",
+  "cls": "neon-btn",
+  "text": "FAUCET"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "FAUCET"
+ },
+ {
+  "tag": "A",
+  "id": "",
+  "cls": "neon-btn",
+  "text": "DICE"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "DICE"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "container",
+  "text": "Referral Program\n\n Total Referrals: 0\n\n Invite Referrals and increase your withd"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "blocks-container",
+  "text": "Referral Program\n\n Total Referrals: 0\n\n Invite Referrals and increase your withd"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "block referral-block",
+  "text": "Referral Program\n\n Total Referrals: 0\n\n Invite Referrals and increase your withd"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "referral-header",
+  "text": "Referral Program\n\n Total Referrals: 0"
+ },
+ {
+  "tag": "H2",
+  "id": "",
+  "cls": "",
+  "text": "Referral Program"
+ },
+ {
+  "tag": "P",
+  "id": "",
+  "cls": "",
+  "text": "Total Referrals: 0"
+ },
+ {
+  "tag": "P",
+  "id": "",
+  "cls": "",
+  "text": "Invite Referrals and increase your withdrawal limit for every 1 referral!"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "referral-link-container",
+  "text": ""
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "referral-input-wrapper",
+  "text": ""
+ },
+ {
+  "tag": "INPUT",
+  "id": "referral_link",
+  "cls": "",
+  "text": ""
+ },
+ {
+  "tag": "BUTTON",
+  "id": "",
+  "cls": "copy-referral-btn",
+  "text": ""
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "block transaction-block",
+  "text": "Balance: 7.00026 LTC ($364.43)\n\n Daily Withdrawal Limit: 0.0005 LTC\n\nEN ▼\n\n\n💸 M"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "",
+  "text": "Balance: 7.00026 LTC ($364.43)"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "7.00026 LTC"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "($364.43)"
+ },
+ {
+  "tag": "P",
+  "id": "",
+  "cls": "",
+  "text": "Daily Withdrawal Limit: 0.0005 LTC"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "deposit-progress-block",
+  "text": "EN ▼\n\n\n💸 Make a Deposit to Unlock Unlimited Withdrawals\n0.0%\n💰 Deposit"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "lang-switcher",
+  "text": "EN ▼"
+ },
+ {
+  "tag": "BUTTON",
+  "id": "",
+  "cls": "",
+  "text": "EN ▼"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "EN"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "▼"
+ },
+ {
+  "tag": "H3",
+  "id": "",
+  "cls": "",
+  "text": "💸 Make a Deposit to Unlock Unlimited Withdrawals"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "progress-bar",
+  "text": "0.0%"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "0.0%"
+ },
+ {
+  "tag": "BUTTON",
+  "id": "",
+  "cls": "btn-deposit main",
+  "text": "💰 Deposit"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "",
+  "text": "Withdrawal amount\nMax"
+ },
+ {
+  "tag": "LABEL",
+  "id": "",
+  "cls": "",
+  "text": "Withdrawal amount"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "",
+  "text": "Max"
+ },
+ {
+  "tag": "INPUT",
+  "id": "amount",
+  "cls": "",
+  "text": ""
+ },
+ {
+  "tag": "BUTTON",
+  "id": "",
+  "cls": "max-btn",
+  "text": "Max"
+ },
+ {
+  "tag": "BUTTON",
+  "id": "",
+  "cls": "btn btn-instant-withdraw",
+  "text": "WITHDRAW"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "",
+  "text": "Transaction History"
+ },
+ {
+  "tag": "BUTTON",
+  "id": "historyBtn",
+  "cls": "",
+  "text": "Transaction History"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "Transaction History"
+ }
+]

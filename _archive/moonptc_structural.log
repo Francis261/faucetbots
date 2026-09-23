@@ -1,0 +1,9 @@
+logged in
+challenge: {"session_id":"65e38f258f2c44961f4b5a04760566ed","challenge":{"type":"rotation","id":"bd62c45300d800881cf4adb9afdfef11","image":"/api/faucet/rotation-captcha/variant/3d5fc5dfc2d4cbf1b46e2e6c75d8ec93ee48a58af82177e6","crop":{"x":0.5,"y":0.375,"radius":0.105}},"tolerance":10}
+top: 223:-0.9058, 220:-0.9037, 218:-0.9028, 216:-0.9016, 217:-0.8999, 222:-0.8978, 225:-0.8966, 219:-0.8951, 224:-0.8941, 215:-0.8932
+trying: 223
+verify: {"error":"wrong","attempts_left":2}
+try 220
+-> {"error":"wrong","attempts_left":1}
+try 218
+-> {"error":"locked","locked_until":1789661682463}

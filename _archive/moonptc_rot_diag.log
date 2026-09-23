@@ -1,0 +1,44 @@
+logged in
+=== checking for rotation puzzle ===
+{
+  "bodyText": "MoonPTC\nEarn crypto\nBalance\nLevel 1\n50\nDashboard\nFaucet\nPTC Ads\nShortlinks\nOfferwalls\nWithdraw\nReferrals\nDaily Bonus\nAdvertiser\n🇺🇸\nEnglish\n▾\nLogout\nFaucet\n\nClaim free coins every 2 minutes\n\nI'm not a robot\nClaim now\nReward Table\n0 – 9,500\n10\n9,501 – 9,950\n20\n9,951 – 10,000\n40\nBalance\n50\nLevel\n1\nTotal Earned\n50\nHow it works\n• Solve the captcha and click Claim to roll the dice\n• Higher rolls win bigger rewards!\n• Higher level = bigger boost on all earnings (+10% at Level 10, +20% at Level 100)\n•",
+  "imgs": [
+    {
+      "src": "https://moonptc.com/logo_moon.png",
+      "w": 128,
+      "h": 128,
+      "style": "",
+      "cls": "w-full h-full object-cover",
+      "parentCls": "w-8 h-8 rounded-lg overflow-hidden border-2 border"
+    },
+    {
+      "src": "https://moonptc.com/logo_moon.png",
+      "w": 36,
+      "h": 36,
+      "style": "",
+      "cls": "w-full h-full object-cover",
+      "parentCls": "w-10 h-10 rounded-xl overflow-hidden border-2 bord"
+    }
+  ],
+  "canvasCount": 2,
+  "sliderCount": 2,
+  "svgCount": 28,
+  "rotationEls": [
+    {
+      "tag": "SPAN",
+      "cls": "transition-transform rotate-0",
+      "html": "<span class=\"transition-transform rotate-0\">▾</span>",
+      "text": "▾"
+    },
+    {
+      "tag": "INPUT",
+      "cls": "w-full h-6 appearance-none bg-transparent cursor-pointer\n   ",
+      "html": "<input type=\"range\" min=\"0\" max=\"360\" step=\"1\" class=\"w-full h-6 appearance-none bg-transparent cursor-pointer\n            [&amp;::-webkit-slider-runnable-track]:h-1.5\n            [&amp;::-webkit-slider-runnable-track]:rounded-full\n            [&amp;::-webkit-slider-runnable-track]:bg-white/10\n     ",
+      "text": ""
+    }
+  ]
+}
+
+modals: []
+
+screenshot saved

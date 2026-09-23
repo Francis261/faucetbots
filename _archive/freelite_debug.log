@@ -1,0 +1,43 @@
+ts: true
+token: 773
+form: {
+ "action": "https://freelitecoin.online/index.php?ref=24084",
+ "method": "post",
+ "inputs": [
+  {
+   "name": "csrf_token",
+   "value": "eaf4618782b537f1cef0ed774a4eaa",
+   "type": "hidden"
+  },
+  {
+   "name": "faucet_email",
+   "value": "francisdominic986532@gmail.com",
+   "type": "email"
+  },
+  {
+   "name": "cf-turnstile-response",
+   "value": "1.fq0jdaIIYUaq1D0AWQex5nzfd0NK",
+   "type": "hidden"
+  }
+ ]
+}
+after url: https://freelitecoin.online/index.php?ref=24084
+page text: ⚡ Instant to FaucetPay | Free LTC Every Minute | No signup • No KYC • Straight to your wallet | 127 people claimed in the last hour | You will receive | 0.00018 LTC | ≈ 0.25 – 0.30 LTC per day | Next claim in | 0:54 | RECENT CLAIMS | d***@gmail.com | +0.00002 LTC | x***@gmail.com | +0.00002 LTC | y***@gmail.com | +0.00002 LTC | m***@gmail.com | +0.00002 LTC | Error | Claim Now → | Instant • No fees | FaucetPay | No KYC | Every 60s | Instant | If you claim every minute | ≈ 0.26 LTC / day | Real results may vary | 🔥 Today claimed: 1.847 LTC  •  Onli
+errors: [ 'Error' ]
+cookies: PHPSESSID=b31fc2252b5868563e6c, cf_clearance=6ZWVUyCuGTwaV5LRKcOk
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.goto: net::ERR_NETWORK_CHANGED at https://freelitecoin.online/mine.php
+Call log:
+[2m  - navigating to "https://freelitecoin.online/mine.php", waiting until "domcontentloaded"[22m
+
+    at /home/francis/adbch/freelite_debug.mjs:64:12 {
+  log: [
+    '  - navigating to "https://freelitecoin.online/mine.php", waiting until "domcontentloaded"'
+  ],
+  name: 'Error'
+}
+
+Node.js v24.14.1

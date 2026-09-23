@@ -1,0 +1,12 @@
+=== clicking captcha checkbox ===
+click result: {"found":false,"msg":"no shadow root"}
+
+=== after click state ===
+[]
+
+screenshot saved
+
+=== mouse click at checkbox position ===
+{
+  "msg": "no shadow root"
+}

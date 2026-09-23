@@ -1,0 +1,60 @@
+{
+  "prompt": "Select all images with\na fire hydrant\nClick verify once there are none left.",
+  "tiles": [
+    {
+      "idx": 0,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA4vDtxZTh23cHmOCp--jJNXtCYllBG6eJTcv6T6o6VrBUzpxvC2VMC3APT4qx8PICWhtbfcD3J6TIJ7ZKNmjxui-5GGxR_nhyXQAd9oeLTjBU_M7RtMeh-vpUTOgakkQltcwyHqV_jCQg-F0WyqV1ZYUhfO9TwX34pPNzDN8CiNQe7eqOvFmivl6sSQ7F7j576MUHRV&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789639650744-0.png",
+      "hash": 4.684465063556301e+21
+    },
+    {
+      "idx": 1,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA4vDtxZTh23cHmOCp--jJNXtCYllBG6eJTcv6T6o6VrBUzpxvC2VMC3APT4qx8PICWhtbfcD3J6TIJ7ZKNmjxui-5GGxR_nhyXQAd9oeLTjBU_M7RtMeh-vpUTOgakkQltcwyHqV_jCQg-F0WyqV1ZYUhfO9TwX34pPNzDN8CiNQe7eqOvFmivl6sSQ7F7j576MUHRV&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789639650744-1.png",
+      "hash": 4.684465063556301e+21
+    },
+    {
+      "idx": 2,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA4vDtxZTh23cHmOCp--jJNXtCYllBG6eJTcv6T6o6VrBUzpxvC2VMC3APT4qx8PICWhtbfcD3J6TIJ7ZKNmjxui-5GGxR_nhyXQAd9oeLTjBU_M7RtMeh-vpUTOgakkQltcwyHqV_jCQg-F0WyqV1ZYUhfO9TwX34pPNzDN8CiNQe7eqOvFmivl6sSQ7F7j576MUHRV&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789639650744-2.png",
+      "hash": 4.684465063556301e+21
+    },
+    {
+      "idx": 3,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA4vDtxZTh23cHmOCp--jJNXtCYllBG6eJTcv6T6o6VrBUzpxvC2VMC3APT4qx8PICWhtbfcD3J6TIJ7ZKNmjxui-5GGxR_nhyXQAd9oeLTjBU_M7RtMeh-vpUTOgakkQltcwyHqV_jCQg-F0WyqV1ZYUhfO9TwX34pPNzDN8CiNQe7eqOvFmivl6sSQ7F7j576MUHRV&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789639650744-3.png",
+      "hash": 4.684465063556301e+21
+    },
+    {
+      "idx": 4,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA4vDtxZTh23cHmOCp--jJNXtCYllBG6eJTcv6T6o6VrBUzpxvC2VMC3APT4qx8PICWhtbfcD3J6TIJ7ZKNmjxui-5GGxR_nhyXQAd9oeLTjBU_M7RtMeh-vpUTOgakkQltcwyHqV_jCQg-F0WyqV1ZYUhfO9TwX34pPNzDN8CiNQe7eqOvFmivl6sSQ7F7j576MUHRV&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789639650744-4.png",
+      "hash": 4.684465063556301e+21
+    },
+    {
+      "idx": 5,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA4vDtxZTh23cHmOCp--jJNXtCYllBG6eJTcv6T6o6VrBUzpxvC2VMC3APT4qx8PICWhtbfcD3J6TIJ7ZKNmjxui-5GGxR_nhyXQAd9oeLTjBU_M7RtMeh-vpUTOgakkQltcwyHqV_jCQg-F0WyqV1ZYUhfO9TwX34pPNzDN8CiNQe7eqOvFmivl6sSQ7F7j576MUHRV&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789639650744-5.png",
+      "hash": 4.684465063556301e+21
+    },
+    {
+      "idx": 6,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA4vDtxZTh23cHmOCp--jJNXtCYllBG6eJTcv6T6o6VrBUzpxvC2VMC3APT4qx8PICWhtbfcD3J6TIJ7ZKNmjxui-5GGxR_nhyXQAd9oeLTjBU_M7RtMeh-vpUTOgakkQltcwyHqV_jCQg-F0WyqV1ZYUhfO9TwX34pPNzDN8CiNQe7eqOvFmivl6sSQ7F7j576MUHRV&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789639650744-6.png",
+      "hash": 4.684465063556301e+21
+    },
+    {
+      "idx": 7,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA4vDtxZTh23cHmOCp--jJNXtCYllBG6eJTcv6T6o6VrBUzpxvC2VMC3APT4qx8PICWhtbfcD3J6TIJ7ZKNmjxui-5GGxR_nhyXQAd9oeLTjBU_M7RtMeh-vpUTOgakkQltcwyHqV_jCQg-F0WyqV1ZYUhfO9TwX34pPNzDN8CiNQe7eqOvFmivl6sSQ7F7j576MUHRV&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789639650744-7.png",
+      "hash": 4.684465063556301e+21
+    },
+    {
+      "idx": 8,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA4vDtxZTh23cHmOCp--jJNXtCYllBG6eJTcv6T6o6VrBUzpxvC2VMC3APT4qx8PICWhtbfcD3J6TIJ7ZKNmjxui-5GGxR_nhyXQAd9oeLTjBU_M7RtMeh-vpUTOgakkQltcwyHqV_jCQg-F0WyqV1ZYUhfO9TwX34pPNzDN8CiNQe7eqOvFmivl6sSQ7F7j576MUHRV&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789639650744-8.png",
+      "hash": 4.684465063556301e+21
+    }
+  ],
+  "id": 1789639650744
+}

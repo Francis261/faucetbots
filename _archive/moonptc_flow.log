@@ -1,0 +1,510 @@
+=== step 1: enter email ===
+email filled
+after start earning url: https://moonptc.com/dashboard
+cookies: moonptc_session=e3af35665bba04a863a3
+
+=== step 2: faucet ===
+faucet url: https://moonptc.com/faucet
+faucet text: MoonPTC | Earn crypto | Balance | Level 1 | 50 | Dashboard | Faucet | PTC Ads | Shortlinks | Offerwalls | Withdraw | Referrals | Daily Bonus | Advertiser | 🇺🇸 | English | ▾ | Logout | Faucet | Claim free coins every 2 minutes | I'm not a robot | Claim now | Reward Table | 0 – 9,500 | 10 | 9,501 – 9,950 | 20 | 9,951 – 10,000 | 40 | Balance | 50 | Level | 1 | Total Earned | 50 | How it works | • Solve the captcha and click Claim to roll the dice | • Higher rolls win bigger rewards! | • Higher level = bigger boost on all earnings (+10% at Level 10, +20% at Level 100) | • Currently, the faucet cooldown is 2 minutes | © 2026 MoonPTC. All rights reserved. | Terms & Conditions | Privacy Policy | Contact
+faucet elements: [
+ {
+  "tag": "BUTTON",
+  "text": "",
+  "id": "",
+  "cls": "w-10 h-10 flex items-center justify-center rounded",
+  "href": ""
+ },
+ {
+  "tag": "BUTTON",
+  "text": "MoonPTC",
+  "id": "",
+  "cls": "flex items-center gap-2 active:scale-95 transition",
+  "href": ""
+ },
+ {
+  "tag": "BUTTON",
+  "text": "50",
+  "id": "",
+  "cls": "flex items-center gap-1.5 px-3 py-1.5 rounded-xl b",
+  "href": ""
+ },
+ {
+  "tag": "A",
+  "text": "MoonPTC\nEarn crypto",
+  "id": "",
+  "cls": "flex items-center gap-3 group",
+  "href": "https://moonptc.com/dashboard"
+ },
+ {
+  "tag": "A",
+  "text": "Dashboard",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "href": "https://moonptc.com/dashboard"
+ },
+ {
+  "tag": "A",
+  "text": "Faucet",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "href": "https://moonptc.com/faucet"
+ },
+ {
+  "tag": "A",
+  "text": "PTC Ads",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "href": "https://moonptc.com/ptc"
+ },
+ {
+  "tag": "A",
+  "text": "Shortlinks",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "href": "https://moonptc.com/shortlinks"
+ },
+ {
+  "tag": "A",
+  "text": "Offerwalls",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "href": "https://moonptc.com/offerwalls"
+ },
+ {
+  "tag": "A",
+  "text": "Withdraw",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "href": "https://moonptc.com/withdraw"
+ },
+ {
+  "tag": "A",
+  "text": "Referrals",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "href": "https://moonptc.com/referrals"
+ },
+ {
+  "tag": "A",
+  "text": "Daily Bonus",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "href": "https://moonptc.com/daily-bonus"
+ },
+ {
+  "tag": "A",
+  "text": "Advertiser",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tex",
+  "href": "https://moonptc.com/advertiser"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "🇺🇸\nEnglish\n▾",
+  "id": "",
+  "cls": "w-full flex items-center justify-between gap-2 px-",
+  "href": ""
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Logout",
+  "id": "",
+  "cls": "w-full flex items-center gap-2 px-3 py-2.5 rounded",
+  "href": ""
+ },
+ {
+  "tag": "BUTTON",
+  "text": "I'm not a robot",
+  "id": "",
+  "cls": "relative w-full max-w-[320px] rounded-xl border bg",
+  "href": ""
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Claim now",
+  "id": "",
+  "cls": "btn-primary text-base px-8 py-3",
+  "href": ""
+ },
+ {
+  "tag": "A",
+  "text": "Terms & Conditions",
+  "id": "",
+  "cls": "hover:text-moonlight-100 transition-colors",
+  "href": "https://moonptc.com/terms"
+ },
+ {
+  "tag": "A",
+  "text": "Privacy Policy",
+  "id": "",
+  "cls": "hover:text-moonlight-100 transition-colors",
+  "href": "https://moonptc.com/privacy"
+ },
+ {
+  "tag": "A",
+  "text": "Contact",
+  "id": "",
+  "cls": "hover:text-moonlight-100 transition-colors",
+  "href": "https://moonptc.com/contact"
+ },
+ {
+  "tag": "A",
+  "text": "Dashboard",
+  "id": "",
+  "cls": "relative flex flex-col items-center gap-0.5 px-3 p",
+  "href": "https://moonptc.com/dashboard"
+ },
+ {
+  "tag": "A",
+  "text": "Faucet",
+  "id": "",
+  "cls": "relative flex flex-col items-center gap-0.5 px-3 p",
+  "href": "https://moonptc.com/faucet"
+ },
+ {
+  "tag": "A",
+  "text": "PTC Ads",
+  "id": "",
+  "cls": "relative flex flex-col items-center gap-0.5 px-3 p",
+  "href": "https://moonptc.com/ptc"
+ },
+ {
+  "tag": "A",
+  "text": "Shortlinks",
+  "id": "",
+  "cls": "relative flex flex-col items-center gap-0.5 px-3 p",
+  "href": "https://moonptc.com/shortlinks"
+ },
+ {
+  "tag": "A",
+  "text": "Withdraw",
+  "id": "",
+  "cls": "relative flex flex-col items-center gap-0.5 px-3 p",
+  "href": "https://moonptc.com/withdraw"
+ }
+]
+captcha info: {
+ "iframes": [
+  {
+   "src": "",
+   "w": 125,
+   "h": 125
+  },
+  {
+   "src": "",
+   "w": 250,
+   "h": 100
+  },
+  {
+   "src": "",
+   "w": 300,
+   "h": 250
+  }
+ ],
+ "hasTurnstile": false,
+ "hasRecaptcha": false,
+ "hasCheckbox": false,
+ "turnstileHtml": ""
+}
+structure: [
+ {
+  "tag": "DIV",
+  "id": "root",
+  "cls": "",
+  "text": "MoonPTC\nEarn crypto\nBalance\nLevel 1\n50\nDashboard\nFaucet\nPTC "
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "",
+  "text": "MoonPTC\nEarn crypto\nBalance\nLevel 1\n50\nDashboard\nFaucet\nPTC "
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "min-h-screen relative",
+  "text": "MoonPTC\nEarn crypto\nBalance\nLevel 1\n50\nDashboard\nFaucet\nPTC "
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "h-full w-full flex flex-col",
+  "text": "MoonPTC\nEarn crypto\nBalance\nLevel 1\n50\nDashboard\nFaucet\nPTC "
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "p-4 border-b border-white/5",
+  "text": "MoonPTC\nEarn crypto"
+ },
+ {
+  "tag": "A",
+  "id": "",
+  "cls": "flex items-center gap-3 group",
+  "text": "MoonPTC\nEarn crypto"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "w-10 h-10 rounded-xl overflow-hidden border-2 bord",
+  "text": ""
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "",
+  "text": "MoonPTC\nEarn crypto"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "text-lg font-bold text-moonlight-100",
+  "text": "MoonPTC"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "text-[10px] text-moonlight-400 -mt-0.5",
+  "text": "Earn crypto"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "p-3 border-b border-white/5",
+  "text": "Balance\nLevel 1\n50"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "p-2.5 space-y-0.5 rounded-xl border border-white/[",
+  "text": "Balance\nLevel 1\n50"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "flex justify-between text-xs text-moonlight-400",
+  "text": "Balance\nLevel 1"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "",
+  "text": "Balance"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "text-[10px]",
+  "text": "Level 1"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "inline-flex items-center gap-1.5 ",
+  "text": "50"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "text-2xl font-bold text-moonlight-100 tabular-nums",
+  "text": "50"
+ },
+ {
+  "tag": "A",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "text": "Dashboard"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "text-moonlight-400",
+  "text": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "font-medium text-sm",
+  "text": "Dashboard"
+ },
+ {
+  "tag": "A",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "text": "Faucet"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "text-moonlight-400",
+  "text": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "font-medium text-sm",
+  "text": "Faucet"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "ml-auto w-1.5 h-1.5 rounded-full bg-slate-200",
+  "text": ""
+ },
+ {
+  "tag": "A",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "text": "PTC Ads"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "text-moonlight-400",
+  "text": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "font-medium text-sm",
+  "text": "PTC Ads"
+ },
+ {
+  "tag": "A",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "text": "Shortlinks"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "text-moonlight-400",
+  "text": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "font-medium text-sm",
+  "text": "Shortlinks"
+ },
+ {
+  "tag": "A",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "text": "Offerwalls"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "text-moonlight-400",
+  "text": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "font-medium text-sm",
+  "text": "Offerwalls"
+ },
+ {
+  "tag": "A",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "text": "Withdraw"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "text-moonlight-400",
+  "text": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "font-medium text-sm",
+  "text": "Withdraw"
+ },
+ {
+  "tag": "A",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "text": "Referrals"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "text-moonlight-400",
+  "text": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "font-medium text-sm",
+  "text": "Referrals"
+ },
+ {
+  "tag": "A",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tra",
+  "text": "Daily Bonus"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "text-moonlight-400",
+  "text": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "font-medium text-sm",
+  "text": "Daily Bonus"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "pt-3 border-t border-white/5 mt-3",
+  "text": "Advertiser"
+ },
+ {
+  "tag": "A",
+  "id": "",
+  "cls": "flex items-center gap-3 px-3 py-2.5 rounded-xl tex",
+  "text": "Advertiser"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "text-moonlight-400",
+  "text": ""
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "font-medium text-sm",
+  "text": "Advertiser"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "mt-auto p-3 border-t border-white/5 space-y-1.5",
+  "text": "🇺🇸\nEnglish\n▾\nLogout"
+ },
+ {
+  "tag": "DIV",
+  "id": "",
+  "cls": "relative",
+  "text": "🇺🇸\nEnglish\n▾"
+ },
+ {
+  "tag": "BUTTON",
+  "id": "",
+  "cls": "w-full flex items-center justify-between gap-2 px-",
+  "text": "🇺🇸\nEnglish\n▾"
+ },
+ {
+  "tag": "SPAN",
+  "id": "",
+  "cls": "flex items-center gap-2",
+  "text": "🇺🇸\nEnglish"
+ }
+]

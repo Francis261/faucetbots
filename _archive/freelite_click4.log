@@ -1,0 +1,24 @@
+turnstile frame: https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/tvlah/0x4AAAAAA
+[0] htmlLen=0 title="Checking your Browser…"
+[1] htmlLen=0 title="Checking your Browser…"
+[2] htmlLen=0 title="Checking your Browser…"
+[3] htmlLen=0 title="Checking your Browser…"
+[4] htmlLen=0 title="Checking your Browser…"
+[5] htmlLen=0 title="Checking your Browser…"
+[6] htmlLen=0 title="Checking your Browser…"
+[7] htmlLen=0 title="Checking your Browser…"
+[8] htmlLen=0 title="Checking your Browser…"
+[9] htmlLen=0 title="Checking your Browser…"
+[10] htmlLen=0 title="Checking your Browser…"
+[11] htmlLen=0 title="Checking your Browser…"
+[12] htmlLen=0 title="Checking your Browser…"
+[13] htmlLen=0 title="Checking your Browser…"
+[14] htmlLen=0 title="Checking your Browser…"
+clicked body at (25,33)
+token after body click: 773
+checkbox count: 0
+iframe element: null
+clicking captcha-wrap at (466.31341552734375, 419.723876953125)
+token after wrap click: 773
+wait[0] token=773
+GOT TOKEN!

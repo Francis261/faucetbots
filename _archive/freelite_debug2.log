@@ -1,0 +1,33 @@
+token before submit: 0
+form data: {
+ "action": "https://freelitecoin.online/index.php?ref=24084",
+ "method": "post",
+ "inputs": [
+  {
+   "name": "csrf_token",
+   "value": "8806f69d8b83e00d04e9390d230841c392a1aeee59e13ecb8cfe638b67428205",
+   "type": "hidden"
+  },
+  {
+   "name": "faucet_email",
+   "value": "francisdominic986532@gmail.com",
+   "type": "email"
+  },
+  {
+   "name": "cf-turnstile-response",
+   "value": "",
+   "type": "hidden"
+  }
+ ]
+}
+POST response: https://freelitecoin.online/cdn-cgi/rum? 204
+POST response: https://freelitecoin.online/index.php?ref=24084 200
+error in response: error {
+    background: rgba(127,29,29,0.65);
+    border: 1px solid rgba(239,68,68,0.35);
+    col
+POST response: https://freelitecoin.online/cdn-cgi/rum? 204
+after url: https://freelitecoin.online/index.php?ref=24084
+page text: ⚡ Instant to FaucetPay | Free LTC Every Minute | No signup • No KYC • Straight to your wallet | 127 people claimed in the last hour | You will receive | 0.00018 LTC | ≈ 0.25 – 0.30 LTC per day | Next claim in | 0:54 | RECENT CLAIMS | j***@gmail.com | +0.00002 LTC | k***@gmail.com | +0.00002 LTC | m***@gmail.com | +0.00002 LTC | r***@gmail.com | +0.00002 LTC | Captcha required | Claim Now → | Instant • No fees | FaucetPay | No KYC | Every 60s | Instant | If you claim every minute | ≈ 0.26 LTC / day | Real results may vary | 🔥 Today claimed: 1.847 LTC  •  Online: 633
+error elements: [{"cls":"error","text":"Captcha required"}]
+success elements: []

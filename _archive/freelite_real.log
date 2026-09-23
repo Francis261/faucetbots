@@ -1,0 +1,24 @@
+=== homepage with real profile ===
+turnstile frame: true
+[poll 0] title="Checking your Browser…" token=0 els=[]
+[poll 1] title="Checking your Browser…" token=0 els=[]
+[poll 2] title="Checking your Browser…" token=0 els=[]
+[poll 3] title="Checking your Browser…" token=0 els=[]
+[poll 4] title="Checking your Browser…" token=0 els=[]
+[poll 5] title="Checking your Browser…" token=0 els=[]
+[poll 6] title="Checking your Browser…" token=0 els=[]
+[poll 7] title="Checking your Browser…" token=0 els=[]
+[poll 8] title="Checking your Browser…" token=0 els=[]
+[poll 9] title="Checking your Browser…" token=0 els=[]
+[poll 10] title="Checking your Browser…" token=0 els=[]
+[poll 11] title="Checking your Browser…" token=0 els=[]
+[poll 12] title="Checking your Browser…" token=0 els=[]
+[poll 13] title="Checking your Browser…" token=0 els=[]
+[poll 14] title="Checking your Browser…" token=0 els=[]
+[poll 15] title="Checking your Browser…" token=0 els=[]
+[poll 16] title="Checking your Browser…" token=0 els=[]
+[poll 17] title="Checking your Browser…" token=0 els=[]
+[poll 18] title="Checking your Browser…" token=0 els=[]
+[poll 19] title="Checking your Browser…" token=0 els=[]
+ts box: null
+cookies now: PHPSESSID=736da419cbe84aa484f3

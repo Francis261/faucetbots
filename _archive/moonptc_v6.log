@@ -1,0 +1,16 @@
+logged in
+looking for turnstile iframe...
+found turnstile frame: https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0
+frame content: {
+  "html": "",
+  "checkbox": false,
+  "labels": []
+}
+no checkbox found, trying label...
+waiting for token...
+waiting... 0
+waiting... 5
+waiting... 10
+waiting... 15
+waiting... 20
+waiting... 25

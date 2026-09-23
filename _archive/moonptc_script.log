@@ -1,0 +1,55 @@
+=== captcha network requests ===
+https://cdn.bmcdn6.com/trl/6a8ef69034f59d0511567cb4/?sourceRef=https%3A%2F%2Fmoonptc.com%2Fdashboard&displayHost=https%3A%2F%2Fcdn.bmcdn6.com%2F&sourc
+https://cdn.bmcdn6.com/trl/6a8eefdc34f59d05115636dc/?sourceRef=https%3A%2F%2Fmoonptc.com%2Fdashboard&displayHost=https%3A%2F%2Fcdn.bmcdn6.com%2F&sourc
+https://cdn.bmcdn6.com/trl/6a8ef81a34f59d0511568953/?sourceRef=https%3A%2F%2Fmoonptc.com%2Ffaucet&displayHost=https%3A%2F%2Fcdn.bmcdn6.com%2F&sourceid
+https://cdn.bmcdn6.com/trl/6a8eefdc34f59d05115636dc/?sourceRef=https%3A%2F%2Fmoonptc.com%2Ffaucet&displayHost=https%3A%2F%2Fcdn.bmcdn6.com%2F&sourceid
+https://cdn.bmcdn6.com/trl/6a8ef69034f59d0511567cb4/?sourceRef=https%3A%2F%2Fmoonptc.com%2Ffaucet&displayHost=https%3A%2F%2Fcdn.bmcdn6.com%2F&sourceid
+
+=== captcha scripts ===
+{"src":"https://moonptc.com/assets/index-YZOGA4jb.js","text":"","type":"module"}
+{"src":"https://cdn.ccnsad.com/js/source/736522663198.js?v=1.0.2","text":"","type":""}
+{"src":"https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495","text":"","type":"module"}
+
+=== cc info ===
+{
+ "globals": {
+  "_ccnsUnitsToLoad": "object",
+  "_ccnsPop": "boolean",
+  "_ccnsLoaderLoading": "boolean",
+  "_ccnsLoaderInitialized": "boolean"
+ },
+ "hasShadow": true,
+ "dataFormats": []
+}
+
+=== react state ===
+{
+ "hasFiber": false,
+ "captchaState": null
+}
+
+=== trying to find captcha click handler ===
+click result: "no cc div"
+
+=== after dispatch ===
+{
+ "iframes": [
+  {
+   "src": "",
+   "w": 125,
+   "h": 125
+  },
+  {
+   "src": "",
+   "w": 468,
+   "h": 60
+  },
+  {
+   "src": "",
+   "w": 180,
+   "h": 150
+  }
+ ],
+ "ccHtml": "",
+ "ccStyle": ""
+}

@@ -1,0 +1,2752 @@
+[16:34:30] === RoseCrypto Faucet Bot Started ===
+[16:34:32] 
+--- Processing: Chidera261 ---
+[16:34:32] Navigating to login...
+[16:34:35] Already logged in (session), going to faucet...
+[16:34:40] CF challenge on faucet (attempt 1), solving...
+[16:34:40] CF state: verifying=false verifyHuman=true frame=true i=0
+[16:34:40] Clicking Verify you are human body...
+[16:34:40] DOM iframes (0): []
+[16:34:40] Frames: ["https://rosecrypto.space/faucet","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/llxlx/0x4AAAAAA"]
+[16:34:40] No visible CF iframe found in DOM
+[16:34:40] Clicking checkbox fallback at (215, 336)
+[16:34:47] Clicking Verify you are human body...
+[16:34:47] DOM iframes (0): []
+[16:34:47] Frames: ["https://rosecrypto.space/faucet","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/llxlx/0x4AAAAAA"]
+[16:34:47] No visible CF iframe found in DOM
+[16:34:47] Clicking checkbox fallback at (215, 336)
+[16:34:53] CF state: verifying=false verifyHuman=true frame=true i=2
+[16:34:53] Clicking Verify you are human body...
+[16:34:53] DOM iframes (0): []
+[16:34:53] Frames: ["https://rosecrypto.space/faucet","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/llxlx/0x4AAAAAA"]
+[16:34:53] No visible CF iframe found in DOM
+[16:34:53] Clicking checkbox fallback at (215, 336)
+[16:35:03] Faucet page loaded
+[16:35:03] Faucet: RoseCrypto Dashboard Withdraw Contest 40 $ Refer Friends 20% Updates 1 EARN COIN
+[16:35:03] Checking faucet status... (attempt 1)
+[16:35:03] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[16:35:03] Solving emoji captcha...
+[16:35:03] Instruction: REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+990 / 1000
+
+AntiBot Links
+Click in order: 🐱 Cat, 🐰 Rabbit, 🐶 Dog
+🐶 Dog
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐱 Cat
+Wait 5 seconds
+🐰 Rabbit
+[16:35:03] Click order: Cat → Rabbit → Dog
+[16:35:03] Clicking Cat at (648, 360)
+[16:35:06] Clicking Rabbit at (762, 597)
+[16:35:08] Clicking Dog at (762, 360)
+[16:35:15] Solving Security Verification (least common icon)...
+[16:35:16] Found 5 icons: 1@(638,315) 2@(700,315) 3@(762,315) 4@(825,315) 5@(887,315)
+[16:35:17] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T15-35-16-620Z.png (410x182.7611846923828)
+[16:35:21] Vision: ```json
+{"unique":"fire icon", "position": 4}
+```
+[16:35:21] Clicking position 4 "fire icon" at (825, 315)
+[16:35:24] Security verification passed
+[16:35:26] Clicking: Claim 5 Coins
+[16:35:37] Claim successful!
+[16:35:37] Claim processed!
+[16:35:37] Waiting for faucet timer countdown (no refresh)...
+[16:35:52] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:39,02,39 timer="3 Min"
+[16:36:07] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:24,02,24 timer="3 Min"
+[16:36:22] Wait 45s: claimBtn=false emoji=false secver=false cooldown=02:09,02,09 timer="3 Min"
+[16:36:37] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:54,01,54 timer="3 Min"
+[16:36:52] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:39,01,39 timer="3 Min"
+[16:37:07] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:24,01,24 timer="3 Min"
+[16:37:22] Wait 105s: claimBtn=false emoji=false secver=false cooldown=01:09,01,09 timer="3 Min"
+[16:37:37] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:54,00,54 timer="3 Min"
+[16:37:52] Wait 135s: claimBtn=false emoji=false secver=false cooldown=00:39,00,39 timer="3 Min"
+[16:38:07] Wait 150s: claimBtn=false emoji=false secver=false cooldown=00:24,00,24 timer="3 Min"
+[16:38:22] Wait 166s: claimBtn=false emoji=false secver=false cooldown=00:09,00,09 timer="3 Min"
+[16:38:37] Wait 181s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[16:38:37] Timer finished — claim ready, claiming without refresh...
+[16:38:37] Checking faucet status... (attempt 1)
+[16:38:37] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[16:38:37] Solving emoji captcha...
+[16:38:37] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+989 / 1000
+
+AntiBot Links
+Click in order: 🦊 Fox, 🐶 Dog, 🐰 Rabbit
+🐶 Dog
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🦊 Fox
+Wait 7 seconds
+🐰 Rabbit
+[16:38:37] Click order: Fox → Dog → Rabbit
+[16:38:37] Clicking Fox at (648, 360)
+[16:38:40] Clicking Dog at (762, 360)
+[16:38:42] Clicking Rabbit at (762, 597)
+[16:38:49] Solving Security Verification (least common icon)...
+[16:38:50] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[16:38:51] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T15-38-50-859Z.png (410x182.7611846923828)
+[16:38:53] Vision: ```json
+{"unique":"heart", "position": 2}
+```
+[16:38:53] Clicking position 2 "heart" at (700, 314)
+[16:38:56] Security verification passed
+[16:38:58] Clicking: Claim 5 Coins
+[16:39:09] Claim successful!
+[16:39:09] Claim processed!
+[16:39:09] Round complete — browser stays open, continuing...
+[16:39:19] 
+--- Processing: Chidera261 ---
+[16:39:19] On faucet but not claimable yet (cooldown?) — will wait
+[16:39:19] Waiting for faucet timer countdown (no refresh)...
+[16:39:34] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:27,02,27 timer="3 Min"
+[16:39:49] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:12,02,12 timer="3 Min"
+[16:40:04] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:57,01,57 timer="3 Min"
+[16:40:19] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:42,01,42 timer="3 Min"
+[16:40:34] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:27,01,27 timer="3 Min"
+[16:40:49] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:12,01,12 timer="3 Min"
+[16:41:04] Wait 105s: claimBtn=false emoji=false secver=false cooldown=00:57,00,57 timer="3 Min"
+[16:41:19] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:42,00,42 timer="3 Min"
+[16:41:34] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:27,00,27 timer="3 Min"
+[16:41:49] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:12,00,12 timer="3 Min"
+[16:42:04] Wait 166s: claimBtn=false emoji=true secver=false cooldown=false timer="3 Min"
+[16:42:04] Timer finished — claim ready, claiming without refresh...
+[16:42:04] Checking faucet status... (attempt 1)
+[16:42:04] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[16:42:04] Solving emoji captcha...
+[16:42:04] Instruction: 83.00 Coins
+
+
+Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+988 / 1000
+
+AntiBot Links
+Click in order: 🐰 Rabbit, 🐱 Cat, 🐻 Bear
+🐱 Cat
+Security Verification
+🐻 Bear
+Wait 9 seconds
+🐰 Rabbit
+© 2026 RoseCrypto. All rights reserved.
+[16:42:04] Click order: Rabbit → Cat → Bear
+[16:42:04] Clicking Rabbit at (648, 597)
+[16:42:07] Clicking Cat at (648, 360)
+[16:42:09] Clicking Bear at (762, 360)
+[16:42:16] Solving Turnstile...
+[16:42:31] Turnstile failed
+[16:42:33] Clicking: Claim 5 Coins
+[16:42:43] Claim successful!
+[16:42:43] Claim processed!
+[16:42:43] Waiting for faucet timer countdown (no refresh)...
+[16:42:58] Wait 15s: claimBtn=true emoji=true secver=false cooldown=false timer="3 Min"
+[16:42:58] Timer finished — claim ready, claiming without refresh...
+[16:42:58] Checking faucet status... (attempt 1)
+[16:42:58] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[16:42:58] Solving emoji captcha...
+[16:42:58] Instruction: 83.00 Coins
+
+
+Please complete the Cloudflare Captcha.
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+988 / 1000
+
+AntiBot Links
+Click in order: 🐰 Rabbit, 🦊 Fox, 🐶 Dog
+🐶 Dog
+Security Verification
+🦊 Fox
+Claim 5 Coins
+🐰 Rabbit
+© 2026 RoseCrypto. All rights reserved.
+[16:42:58] Click order: Rabbit → Fox → Dog
+[16:42:59] Clicking Rabbit at (762, 597)
+[16:43:01] Clicking Fox at (762, 360)
+[16:43:05] Clicking Dog at (762, 360)
+[16:43:12] Solving Turnstile...
+[16:43:27] Turnstile failed
+[16:43:29] Clicking: Claim 5 Coins
+[16:43:39] Claim successful!
+[16:43:39] Claim processed!
+[16:43:39] Round complete — browser stays open, continuing...
+[16:43:50] 
+--- Processing: Chidera261 ---
+[16:43:50] Already on faucet and claimable — skipping login
+[16:43:53] Checking faucet status... (attempt 1)
+[16:43:53] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[16:43:53] Solving emoji captcha...
+[16:43:53] Instruction: 83.00 Coins
+
+
+Please complete the Cloudflare Captcha.
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+988 / 1000
+
+AntiBot Links
+Click in order: 🐱 Cat, 🐶 Dog, 🐰 Rabbit
+🐰 Rabbit
+Security Verification
+🐶 Dog
+Claim 5 Coins
+🐱 Cat
+© 2026 RoseCrypto. All rights reserved.
+[16:43:53] Click order: Cat → Dog → Rabbit
+[16:43:53] Clicking Cat at (762, 597)
+[16:43:56] Clicking Dog at (762, 360)
+[16:43:58] Clicking Rabbit at (762, 360)
+[16:44:05] Solving Turnstile...
+[16:44:21] Turnstile failed
+[16:44:23] Clicking: Claim 5 Coins
+[16:44:33] Claim successful!
+[16:44:33] Claim processed!
+[16:44:33] Waiting for faucet timer countdown (no refresh)...
+[16:44:48] Wait 15s: claimBtn=true emoji=true secver=false cooldown=false timer="3 Min"
+[16:44:48] Timer finished — claim ready, claiming without refresh...
+[16:44:48] Checking faucet status... (attempt 1)
+[16:44:48] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[16:44:48] Solving emoji captcha...
+[16:44:48] Instruction: 83.00 Coins
+
+
+Please complete the Cloudflare Captcha.
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+988 / 1000
+
+AntiBot Links
+Click in order: 🐱 Cat, 🐶 Dog, 🐼 Panda
+🐼 Panda
+Security Verification
+🐱 Cat
+Claim 5 Coins
+🐶 Dog
+© 2026 RoseCrypto. All rights reserved.
+[16:44:48] Click order: Cat → Dog → Panda
+[16:44:48] Clicking Cat at (762, 360)
+[16:44:51] Clicking Dog at (762, 597)
+[16:44:53] Clicking Panda at (762, 360)
+[16:45:00] Solving Turnstile...
+[16:45:16] Turnstile failed
+[16:45:18] Clicking: Claim 5 Coins
+[16:45:29] Claim successful!
+[16:45:29] Claim processed!
+[16:45:29] Round complete — browser stays open, continuing...
+[16:45:39] 
+--- Processing: Chidera261 ---
+[16:45:39] Already on faucet and claimable — skipping login
+[16:45:41] Checking faucet status... (attempt 1)
+[16:45:41] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[16:45:41] Solving emoji captcha...
+[16:45:41] Instruction: 83.00 Coins
+
+
+Please complete the Cloudflare Captcha.
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+988 / 1000
+
+AntiBot Links
+Click in order: 🐶 Dog, 🦁 Lion, 🐼 Panda
+🐼 Panda
+Security Verification
+🦁 Lion
+Claim 5 Coins
+🐶 Dog
+© 2026 RoseCrypto. All rights reserved.
+[16:45:41] Click order: Dog → Lion → Panda
+[16:45:41] Clicking Dog at (762, 597)
+[16:45:44] Clicking Lion at (762, 360)
+[16:45:47] Clicking Panda at (762, 360)
+[16:45:53] Solving Turnstile...
+[16:46:09] Turnstile failed
+[16:46:11] Clicking: Claim 5 Coins
+[16:46:21] Claim successful!
+[16:46:21] Claim processed!
+[16:46:21] Waiting for faucet timer countdown (no refresh)...
+[16:46:36] Wait 15s: claimBtn=true emoji=true secver=false cooldown=false timer="3 Min"
+[16:46:36] Timer finished — claim ready, claiming without refresh...
+[16:46:36] Checking faucet status... (attempt 1)
+[16:46:36] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[16:46:36] Solving emoji captcha...
+[16:46:36] Instruction: 83.00 Coins
+
+
+Please complete the Cloudflare Captcha.
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+988 / 1000
+
+AntiBot Links
+Click in order: 🐶 Dog, 🐱 Cat, 🐻 Bear
+🐻 Bear
+Security Verification
+🐱 Cat
+Claim 5 Coins
+🐶 Dog
+© 2026 RoseCrypto. All rights reserved.
+[16:46:36] Click order: Dog → Cat → Bear
+[16:46:36] Clicking Dog at (762, 597)
+[16:46:39] Clicking Cat at (762, 360)
+[16:46:41] Clicking Bear at (762, 360)
+[16:46:48] Solving Turnstile...
+[16:47:04] Turnstile solved (token: 1.2CKNVGhwPpuetF_wbd...)
+[16:47:06] Clicking: Claim 5 Coins
+[16:47:17] Claim successful!
+[16:47:17] Claim processed!
+[16:47:17] Round complete — browser stays open, continuing...
+[16:47:27] 
+--- Processing: Chidera261 ---
+[16:47:27] On faucet but not claimable yet (cooldown?) — will wait
+[16:47:27] Waiting for faucet timer countdown (no refresh)...
+[16:47:42] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:27,02,27 timer="3 Min"
+[16:47:57] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:12,02,12 timer="3 Min"
+[16:48:12] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:57,01,57 timer="3 Min"
+[16:48:27] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:42,01,42 timer="3 Min"
+[16:48:42] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:27,01,27 timer="3 Min"
+[16:48:57] Wait 91s: claimBtn=false emoji=false secver=false cooldown=01:12,01,12 timer="3 Min"
+[16:49:12] Wait 106s: claimBtn=false emoji=false secver=false cooldown=00:57,00,57 timer="3 Min"
+[16:49:27] Wait 121s: claimBtn=false emoji=false secver=false cooldown=00:42,00,42 timer="3 Min"
+[16:49:43] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:27,00,27 timer="3 Min"
+[16:49:58] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:12,00,12 timer="3 Min"
+[16:50:13] Wait 166s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[16:50:28] Wait 181s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[16:50:28] CF appeared while waiting, solving...
+[16:50:28] CF state: verifying=false verifyHuman=true frame=true i=0
+[16:50:28] Clicking Verify you are human body...
+[16:50:28] DOM iframes (0): []
+[16:50:28] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/d3dps/0x4AAAAAA"]
+[16:50:28] No visible CF iframe found in DOM
+[16:50:28] Clicking checkbox fallback at (215, 336)
+[16:50:34] Clicking Verify you are human body...
+[16:50:34] DOM iframes (0): []
+[16:50:34] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/d3dps/0x4AAAAAA"]
+[16:50:34] No visible CF iframe found in DOM
+[16:50:34] Clicking checkbox fallback at (215, 336)
+[16:50:40] CF state: verifying=false verifyHuman=true frame=true i=2
+[16:50:41] Clicking Verify you are human body...
+[16:50:41] DOM iframes (0): []
+[16:50:41] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/d3dps/0x4AAAAAA"]
+[16:50:41] No visible CF iframe found in DOM
+[16:50:41] Clicking checkbox fallback at (215, 336)
+[16:50:47] Clicking Verify you are human body...
+[16:50:47] DOM iframes (0): []
+[16:50:47] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/d3dps/0x4AAAAAA"]
+[16:50:47] No visible CF iframe found in DOM
+[16:50:47] Clicking checkbox fallback at (215, 336)
+[16:50:53] CF state: verifying=false verifyHuman=false frame=false i=4
+[16:50:53] On challenge, clicking widget fallback...
+[16:50:59] Clicking Verify you are human body...
+[16:50:59] DOM iframes (0): []
+[16:50:59] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/robyl/0x4AAAAAA"]
+[16:50:59] No visible CF iframe found in DOM
+[16:50:59] Clicking checkbox fallback at (215, 336)
+[16:51:06] CF state: verifying=false verifyHuman=true frame=true i=6
+[16:51:06] Clicking Verify you are human body...
+[16:51:06] DOM iframes (0): []
+[16:51:06] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/robyl/0x4AAAAAA"]
+[16:51:06] No visible CF iframe found in DOM
+[16:51:06] Clicking checkbox fallback at (215, 336)
+[16:51:12] Clicking Verify you are human body...
+[16:51:12] DOM iframes (0): []
+[16:51:12] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/robyl/0x4AAAAAA"]
+[16:51:12] No visible CF iframe found in DOM
+[16:51:12] Clicking checkbox fallback at (215, 336)
+[16:51:18] CF state: verifying=false verifyHuman=true frame=true i=8
+[16:51:18] Clicking Verify you are human body...
+[16:51:18] DOM iframes (0): []
+[16:51:18] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/robyl/0x4AAAAAA"]
+[16:51:18] No visible CF iframe found in DOM
+[16:51:18] Clicking checkbox fallback at (215, 336)
+[16:51:25] Clicking Verify you are human body...
+[16:51:25] DOM iframes (0): []
+[16:51:25] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/robyl/0x4AAAAAA"]
+[16:51:25] No visible CF iframe found in DOM
+[16:51:25] Clicking checkbox fallback at (215, 336)
+[16:51:31] CF state: verifying=false verifyHuman=true frame=true i=10
+[16:51:31] Clicking Verify you are human body...
+[16:51:31] DOM iframes (0): []
+[16:51:31] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/robyl/0x4AAAAAA"]
+[16:51:31] No visible CF iframe found in DOM
+[16:51:31] Clicking checkbox fallback at (215, 336)
+[16:51:38] CF widget not loaded, reloading page...
+[16:51:46] CF state: verifying=false verifyHuman=true frame=true i=12
+[16:51:46] Clicking Verify you are human body...
+[16:51:46] DOM iframes (0): []
+[16:51:46] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/11had/0x4AAAAAA"]
+[16:51:46] No visible CF iframe found in DOM
+[16:51:46] Clicking checkbox fallback at (215, 336)
+[16:51:52] Clicking Verify you are human body...
+[16:51:52] DOM iframes (0): []
+[16:51:52] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/11had/0x4AAAAAA"]
+[16:51:52] No visible CF iframe found in DOM
+[16:51:52] Clicking checkbox fallback at (215, 336)
+[16:51:59] CF state: verifying=false verifyHuman=true frame=true i=14
+[16:51:59] Clicking Verify you are human body...
+[16:51:59] DOM iframes (0): []
+[16:51:59] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/11had/0x4AAAAAA"]
+[16:51:59] No visible CF iframe found in DOM
+[16:51:59] Clicking checkbox fallback at (215, 336)
+[16:52:05] Clicking Verify you are human body...
+[16:52:05] DOM iframes (0): []
+[16:52:05] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/11had/0x4AAAAAA"]
+[16:52:05] No visible CF iframe found in DOM
+[16:52:05] Clicking checkbox fallback at (215, 336)
+[16:52:11] CF state: verifying=false verifyHuman=true frame=true i=16
+[16:52:12] Clicking Verify you are human body...
+[16:52:12] DOM iframes (0): []
+[16:52:12] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/11had/0x4AAAAAA"]
+[16:52:12] No visible CF iframe found in DOM
+[16:52:12] Clicking checkbox fallback at (215, 336)
+[16:52:18] Clicking Verify you are human body...
+[16:52:18] DOM iframes (0): []
+[16:52:18] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/11had/0x4AAAAAA"]
+[16:52:18] No visible CF iframe found in DOM
+[16:52:18] Clicking checkbox fallback at (215, 336)
+[16:52:24] CF state: verifying=false verifyHuman=true frame=true i=18
+[16:52:24] Clicking Verify you are human body...
+[16:52:24] DOM iframes (0): []
+[16:52:24] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/11had/0x4AAAAAA"]
+[16:52:24] No visible CF iframe found in DOM
+[16:52:24] Clicking checkbox fallback at (215, 336)
+[16:52:31] CF widget not loaded, reloading page...
+[16:52:37] CF state: verifying=false verifyHuman=true frame=true i=20
+[16:52:38] Clicking Verify you are human body...
+[16:52:38] DOM iframes (0): []
+[16:52:38] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/f88q9/0x4AAAAAA"]
+[16:52:38] No visible CF iframe found in DOM
+[16:52:38] Clicking checkbox fallback at (215, 336)
+[16:52:44] Clicking Verify you are human body...
+[16:52:44] DOM iframes (0): []
+[16:52:44] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/f88q9/0x4AAAAAA"]
+[16:52:44] No visible CF iframe found in DOM
+[16:52:44] Clicking checkbox fallback at (215, 336)
+[16:52:50] CF state: verifying=false verifyHuman=true frame=true i=22
+[16:52:51] Clicking Verify you are human body...
+[16:52:51] DOM iframes (0): []
+[16:52:51] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/f88q9/0x4AAAAAA"]
+[16:52:51] No visible CF iframe found in DOM
+[16:52:51] Clicking checkbox fallback at (215, 336)
+[16:52:57] Clicking Verify you are human body...
+[16:52:57] DOM iframes (0): []
+[16:52:57] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/f88q9/0x4AAAAAA"]
+[16:52:57] No visible CF iframe found in DOM
+[16:52:57] Clicking checkbox fallback at (215, 336)
+[16:53:03] CF state: verifying=false verifyHuman=true frame=true i=24
+[16:53:03] Clicking Verify you are human body...
+[16:53:03] DOM iframes (0): []
+[16:53:03] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/f88q9/0x4AAAAAA"]
+[16:53:03] No visible CF iframe found in DOM
+[16:53:03] Clicking checkbox fallback at (215, 336)
+[16:53:11] Clicking Verify you are human body...
+[16:53:11] DOM iframes (0): []
+[16:53:11] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/f88q9/0x4AAAAAA"]
+[16:53:11] No visible CF iframe found in DOM
+[16:53:11] Clicking checkbox fallback at (215, 336)
+[16:53:18] CF state: verifying=false verifyHuman=true frame=true i=26
+[16:53:18] Clicking Verify you are human body...
+[16:53:18] DOM iframes (0): []
+[16:53:18] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/f88q9/0x4AAAAAA"]
+[16:53:18] No visible CF iframe found in DOM
+[16:53:18] Clicking checkbox fallback at (215, 336)
+[16:53:40] Wait 373s: claimBtn=true emoji=true secver=false cooldown=false timer="3 Min"
+[16:53:40] Timer finished — claim ready, claiming without refresh...
+[16:53:40] Checking faucet status... (attempt 1)
+[16:53:40] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[16:53:40] Solving emoji captcha...
+[16:53:40] Instruction: AntiBot Links
+Click in order: 🐱 Cat, 🦁 Lion, 🐼 Panda
+Auto earn with videos
+Install mobile app, watch videos and earn USDT. Paying from 0.01
+fomoearn.com
+🐱 Cat
+Security Verification
+🐼 Panda
+Claim 5 Coins
+[16:53:40] Click order: Cat → Lion → Panda
+[16:53:40] Clicking Cat at (762, 360)
+[16:53:42] Clicking Lion at (762, 597)
+[16:53:45] Clicking Panda at (762, 360)
+[16:53:52] Solving Turnstile...
+[16:53:55] Turnstile solved (token: 1.7Vgdn3dAPtERrFHfAa...)
+[16:53:57] Clicking: Claim 5 Coins
+[16:54:07] Claim successful!
+[16:54:07] Claim processed!
+[16:54:07] Waiting for faucet timer countdown (no refresh)...
+[16:54:22] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:37,02,37 timer="3 Min"
+[16:54:37] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:22,02,22 timer="3 Min"
+[16:54:52] Wait 45s: claimBtn=false emoji=false secver=false cooldown=02:07,02,07 timer="3 Min"
+[16:55:07] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:52,01,52 timer="3 Min"
+[16:55:22] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:37,01,37 timer="3 Min"
+[16:55:37] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:22,01,22 timer="3 Min"
+[16:55:52] Wait 105s: claimBtn=false emoji=false secver=false cooldown=01:07,01,07 timer="3 Min"
+[16:56:07] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:52,00,52 timer="3 Min"
+[16:56:22] Wait 135s: claimBtn=false emoji=false secver=false cooldown=00:37,00,37 timer="3 Min"
+[16:56:37] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:22,00,22 timer="3 Min"
+[16:56:52] Wait 166s: claimBtn=false emoji=false secver=false cooldown=00:07,00,07 timer="3 Min"
+[16:57:08] Wait 181s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[16:57:08] Timer finished — claim ready, claiming without refresh...
+[16:57:08] Checking faucet status... (attempt 1)
+[16:57:08] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[16:57:08] Solving emoji captcha...
+[16:57:08] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+986 / 1000
+
+AntiBot Links
+Click in order: 🐼 Panda, 🦁 Lion, 🐱 Cat
+🐼 Panda
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐱 Cat
+Wait 4 seconds
+🦁 Lion
+[16:57:08] Click order: Panda → Lion → Cat
+[16:57:08] Clicking Panda at (762, 360)
+[16:57:10] Clicking Lion at (762, 597)
+[16:57:13] Clicking Cat at (762, 360)
+[16:57:20] Solving Security Verification (least common icon)...
+[16:57:21] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[16:57:23] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T15-57-21-791Z.png (410x182.7611846923828)
+[16:57:27] Vision: ```json
+{"unique":"shield", "position": 4}
+```
+[16:57:27] Clicking position 4 "shield" at (825, 314)
+[16:57:30] Security verification passed
+[16:57:32] Clicking: Claim 5 Coins
+[16:57:42] Claim successful!
+[16:57:42] Claim processed!
+[16:57:42] Round complete — browser stays open, continuing...
+[16:57:52] 
+--- Processing: Chidera261 ---
+[16:57:52] On faucet but not claimable yet (cooldown?) — will wait
+[16:57:53] Waiting for faucet timer countdown (no refresh)...
+[16:58:08] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:27,02,27 timer="3 Min"
+[16:58:23] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:12,02,12 timer="3 Min"
+[16:58:38] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:57,01,57 timer="3 Min"
+[16:58:53] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:42,01,42 timer="3 Min"
+[16:59:08] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:27,01,27 timer="3 Min"
+[16:59:23] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:12,01,12 timer="3 Min"
+[16:59:38] Wait 105s: claimBtn=false emoji=false secver=false cooldown=00:57,00,57 timer="3 Min"
+[16:59:53] Wait 121s: claimBtn=false emoji=false secver=false cooldown=00:42,00,42 timer="3 Min"
+[17:00:08] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:27,00,27 timer="3 Min"
+[17:00:23] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:12,00,12 timer="3 Min"
+[17:00:38] Wait 166s: claimBtn=false emoji=true secver=false cooldown=false timer="3 Min"
+[17:00:38] Timer finished — claim ready, claiming without refresh...
+[17:00:38] Checking faucet status... (attempt 1)
+[17:00:38] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[17:00:38] Solving emoji captcha...
+[17:00:38] Instruction: 98.00 Coins
+
+
+Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+985 / 1000
+
+AntiBot Links
+Click in order: 🐱 Cat, 🐻 Bear, 🐶 Dog
+🐱 Cat
+Security Verification
+🐻 Bear
+Wait 9 seconds
+🐶 Dog
+© 2026 RoseCrypto. All rights reserved.
+[17:00:38] Click order: Cat → Bear → Dog
+[17:00:38] Clicking Cat at (648, 360)
+[17:00:41] Clicking Bear at (762, 360)
+[17:00:44] Clicking Dog at (762, 597)
+[17:00:50] Solving Turnstile...
+[17:01:06] Turnstile failed
+[17:01:08] Clicking: Claim 5 Coins
+[17:01:18] Claim successful!
+[17:01:18] Claim processed!
+[17:01:18] Waiting for faucet timer countdown (no refresh)...
+[17:01:33] Wait 15s: claimBtn=true emoji=true secver=false cooldown=false timer="3 Min"
+[17:01:33] Timer finished — claim ready, claiming without refresh...
+[17:01:33] Checking faucet status... (attempt 1)
+[17:01:33] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[17:01:33] Solving emoji captcha...
+[17:01:33] Instruction: 98.00 Coins
+
+
+Please complete the Cloudflare Captcha.
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+985 / 1000
+
+AntiBot Links
+Click in order: 🦊 Fox, 🐶 Dog, 🐱 Cat
+🦊 Fox
+Security Verification
+🐶 Dog
+Claim 5 Coins
+🐱 Cat
+© 2026 RoseCrypto. All rights reserved.
+[17:01:33] Click order: Fox → Dog → Cat
+[17:01:33] Clicking Fox at (762, 360)
+[17:01:36] Clicking Dog at (762, 360)
+[17:01:38] Clicking Cat at (762, 597)
+[17:01:45] Solving Turnstile...
+[17:02:00] Turnstile failed
+[17:02:02] Clicking: Claim 5 Coins
+[17:02:12] Claim successful!
+[17:02:12] Claim processed!
+[17:02:12] Round complete — browser stays open, continuing...
+[17:02:22] 
+--- Processing: Chidera261 ---
+[17:02:22] Already on faucet and claimable — skipping login
+[17:02:24] Checking faucet status... (attempt 1)
+[17:02:24] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[17:02:24] Solving emoji captcha...
+[17:02:24] Instruction: 98.00 Coins
+
+
+Please complete the Cloudflare Captcha.
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+985 / 1000
+
+AntiBot Links
+Click in order: 🦊 Fox, 🐶 Dog, 🐱 Cat
+Security Verification
+Claim 5 Coins
+© 2026 RoseCrypto. All rights reserved.
+[17:02:24] Click order: Fox → Dog → Cat
+[17:02:24] Detected 2 tabs, closing extras...
+[17:02:24] Fox not found
+[17:02:24] Dog not found
+[17:02:24] Cat not found
+[17:02:26] Emoji captcha still present after clicks
+[17:02:28] Emoji captcha failed — reloading to start afresh
+[17:02:28] Reloading faucet page...
+[17:02:36] Reload complete
+[17:02:36] Checking faucet status... (attempt 2)
+[17:02:36] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[17:02:36] Solving emoji captcha...
+[17:02:36] Instruction: 98.00 Coins
+
+
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+985 / 1000
+
+AntiBot Links
+Click in order: 🐱 Cat, 🐯 Tiger, 🐶 Dog
+🐱 Cat
+Security Verification
+🐯 Tiger
+Wait 5 seconds
+🐶 Dog
+© 2026 RoseCrypto. All rights reserved.
+[17:02:36] Click order: Cat → Tiger → Dog
+[17:02:36] Clicking Cat at (762, 360)
+[17:02:39] Clicking Tiger at (762, 360)
+[17:02:41] Clicking Dog at (762, 597)
+[17:02:48] Solving Turnstile...
+[17:03:03] Turnstile failed
+[17:03:05] Clicking: Claim 5 Coins
+[17:03:15] Claim successful!
+[17:03:15] Claim processed!
+[17:03:15] Waiting for faucet timer countdown (no refresh)...
+[17:03:30] Wait 15s: claimBtn=true emoji=true secver=false cooldown=false timer="3 Min"
+[17:03:30] Timer finished — claim ready, claiming without refresh...
+[17:03:30] Checking faucet status... (attempt 1)
+[17:03:30] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[17:03:30] Solving emoji captcha...
+[17:03:30] Instruction: 98.00 Coins
+
+
+Please complete the Cloudflare Captcha.
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+985 / 1000
+
+AntiBot Links
+Click in order: 🐱 Cat, 🐻 Bear, 🐶 Dog
+🐱 Cat
+Security Verification
+🐻 Bear
+Claim 5 Coins
+🐶 Dog
+© 2026 RoseCrypto. All rights reserved.
+[17:03:30] Click order: Cat → Bear → Dog
+[17:03:30] Clicking Cat at (762, 360)
+[17:03:33] Clicking Bear at (762, 360)
+[17:03:35] Clicking Dog at (762, 597)
+[17:03:42] Solving Turnstile...
+[17:03:57] Turnstile failed
+[17:03:59] Clicking: Claim 5 Coins
+[17:04:09] Claim successful!
+[17:04:09] Claim processed!
+[17:04:09] Round complete — browser stays open, continuing...
+[17:04:19] 
+--- Processing: Chidera261 ---
+[17:04:19] Already on faucet and claimable — skipping login
+[17:04:21] Checking faucet status... (attempt 1)
+[17:04:21] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[17:04:21] Solving emoji captcha...
+[17:04:21] Instruction: 98.00 Coins
+
+
+Please complete the Cloudflare Captcha.
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+985 / 1000
+
+AntiBot Links
+Click in order: 🐱 Cat, 🐻 Bear, 🐶 Dog
+Security Verification
+Claim 5 Coins
+© 2026 RoseCrypto. All rights reserved.
+[17:04:21] Click order: Cat → Bear → Dog
+[17:04:21] Detected 2 tabs, closing extras...
+[17:04:21] Cat not found
+[17:04:21] Bear not found
+[17:04:21] Dog not found
+[17:04:23] Emoji captcha still present after clicks
+[17:04:25] Emoji captcha failed — reloading to start afresh
+[17:04:25] Reloading faucet page...
+[17:04:31] Reload complete
+[17:04:31] Checking faucet status... (attempt 2)
+[17:04:31] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[17:04:31] Solving emoji captcha...
+[17:04:31] Instruction: REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+985 / 1000
+
+AntiBot Links
+Click in order: 🦁 Lion, 🦊 Fox, 🐯 Tiger
+🦊 Fox
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🦁 Lion
+Wait 5 seconds
+🐯 Tiger
+[17:04:31] Click order: Lion → Fox → Tiger
+[17:04:31] Clicking Lion at (648, 360)
+[17:04:34] Clicking Fox at (648, 360)
+[17:04:36] Clicking Tiger at (762, 597)
+[17:04:43] Solving Security Verification (least common icon)...
+[17:04:44] Found 5 icons: 1@(638,315) 2@(700,315) 3@(762,315) 4@(825,315) 5@(887,315)
+[17:04:44] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T16-04-44-284Z.png (410x182.7611846923828)
+[17:04:51] Vision: ```json
+{"unique":"star", "position": 4}
+```
+[17:04:51] Clicking position 4 "star" at (825, 315)
+[17:04:54] Security verification passed
+[17:04:56] Clicking: Claim 5 Coins
+[17:05:06] Claim successful!
+[17:05:06] Claim processed!
+[17:05:06] Waiting for faucet timer countdown (no refresh)...
+[17:05:21] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:36,02,36 timer="3 Min"
+[17:05:36] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:21,02,21 timer="3 Min"
+[17:05:51] Wait 45s: claimBtn=false emoji=false secver=false cooldown=02:06,02,06 timer="3 Min"
+[17:06:07] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:50,01,50 timer="3 Min"
+[17:06:22] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:35,01,35 timer="3 Min"
+[17:06:37] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:20,01,20 timer="3 Min"
+[17:06:52] Wait 106s: claimBtn=false emoji=false secver=false cooldown=01:05,01,05 timer="3 Min"
+[17:07:07] Wait 121s: claimBtn=false emoji=false secver=false cooldown=00:50,00,50 timer="3 Min"
+[17:07:22] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:35,00,35 timer="3 Min"
+[17:07:37] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:20,00,20 timer="3 Min"
+[17:07:52] Wait 166s: claimBtn=false emoji=false secver=false cooldown=00:05,00,05 timer="3 Min"
+[17:08:07] Wait 181s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[17:08:07] Timer finished — claim ready, claiming without refresh...
+[17:08:07] Checking faucet status... (attempt 1)
+[17:08:07] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[17:08:07] Solving emoji captcha...
+[17:08:07] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+984 / 1000
+
+AntiBot Links
+Click in order: 🦁 Lion, 🐰 Rabbit, 🐻 Bear
+🐰 Rabbit
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐻 Bear
+Wait 3 seconds
+🦁 Lion
+[17:08:07] Click order: Lion → Rabbit → Bear
+[17:08:07] Clicking Lion at (648, 597)
+[17:08:10] Clicking Rabbit at (762, 360)
+[17:08:12] Clicking Bear at (762, 360)
+[17:08:19] Solving Security Verification (least common icon)...
+[17:08:20] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[17:08:20] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T16-08-20-261Z.png (410x182.7611846923828)
+[17:08:22] Vision: ```json
+{"unique":"bell", "position": 1}
+```
+[17:08:22] Clicking position 1 "bell" at (638, 314)
+[17:08:26] Security verification passed
+[17:08:28] Clicking: Claim 5 Coins
+[17:08:38] After claim: rosecrypto.space
+Performing security verification
+
+This website uses a security service to protect against malicious bots. This page is displayed whil
+[17:08:38] Claim processed!
+[17:08:38] Round complete — browser stays open, continuing...
+[17:08:48] 
+--- Processing: Chidera261 ---
+[17:08:48] On faucet but not claimable yet (cooldown?) — will wait
+[17:08:48] Waiting for faucet timer countdown (no refresh)...
+[17:09:03] Wait 15s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[17:09:03] CF appeared while waiting, solving...
+[17:09:03] CF state: verifying=false verifyHuman=true frame=true i=0
+[17:09:03] Clicking Verify you are human body...
+[17:09:03] DOM iframes (0): []
+[17:09:03] Frames: ["https://rosecrypto.space/faucet","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/wqyjz/0x4AAAAAA"]
+[17:09:03] No visible CF iframe found in DOM
+[17:09:03] Clicking checkbox fallback at (215, 336)
+[17:09:24] Wait 37s: claimBtn=false emoji=false secver=false cooldown=02:43,02,43 timer="3 Min"
+[17:09:39] Wait 52s: claimBtn=false emoji=false secver=false cooldown=02:28,02,28 timer="3 Min"
+[17:09:54] Wait 67s: claimBtn=false emoji=false secver=false cooldown=02:13,02,13 timer="3 Min"
+[17:10:10] Wait 82s: claimBtn=false emoji=false secver=false cooldown=01:58,01,58 timer="3 Min"
+[17:10:25] Wait 97s: claimBtn=false emoji=false secver=false cooldown=01:43,01,43 timer="3 Min"
+[17:10:40] Wait 112s: claimBtn=false emoji=false secver=false cooldown=01:28,01,28 timer="3 Min"
+[17:10:55] Wait 127s: claimBtn=false emoji=false secver=false cooldown=01:13,01,13 timer="3 Min"
+[17:11:10] Wait 142s: claimBtn=false emoji=false secver=false cooldown=00:58,00,58 timer="3 Min"
+[17:11:25] Wait 157s: claimBtn=false emoji=false secver=false cooldown=00:43,00,43 timer="3 Min"
+[17:11:40] Wait 172s: claimBtn=false emoji=false secver=false cooldown=00:27,00,27 timer="3 Min"
+[17:11:55] Wait 187s: claimBtn=false emoji=false secver=false cooldown=00:12,00,12 timer="3 Min"
+[17:12:10] Wait 202s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[17:12:10] Timer finished — claim ready, claiming without refresh...
+[17:12:10] Checking faucet status... (attempt 1)
+[17:12:10] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[17:12:10] Solving emoji captcha...
+[17:12:10] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+983 / 1000
+
+AntiBot Links
+Click in order: 🐱 Cat, 🐰 Rabbit, 🦁 Lion
+🐱 Cat
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐰 Rabbit
+Wait 8 seconds
+🦁 Lion
+[17:12:10] Click order: Cat → Rabbit → Lion
+[17:12:10] Clicking Cat at (762, 360)
+[17:12:13] Clicking Rabbit at (762, 360)
+[17:12:15] Clicking Lion at (762, 597)
+[17:12:22] Solving Security Verification (least common icon)...
+[17:12:23] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[17:12:23] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T16-12-23-252Z.png (410x182.7611846923828)
+[17:12:30] Vision: ```json
+{"unique":"heart","position":4}
+```
+[17:12:30] Clicking position 4 "heart" at (825, 314)
+[17:12:33] Security verification passed
+[17:12:35] Clicking: Claim 5 Coins
+[17:12:46] Claim successful!
+[17:12:46] Claim processed!
+[17:12:46] Waiting for faucet timer countdown (no refresh)...
+[17:13:01] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:37,02,37 timer="3 Min"
+[17:13:16] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:22,02,22 timer="3 Min"
+[17:13:31] Wait 45s: claimBtn=false emoji=false secver=false cooldown=02:06,02,06 timer="3 Min"
+[17:13:46] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:51,01,51 timer="3 Min"
+[17:14:01] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:36,01,36 timer="3 Min"
+[17:14:16] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:21,01,21 timer="3 Min"
+[17:14:31] Wait 106s: claimBtn=false emoji=false secver=false cooldown=01:06,01,06 timer="3 Min"
+[17:14:46] Wait 121s: claimBtn=false emoji=false secver=false cooldown=00:51,00,51 timer="3 Min"
+[17:15:01] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:36,00,36 timer="3 Min"
+[17:15:16] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:21,00,21 timer="3 Min"
+[17:15:31] Wait 166s: claimBtn=false emoji=false secver=false cooldown=00:06,00,06 timer="3 Min"
+[17:15:46] Wait 181s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[17:15:46] Timer finished — claim ready, claiming without refresh...
+[17:15:46] Checking faucet status... (attempt 1)
+[17:15:46] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[17:15:46] Solving emoji captcha...
+[17:15:46] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+982 / 1000
+
+AntiBot Links
+Click in order: 🐱 Cat, 🐶 Dog, 🦊 Fox
+🦊 Fox
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐱 Cat
+Wait 2 seconds
+🐶 Dog
+[17:15:46] Click order: Cat → Dog → Fox
+[17:15:46] Clicking Cat at (762, 360)
+[17:15:55] Clicking Dog at (762, 597)
+[17:15:57] Clicking Fox at (762, 360)
+[17:16:04] Solving Security Verification (least common icon)...
+[17:16:05] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[17:16:05] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T16-16-05-171Z.png (410x182.7611846923828)
+[17:16:07] Vision: ```json
+{"unique":"cube","position":3}
+```
+[17:16:07] Clicking position 3 "cube" at (762, 314)
+[17:16:10] Security verification passed
+[17:16:12] Clicking: Claim 5 Coins
+[17:16:22] Claim successful!
+[17:16:22] Claim processed!
+[17:16:22] Round complete — browser stays open, continuing...
+[17:16:32] 
+--- Processing: Chidera261 ---
+[17:16:32] Already on faucet and claimable — skipping login
+[17:16:33] Checking faucet status... (attempt 1)
+[17:16:33] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[17:16:33] Solving emoji captcha...
+[17:16:33] Instruction: Invalid AntiBot Link order. Please click in the specified sequence!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+982 / 1000
+
+AntiBot Links
+Click in order: 🐱 Cat, 🦊 Fox, 🐯 Tiger
+🦊 Fox
+Security Verification
+🐱 Cat
+Claim 5 Coins
+🐯 Tiger
+[17:16:33] Click order: Cat → Fox → Tiger
+[17:16:33] Clicking Cat at (762, 360)
+[17:16:35] Clicking Fox at (762, 360)
+[17:16:38] Clicking Tiger at (762, 597)
+[17:16:44] Solving Turnstile...
+[17:16:47] Turnstile solved (token: 1.zCGjQe1aLXp3F0YxpQ...)
+[17:16:49] Clicking: Claim 5 Coins
+[17:16:59] Claim successful!
+[17:16:59] Claim processed!
+[17:16:59] Waiting for faucet timer countdown (no refresh)...
+[17:17:14] Wait 15s: claimBtn=true emoji=true secver=false cooldown=false timer="3 Min"
+[17:17:14] Timer finished — claim ready, claiming without refresh...
+[17:17:14] Checking faucet status... (attempt 1)
+[17:17:14] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[17:17:14] Solving emoji captcha...
+[17:17:14] Instruction: 113.00 Coins
+
+
+Invalid AntiBot Link order. Please click in the specified sequence!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+982 / 1000
+
+AntiBot Links
+Click in order: 🐱 Cat, 🦊 Fox, 🐯 Tiger
+Security Verification
+Claim 5 Coins
+© 2026 RoseCrypto. All rights reserved.
+[17:17:14] Click order: Cat → Fox → Tiger
+[17:17:14] Detected 2 tabs, closing extras...
+[17:17:14] Cat not found
+[17:17:14] Fox not found
+[17:17:14] Tiger not found
+[17:17:16] Emoji captcha still present after clicks
+[17:17:18] Emoji captcha failed — reloading to start afresh
+[17:17:18] Reloading faucet page...
+[17:17:25] Reload complete
+[17:17:25] Checking faucet status... (attempt 2)
+[17:17:25] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[17:17:25] Solving emoji captcha...
+[17:17:25] Instruction: 113.00 Coins
+
+
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+982 / 1000
+
+AntiBot Links
+Click in order: 🐶 Dog, 🐱 Cat, 🐯 Tiger
+🐯 Tiger
+Security Verification
+🐱 Cat
+Wait 5 seconds
+🐶 Dog
+© 2026 RoseCrypto. All rights reserved.
+[17:17:25] Click order: Dog → Cat → Tiger
+[17:17:25] Clicking Dog at (762, 597)
+[17:17:27] Clicking Cat at (762, 360)
+[17:17:30] Clicking Tiger at (762, 360)
+[17:17:36] Solving Turnstile...
+[17:17:38] Turnstile solved (token: 1.8W3YS-sJ4q82LCkSxG...)
+[17:17:40] Clicking: Claim 5 Coins
+[17:17:50] Claim successful!
+[17:17:50] Claim processed!
+[17:17:50] Round complete — browser stays open, continuing...
+[17:18:00] 
+--- Processing: Chidera261 ---
+[17:18:00] On faucet but not claimable yet (cooldown?) — will wait
+[17:18:00] Waiting for faucet timer countdown (no refresh)...
+[17:18:15] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:26,02,26 timer="3 Min"
+[17:18:30] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:11,02,11 timer="3 Min"
+[17:18:45] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:56,01,56 timer="3 Min"
+[17:19:00] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:40,01,40 timer="3 Min"
+[17:19:15] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:25,01,25 timer="3 Min"
+[17:19:30] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:10,01,10 timer="3 Min"
+[17:19:45] Wait 106s: claimBtn=false emoji=false secver=false cooldown=00:55,00,55 timer="3 Min"
+[17:20:01] Wait 121s: claimBtn=false emoji=false secver=false cooldown=00:40,00,40 timer="3 Min"
+[17:20:16] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:25,00,25 timer="3 Min"
+[17:20:31] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:10,00,10 timer="3 Min"
+[17:20:46] Wait 166s: claimBtn=false emoji=true secver=false cooldown=false timer="3 Min"
+[17:20:46] Timer finished — claim ready, claiming without refresh...
+[17:20:46] Checking faucet status... (attempt 1)
+[17:20:46] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[17:20:46] Solving emoji captcha...
+[17:20:46] Instruction: 118.00 Coins
+
+
+Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+981 / 1000
+
+AntiBot Links
+Click in order: 🦁 Lion, 🐯 Tiger, 🐱 Cat
+🦁 Lion
+Security Verification
+🐯 Tiger
+Wait 8 seconds
+🐱 Cat
+© 2026 RoseCrypto. All rights reserved.
+[17:20:46] Click order: Lion → Tiger → Cat
+[17:20:46] Clicking Lion at (648, 360)
+[17:20:48] Clicking Tiger at (648, 360)
+[17:20:51] Clicking Cat at (762, 597)
+[17:20:58] Solving Turnstile...
+[17:21:13] Turnstile failed
+[17:21:15] Clicking: Claim 5 Coins
+[17:21:25] Claim successful!
+[17:21:25] Claim processed!
+[17:21:25] Waiting for faucet timer countdown (no refresh)...
+[17:21:40] Wait 15s: claimBtn=true emoji=true secver=true cooldown=false timer="3 Min"
+[17:21:40] Timer finished — claim ready, claiming without refresh...
+[17:21:40] Checking faucet status... (attempt 1)
+[17:21:40] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[17:21:40] Solving emoji captcha...
+[17:21:40] Instruction: AntiBot Links
+Click in order: 🐱 Cat, 🐯 Tiger, 🐶 Dog
+🐱 Cat
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐯 Tiger
+Claim 5 Coins
+[17:21:40] Click order: Cat → Tiger → Dog
+[17:21:40] Clicking Cat at (762, 360)
+[17:21:42] Clicking Tiger at (762, 360)
+[17:21:45] Clicking Dog at (762, 597)
+[17:21:52] Solving Security Verification (least common icon)...
+[17:21:53] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[17:21:53] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T16-21-53-200Z.png (410x182.7611846923828)
+[17:21:55] Vision: ```json
+{"unique":"heart", "position": 1}
+```
+[17:21:55] Clicking position 1 "heart" at (638, 314)
+[17:21:59] Security verification passed
+[17:22:01] Clicking: Claim 5 Coins
+[17:22:11] Claim successful!
+[17:22:11] Claim processed!
+[17:22:11] Round complete — browser stays open, continuing...
+[17:22:21] 
+--- Processing: Chidera261 ---
+[17:22:21] On faucet but not claimable yet (cooldown?) — will wait
+[17:22:21] Waiting for faucet timer countdown (no refresh)...
+[17:22:36] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:27,02,27 timer="3 Min"
+[17:22:51] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:12,02,12 timer="3 Min"
+[17:23:06] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:57,01,57 timer="3 Min"
+[17:23:21] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:42,01,42 timer="3 Min"
+[17:23:36] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:27,01,27 timer="3 Min"
+[17:23:51] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:12,01,12 timer="3 Min"
+[17:24:06] Wait 105s: claimBtn=false emoji=false secver=false cooldown=00:57,00,57 timer="3 Min"
+[17:24:21] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:42,00,42 timer="3 Min"
+[17:24:36] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:27,00,27 timer="3 Min"
+[17:24:51] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:12,00,12 timer="3 Min"
+[17:25:07] Wait 166s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[17:25:07] CF appeared while waiting, solving...
+[17:25:07] CF state: verifying=false verifyHuman=true frame=true i=0
+[17:25:07] Clicking Verify you are human body...
+[17:25:07] DOM iframes (0): []
+[17:25:07] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/f/av0/rch/rwicl/0x4AAAAAA"]
+[17:25:07] No visible CF iframe found in DOM
+[17:25:07] Clicking checkbox fallback at (215, 336)
+[17:25:13] Clicking Verify you are human body...
+[17:25:13] DOM iframes (0): []
+[17:25:13] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/f/av0/rch/rwicl/0x4AAAAAA"]
+[17:25:13] No visible CF iframe found in DOM
+[17:25:13] Clicking checkbox fallback at (215, 336)
+[17:25:20] CF state: verifying=false verifyHuman=true frame=true i=2
+[17:25:20] Clicking Verify you are human body...
+[17:25:20] DOM iframes (0): []
+[17:25:20] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/f/av0/rch/rwicl/0x4AAAAAA"]
+[17:25:20] No visible CF iframe found in DOM
+[17:25:20] Clicking checkbox fallback at (215, 336)
+[17:25:42] Wait 201s: claimBtn=true emoji=true secver=true cooldown=false timer="3 Min"
+[17:25:42] Timer finished — claim ready, claiming without refresh...
+[17:25:42] Checking faucet status... (attempt 1)
+[17:25:42] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[17:25:42] Solving emoji captcha...
+[17:25:42] Instruction: AntiBot Links
+Click in order: 🐯 Tiger, 🦁 Lion, 🐻 Bear
+Auto earn with videos
+Install mobile app, watch videos and earn USDT. Paying from 0.01
+fomoearn.com
+🐻 Bear
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🦁 Lion
+Claim 5 Coins
+[17:25:42] Click order: Tiger → Lion → Bear
+[17:25:42] Clicking Tiger at (762, 597)
+[17:25:45] Clicking Lion at (762, 360)
+[17:25:47] Clicking Bear at (762, 360)
+[17:25:54] Solving Security Verification (least common icon)...
+[17:25:55] Found 5 icons: 1@(638,315) 2@(700,315) 3@(762,315) 4@(825,315) 5@(887,315)
+[17:25:56] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T16-25-55-453Z.png (410x182.7611846923828)
+[17:25:58] Vision: ```json
+{"unique":"star", "position": 1}
+```
+[17:25:58] Clicking position 1 "star" at (638, 315)
+[17:26:01] Security verification passed
+[17:26:03] Clicking: Claim 5 Coins
+[17:26:14] Claim successful!
+[17:26:14] Claim processed!
+[17:26:14] Waiting for faucet timer countdown (no refresh)...
+[17:26:29] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:37,02,37 timer="3 Min"
+[17:26:44] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:22,02,22 timer="3 Min"
+[17:26:59] Wait 45s: claimBtn=false emoji=false secver=false cooldown=02:07,02,07 timer="3 Min"
+[17:27:14] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:52,01,52 timer="3 Min"
+[17:27:29] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:37,01,37 timer="3 Min"
+[17:27:44] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:22,01,22 timer="3 Min"
+[17:27:59] Wait 106s: claimBtn=false emoji=false secver=false cooldown=01:07,01,07 timer="3 Min"
+[17:28:14] Wait 121s: claimBtn=false emoji=false secver=false cooldown=00:52,00,52 timer="3 Min"
+[17:28:29] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:37,00,37 timer="3 Min"
+[17:28:44] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:21,00,21 timer="3 Min"
+[17:29:00] Wait 166s: claimBtn=false emoji=false secver=false cooldown=00:06,00,06 timer="3 Min"
+[17:29:15] Wait 181s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[17:29:15] Timer finished — claim ready, claiming without refresh...
+[17:29:15] Checking faucet status... (attempt 1)
+[17:29:15] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[17:29:15] Solving emoji captcha...
+[17:29:15] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+979 / 1000
+
+AntiBot Links
+Click in order: 🐼 Panda, 🐻 Bear, 🦁 Lion
+🦁 Lion
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐻 Bear
+Wait 8 seconds
+🐼 Panda
+[17:29:15] Click order: Panda → Bear → Lion
+[17:29:15] Clicking Panda at (762, 597)
+[17:29:17] Clicking Bear at (762, 360)
+[17:29:20] Clicking Lion at (762, 360)
+[17:29:26] Solving Security Verification (least common icon)...
+[17:29:27] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[17:29:28] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T16-29-27-645Z.png (410x182.7611846923828)
+[17:29:30] Vision: ```json
+{"unique":"star", "position": 1}
+```
+[17:29:30] Clicking position 1 "star" at (638, 314)
+[17:29:34] Security verification passed
+[17:29:36] Clicking: Claim 5 Coins
+[17:29:46] Claim successful!
+[17:29:46] Claim processed!
+[17:29:46] Round complete — browser stays open, continuing...
+[17:29:56] 
+--- Processing: Chidera261 ---
+[17:29:56] On faucet but not claimable yet (cooldown?) — will wait
+[17:29:56] Waiting for faucet timer countdown (no refresh)...
+[17:30:11] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:27,02,27 timer="3 Min"
+[17:30:26] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:12,02,12 timer="3 Min"
+[17:30:41] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:57,01,57 timer="3 Min"
+[17:30:56] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:42,01,42 timer="3 Min"
+[17:31:11] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:27,01,27 timer="3 Min"
+[17:31:26] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:12,01,12 timer="3 Min"
+[17:31:41] Wait 105s: claimBtn=false emoji=false secver=false cooldown=00:57,00,57 timer="3 Min"
+[17:31:56] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:42,00,42 timer="3 Min"
+[17:32:11] Wait 135s: claimBtn=false emoji=false secver=false cooldown=00:27,00,27 timer="3 Min"
+[17:32:26] Wait 150s: claimBtn=false emoji=false secver=false cooldown=00:12,00,12 timer="3 Min"
+[17:32:41] Wait 165s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[17:32:56] Wait 180s: claimBtn=true emoji=true secver=false cooldown=false timer="3 Min"
+[17:32:56] Timer finished — claim ready, claiming without refresh...
+[17:32:56] Checking faucet status... (attempt 1)
+[17:32:56] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[17:32:56] Solving emoji captcha...
+[17:32:56] Instruction: 133.00 Coins
+
+
+Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+978 / 1000
+
+AntiBot Links
+Click in order: 🐻 Bear, 🐱 Cat, 🐶 Dog
+🐱 Cat
+Security Verification
+🐶 Dog
+Claim 5 Coins
+🐻 Bear
+© 2026 RoseCrypto. All rights reserved.
+[17:32:56] Click order: Bear → Cat → Dog
+[17:32:56] Clicking Bear at (762, 597)
+[17:32:59] Clicking Cat at (762, 360)
+[17:33:01] Clicking Dog at (762, 360)
+[17:33:08] Solving Turnstile...
+[17:33:11] Turnstile solved (token: 1.romHDSO9NtWTR5wKU6...)
+[17:33:13] Clicking: Claim 5 Coins
+[17:33:23] Claim successful!
+[17:33:23] Claim processed!
+[17:33:23] Waiting for faucet timer countdown (no refresh)...
+[17:33:38] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:36,02,36 timer="3 Min"
+[17:33:53] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:21,02,21 timer="3 Min"
+[17:34:08] Wait 45s: claimBtn=false emoji=false secver=false cooldown=02:06,02,06 timer="3 Min"
+[17:34:23] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:51,01,51 timer="3 Min"
+[17:34:38] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:36,01,36 timer="3 Min"
+[17:34:53] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:21,01,21 timer="3 Min"
+[17:35:09] Wait 105s: claimBtn=false emoji=false secver=false cooldown=01:06,01,06 timer="3 Min"
+[17:35:24] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:51,00,51 timer="3 Min"
+[17:35:39] Wait 135s: claimBtn=false emoji=false secver=false cooldown=00:36,00,36 timer="3 Min"
+[17:35:54] Wait 150s: claimBtn=false emoji=false secver=false cooldown=00:21,00,21 timer="3 Min"
+[17:36:09] Wait 165s: claimBtn=false emoji=false secver=false cooldown=00:06,00,06 timer="3 Min"
+[17:36:24] Wait 180s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[17:36:24] Timer finished — claim ready, claiming without refresh...
+[17:36:24] Checking faucet status... (attempt 1)
+[17:36:24] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[17:36:24] Solving emoji captcha...
+[17:36:24] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+977 / 1000
+
+AntiBot Links
+Click in order: 🦊 Fox, 🐰 Rabbit, 🐻 Bear
+🐰 Rabbit
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🦊 Fox
+Wait 2 seconds
+🐻 Bear
+[17:36:24] Click order: Fox → Rabbit → Bear
+[17:36:24] Clicking Fox at (762, 360)
+[17:36:26] Clicking Rabbit at (762, 360)
+[17:36:29] Clicking Bear at (762, 597)
+[17:36:36] Solving Security Verification (least common icon)...
+[17:36:37] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[17:36:37] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T16-36-37-101Z.png (410x182.7611846923828)
+[17:36:41] Vision: ```json
+{"unique":"bell", "position": 4}
+```
+[17:36:41] Clicking position 4 "bell" at (825, 314)
+[17:36:44] Security verification passed
+[17:36:46] Clicking: Claim 5 Coins
+[17:36:56] Claim successful!
+[17:36:56] Claim processed!
+[17:36:56] Round complete — browser stays open, continuing...
+[17:37:06] 
+--- Processing: Chidera261 ---
+[17:37:06] On faucet but not claimable yet (cooldown?) — will wait
+[17:37:07] Waiting for faucet timer countdown (no refresh)...
+[17:37:22] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:27,02,27 timer="3 Min"
+[17:37:37] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:12,02,12 timer="3 Min"
+[17:37:52] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:57,01,57 timer="3 Min"
+[17:38:07] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:42,01,42 timer="3 Min"
+[17:38:22] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:27,01,27 timer="3 Min"
+[17:38:37] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:12,01,12 timer="3 Min"
+[17:38:52] Wait 105s: claimBtn=false emoji=false secver=false cooldown=00:57,00,57 timer="3 Min"
+[17:39:07] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:42,00,42 timer="3 Min"
+[17:39:22] Wait 135s: claimBtn=false emoji=false secver=false cooldown=00:27,00,27 timer="3 Min"
+[17:39:37] Wait 150s: claimBtn=false emoji=false secver=false cooldown=00:12,00,12 timer="3 Min"
+[17:39:52] Wait 166s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[17:39:52] Timer finished — claim ready, claiming without refresh...
+[17:39:52] Checking faucet status... (attempt 1)
+[17:39:52] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[17:39:52] Solving emoji captcha...
+[17:39:52] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+976 / 1000
+
+AntiBot Links
+Click in order: 🐰 Rabbit, 🐶 Dog, 🦁 Lion
+🦁 Lion
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐶 Dog
+Wait 10 seconds
+🐰 Rabbit
+[17:39:52] Click order: Rabbit → Dog → Lion
+[17:39:52] Clicking Rabbit at (648, 597)
+[17:39:55] Clicking Dog at (648, 360)
+[17:39:57] Clicking Lion at (762, 360)
+[17:40:04] Solving Security Verification (least common icon)...
+[17:40:05] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[17:40:06] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T16-40-05-582Z.png (410x182.7611846923828)
+[17:40:08] Vision: ```json
+{"unique":"heart", "position": 2}
+```
+[17:40:08] Clicking position 2 "heart" at (700, 314)
+[17:40:11] Security verification passed
+[17:40:13] Clicking: Claim 5 Coins
+[17:40:23] Claim successful!
+[17:40:23] Claim processed!
+[17:40:23] Waiting for faucet timer countdown (no refresh)...
+[17:40:38] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:37,02,37 timer="3 Min"
+[17:40:53] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:22,02,22 timer="3 Min"
+[17:41:09] Wait 45s: claimBtn=false emoji=false secver=false cooldown=02:07,02,07 timer="3 Min"
+[17:41:24] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:52,01,52 timer="3 Min"
+[17:41:39] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:37,01,37 timer="3 Min"
+[17:41:54] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:22,01,22 timer="3 Min"
+[17:42:09] Wait 105s: claimBtn=false emoji=false secver=false cooldown=01:06,01,06 timer="3 Min"
+[17:42:24] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:51,00,51 timer="3 Min"
+[17:42:39] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:36,00,36 timer="3 Min"
+[17:42:54] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:21,00,21 timer="3 Min"
+[17:43:09] Wait 166s: claimBtn=false emoji=false secver=false cooldown=00:06,00,06 timer="3 Min"
+[17:43:24] Wait 181s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[17:43:24] CF appeared while waiting, solving...
+[17:43:24] CF state: verifying=false verifyHuman=true frame=true i=0
+[17:43:24] Clicking Verify you are human body...
+[17:43:24] DOM iframes (0): []
+[17:43:24] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/diors/0x4AAAAAA"]
+[17:43:24] No visible CF iframe found in DOM
+[17:43:24] Clicking checkbox fallback at (215, 336)
+[17:43:31] Clicking Verify you are human body...
+[17:43:31] DOM iframes (0): []
+[17:43:31] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/diors/0x4AAAAAA"]
+[17:43:31] No visible CF iframe found in DOM
+[17:43:31] Clicking checkbox fallback at (215, 336)
+[17:43:37] CF state: verifying=false verifyHuman=true frame=true i=2
+[17:43:37] Clicking Verify you are human body...
+[17:43:37] DOM iframes (0): []
+[17:43:37] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/diors/0x4AAAAAA"]
+[17:43:37] No visible CF iframe found in DOM
+[17:43:37] Clicking checkbox fallback at (215, 336)
+[17:43:58] Wait 215s: claimBtn=true emoji=true secver=true cooldown=false timer="3 Min"
+[17:43:58] Timer finished — claim ready, claiming without refresh...
+[17:43:58] Checking faucet status... (attempt 1)
+[17:43:58] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[17:43:58] Solving emoji captcha...
+[17:43:58] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+975 / 1000
+
+AntiBot Links
+Click in order: 🦁 Lion, 🐰 Rabbit, 🦊 Fox
+🦊 Fox
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐰 Rabbit
+Claim 5 Coins
+🦁 Lion
+[17:43:58] Click order: Lion → Rabbit → Fox
+[17:43:58] Clicking Lion at (762, 597)
+[17:44:01] Clicking Rabbit at (762, 360)
+[17:44:03] Clicking Fox at (762, 360)
+[17:44:10] Solving Security Verification (least common icon)...
+[17:44:11] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[17:44:11] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T16-44-11-480Z.png (410x182.7611846923828)
+[17:44:14] Vision: ```json
+{"unique":"heart", "position":3}
+```
+[17:44:14] Clicking position 3 "heart" at (762, 314)
+[17:44:17] Security verification passed
+[17:44:19] Clicking: Claim 5 Coins
+[17:44:29] Claim successful!
+[17:44:29] Claim processed!
+[17:44:29] Round complete — browser stays open, continuing...
+[17:44:39] 
+--- Processing: Chidera261 ---
+[17:44:39] On faucet but not claimable yet (cooldown?) — will wait
+[17:44:39] Waiting for faucet timer countdown (no refresh)...
+[17:44:54] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:28,02,28 timer="3 Min"
+[17:45:09] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:13,02,13 timer="3 Min"
+[17:45:24] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:57,01,57 timer="3 Min"
+[17:45:39] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:42,01,42 timer="3 Min"
+[17:45:54] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:27,01,27 timer="3 Min"
+[17:46:09] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:12,01,12 timer="3 Min"
+[17:46:24] Wait 105s: claimBtn=false emoji=false secver=false cooldown=00:57,00,57 timer="3 Min"
+[17:46:39] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:42,00,42 timer="3 Min"
+[17:46:54] Wait 135s: claimBtn=false emoji=false secver=false cooldown=00:27,00,27 timer="3 Min"
+[17:47:09] Wait 150s: claimBtn=false emoji=false secver=false cooldown=00:12,00,12 timer="3 Min"
+[17:47:25] Wait 165s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[17:47:25] Timer finished — claim ready, claiming without refresh...
+[17:47:25] Checking faucet status... (attempt 1)
+[17:47:25] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[17:47:25] Solving emoji captcha...
+[17:47:25] Instruction: AntiBot Links
+Click in order: 🐯 Tiger, 🐰 Rabbit, 🐼 Panda
+🐼 Panda
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐰 Rabbit
+Wait 9 seconds
+[17:47:25] Click order: Tiger → Rabbit → Panda
+[17:47:25] Clicking Tiger at (648, 597)
+[17:47:27] Clicking Rabbit at (762, 360)
+[17:47:30] Clicking Panda at (762, 360)
+[17:47:36] Solving Security Verification (least common icon)...
+[17:47:37] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[17:47:37] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T16-47-37-567Z.png (410x182.7611846923828)
+[17:47:43] Vision: ```json
+{"unique":"heart", "position": 2}
+```
+[17:47:43] Clicking position 2 "heart" at (700, 314)
+[17:47:46] Security verification passed
+[17:47:48] Clicking: Claim 5 Coins
+[17:47:58] Claim successful!
+[17:47:58] Claim processed!
+[17:47:58] Waiting for faucet timer countdown (no refresh)...
+[17:48:13] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:36,02,36 timer="3 Min"
+[17:48:28] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:21,02,21 timer="3 Min"
+[17:48:43] Wait 45s: claimBtn=false emoji=false secver=false cooldown=02:06,02,06 timer="3 Min"
+[17:48:58] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:51,01,51 timer="3 Min"
+[17:49:13] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:36,01,36 timer="3 Min"
+[17:49:28] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:21,01,21 timer="3 Min"
+[17:49:43] Wait 105s: claimBtn=false emoji=false secver=false cooldown=01:06,01,06 timer="3 Min"
+[17:49:59] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:51,00,51 timer="3 Min"
+[17:50:14] Wait 135s: claimBtn=false emoji=false secver=false cooldown=00:36,00,36 timer="3 Min"
+[17:50:29] Wait 150s: claimBtn=false emoji=false secver=false cooldown=00:21,00,21 timer="3 Min"
+[17:50:44] Wait 165s: claimBtn=false emoji=false secver=false cooldown=00:06,00,06 timer="3 Min"
+[17:50:59] Wait 180s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[17:50:59] Timer finished — claim ready, claiming without refresh...
+[17:50:59] Checking faucet status... (attempt 1)
+[17:50:59] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[17:50:59] Solving emoji captcha...
+[17:50:59] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+973 / 1000
+
+AntiBot Links
+Click in order: 🐰 Rabbit, 🐱 Cat, 🐶 Dog
+🐰 Rabbit
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐱 Cat
+Wait 8 seconds
+🐶 Dog
+[17:50:59] Click order: Rabbit → Cat → Dog
+[17:50:59] Clicking Rabbit at (762, 360)
+[17:51:01] Clicking Cat at (762, 360)
+[17:51:04] Clicking Dog at (762, 597)
+[17:51:10] Solving Security Verification (least common icon)...
+[17:51:11] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[17:51:13] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T16-51-12-005Z.png (410x182.7611846923828)
+[17:51:14] Vision: ```json
+{"unique":"fire icon", "position": 1}
+```
+[17:51:14] Clicking position 1 "fire icon" at (638, 314)
+[17:51:17] Security verification passed
+[17:51:19] Clicking: Claim 5 Coins
+[17:51:30] Claim successful!
+[17:51:30] Claim processed!
+[17:51:30] Round complete — browser stays open, continuing...
+[17:51:40] 
+--- Processing: Chidera261 ---
+[17:51:40] On faucet but not claimable yet (cooldown?) — will wait
+[17:51:40] Waiting for faucet timer countdown (no refresh)...
+[17:51:55] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:27,02,27 timer="3 Min"
+[17:52:10] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:12,02,12 timer="3 Min"
+[17:52:25] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:57,01,57 timer="3 Min"
+[17:52:40] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:42,01,42 timer="3 Min"
+[17:52:55] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:27,01,27 timer="3 Min"
+[17:53:10] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:12,01,12 timer="3 Min"
+[17:53:25] Wait 105s: claimBtn=false emoji=false secver=false cooldown=00:57,00,57 timer="3 Min"
+[17:53:40] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:42,00,42 timer="3 Min"
+[17:53:55] Wait 135s: claimBtn=false emoji=false secver=false cooldown=00:26,00,26 timer="3 Min"
+[17:54:10] Wait 150s: claimBtn=false emoji=false secver=false cooldown=00:11,00,11 timer="3 Min"
+[17:54:25] Wait 165s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[17:54:25] Timer finished — claim ready, claiming without refresh...
+[17:54:25] Checking faucet status... (attempt 1)
+[17:54:25] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[17:54:25] Solving emoji captcha...
+[17:54:25] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+972 / 1000
+
+AntiBot Links
+Click in order: 🐶 Dog, 🐱 Cat, 🐼 Panda
+🐼 Panda
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐱 Cat
+Wait 8 seconds
+🐶 Dog
+[17:54:25] Click order: Dog → Cat → Panda
+[17:54:25] Clicking Dog at (648, 597)
+[17:54:27] Clicking Cat at (648, 360)
+[17:54:30] Clicking Panda at (762, 360)
+[17:54:37] Solving Security Verification (least common icon)...
+[17:54:38] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[17:54:38] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-22T16-54-38-028Z.png (410x182.7611846923828)
+[17:54:45] Vision: ```json
+{"unique":"diamond", "position":1}
+```
+[17:54:45] Clicking position 1 "diamond" at (638, 314)
+[17:54:48] Security verification passed
+[17:54:50] Clicking: Claim 5 Coins
+[17:55:00] Claim successful!
+[17:55:00] Claim processed!
+[17:55:00] Waiting for faucet timer countdown (no refresh)...
+[17:55:15] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:37,02,37 timer="3 Min"
+[17:55:30] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:22,02,22 timer="3 Min"
+[02:34:00] Wait 31140s: claimBtn=false emoji=false secver=false cooldown=02:07,02,07 timer="3 Min"
+[02:34:04] Timer wait timed out (10 min)
+[02:34:04] Round complete — browser stays open, continuing...
+[02:34:14] 
+--- Processing: Chidera261 ---
+[02:34:14] On faucet but not claimable yet (cooldown?) — will wait
+[02:34:14] Waiting for faucet timer countdown (no refresh)...
+[02:34:29] Wait 15s: claimBtn=false emoji=false secver=false cooldown=01:36,01,36 timer="3 Min"
+[02:34:44] Wait 30s: claimBtn=false emoji=false secver=false cooldown=01:21,01,21 timer="3 Min"
+[02:34:59] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:06,01,06 timer="3 Min"
+[02:35:14] Wait 60s: claimBtn=false emoji=false secver=false cooldown=00:51,00,51 timer="3 Min"
+[02:35:29] Wait 75s: claimBtn=false emoji=false secver=false cooldown=00:36,00,36 timer="3 Min"
+[02:35:44] Wait 90s: claimBtn=false emoji=false secver=false cooldown=00:21,00,21 timer="3 Min"
+[02:35:59] Wait 105s: claimBtn=false emoji=false secver=false cooldown=00:06,00,06 timer="3 Min"
+[02:36:14] Wait 120s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[02:36:14] CF appeared while waiting, solving...
+[02:36:14] CF state: verifying=false verifyHuman=true frame=true i=0
+[02:36:15] Clicking Verify you are human body...
+[02:36:15] DOM iframes (0): []
+[02:36:15] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/f/av0/rch/magcu/0x4AAAAAA"]
+[02:36:15] No visible CF iframe found in DOM
+[02:36:15] Clicking checkbox fallback at (215, 336)
+[02:36:22] Clicking Verify you are human body...
+[02:36:22] DOM iframes (0): []
+[02:36:22] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/f/av0/rch/magcu/0x4AAAAAA"]
+[02:36:22] No visible CF iframe found in DOM
+[02:36:22] Clicking checkbox fallback at (215, 336)
+[02:36:45] Wait 151s: claimBtn=true emoji=true secver=false cooldown=false timer="3 Min"
+[02:36:45] Timer finished — claim ready, claiming without refresh...
+[02:36:45] Checking faucet status... (attempt 1)
+[02:36:45] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[02:36:45] Solving emoji captcha...
+[02:36:45] Instruction: 168.00 Coins
+
+
+Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+1000 / 1000
+
+AntiBot Links
+Click in order: 🦁 Lion, 🦊 Fox, 🐶 Dog
+🦊 Fox
+Security Verification
+🐶 Dog
+Claim 5 Coins
+🦁 Lion
+© 2026 RoseCrypto. All rights reserved.
+[02:36:45] Click order: Lion → Fox → Dog
+[02:36:45] Clicking Lion at (762, 597)
+[02:36:47] Detected 2 tabs, closing extras...
+[02:36:48] Clicking Fox at (762, 360)
+[02:36:51] Clicking Dog at (762, 360)
+[02:36:58] Solving Turnstile...
+[02:37:02] Turnstile solved (token: 1.7Se6TtMegz4IRW3GKN...)
+[02:37:04] Clicking: Claim 5 Coins
+[02:37:14] Claim successful!
+[02:37:14] Claim processed!
+[02:37:14] Waiting for faucet timer countdown (no refresh)...
+[02:37:29] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:37,02,37 timer="3 Min"
+[02:37:44] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:22,02,22 timer="3 Min"
+[02:38:00] Wait 45s: claimBtn=false emoji=false secver=false cooldown=02:07,02,07 timer="3 Min"
+[02:38:15] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:52,01,52 timer="3 Min"
+[02:38:30] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:37,01,37 timer="3 Min"
+[02:38:45] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:21,01,21 timer="3 Min"
+[02:39:00] Wait 105s: claimBtn=false emoji=false secver=false cooldown=01:06,01,06 timer="3 Min"
+[02:39:15] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:51,00,51 timer="3 Min"
+[02:39:30] Wait 135s: claimBtn=false emoji=false secver=false cooldown=00:36,00,36 timer="3 Min"
+[02:39:45] Wait 150s: claimBtn=false emoji=false secver=false cooldown=00:21,00,21 timer="3 Min"
+[02:40:00] Wait 166s: claimBtn=false emoji=false secver=false cooldown=00:06,00,06 timer="3 Min"
+[02:40:15] Wait 181s: claimBtn=false emoji=true secver=false cooldown=false timer="3 Min"
+[02:40:15] Timer finished — claim ready, claiming without refresh...
+[02:40:15] Checking faucet status... (attempt 1)
+[02:40:15] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[02:40:15] Solving emoji captcha...
+[02:40:15] Instruction: 173.00 Coins
+
+
+Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+999 / 1000
+
+AntiBot Links
+Click in order: 🐯 Tiger, 🐰 Rabbit, 🦁 Lion
+🐰 Rabbit
+Security Verification
+🦁 Lion
+Wait 5 seconds
+🐯 Tiger
+© 2026 RoseCrypto. All rights reserved.
+[02:40:15] Click order: Tiger → Rabbit → Lion
+[02:40:15] Clicking Tiger at (762, 597)
+[02:40:19] Detected 2 tabs, closing extras...
+[02:40:20] Clicking Rabbit at (762, 360)
+[02:40:23] Clicking Lion at (762, 360)
+[02:40:29] Solving Turnstile...
+[02:40:33] Turnstile solved (token: 1.6AiAd8Rjc81Sf1ZIni...)
+[02:40:35] Clicking: Claim 5 Coins
+[02:40:45] Claim successful!
+[02:40:45] Claim processed!
+[02:40:45] Round complete — browser stays open, continuing...
+[02:40:55] 
+--- Processing: Chidera261 ---
+[02:40:55] On faucet but not claimable yet (cooldown?) — will wait
+[02:40:55] Waiting for faucet timer countdown (no refresh)...
+[02:41:11] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:26,02,26 timer="3 Min"
+[02:41:26] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:11,02,11 timer="3 Min"
+[02:41:41] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:56,01,56 timer="3 Min"
+[02:41:56] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:41,01,41 timer="3 Min"
+[02:42:11] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:26,01,26 timer="3 Min"
+[02:42:26] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:11,01,11 timer="3 Min"
+[02:42:41] Wait 105s: claimBtn=false emoji=false secver=false cooldown=00:56,00,56 timer="3 Min"
+[02:42:56] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:41,00,41 timer="3 Min"
+[02:43:11] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:26,00,26 timer="3 Min"
+[02:43:26] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:11,00,11 timer="3 Min"
+[02:43:42] Wait 166s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[02:43:42] Timer finished — claim ready, claiming without refresh...
+[02:43:42] Checking faucet status... (attempt 1)
+[02:43:42] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[02:43:42] Solving emoji captcha...
+[02:43:42] Instruction: AntiBot Links
+Click in order: 🐼 Panda, 🐯 Tiger, 🐰 Rabbit
+🐰 Rabbit
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐯 Tiger
+Wait 9 seconds
+[02:43:42] Click order: Panda → Tiger → Rabbit
+[02:43:42] Clicking Panda at (762, 597)
+[02:43:46] Detected 2 tabs, closing extras...
+[02:43:52] Clicking Tiger at (762, 360)
+[02:43:55] Clicking Rabbit at (762, 360)
+[02:44:02] Solving Security Verification (least common icon)...
+[02:44:03] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[02:44:04] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-23T01-44-03-123Z.png (410x182.7611846923828)
+[02:44:06] Vision: ```json
+{"unique":"star", "position": 1}
+```
+[02:44:06] Clicking position 1 "star" at (638, 314)
+[02:44:09] Security verification passed
+[02:44:11] Clicking: Claim 5 Coins
+[02:44:22] Claim successful!
+[02:44:22] Claim processed!
+[02:44:22] Waiting for faucet timer countdown (no refresh)...
+[02:44:37] Wait 15s: claimBtn=true emoji=true secver=false cooldown=false timer="3 Min"
+[02:44:37] Timer finished — claim ready, claiming without refresh...
+[02:44:37] Checking faucet status... (attempt 1)
+[02:44:37] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[02:44:37] Solving emoji captcha...
+[02:44:37] Instruction: Invalid AntiBot Link order. Please click in the specified sequence!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+998 / 1000
+
+AntiBot Links
+Click in order: 🐰 Rabbit, 🐶 Dog, 🐱 Cat
+🐱 Cat
+Security Verification
+🐶 Dog
+Claim 5 Coins
+🐰 Rabbit
+[02:44:37] Click order: Rabbit → Dog → Cat
+[02:44:37] Clicking Rabbit at (762, 597)
+[02:44:41] Clicking Dog at (762, 360)
+[02:44:44] Clicking Cat at (762, 360)
+[02:44:51] Solving Turnstile...
+[02:44:54] Turnstile solved (token: 1.LHCSAG3mYhOzflyzeK...)
+[02:44:56] Clicking: Claim 5 Coins
+[02:45:07] Claim successful!
+[02:45:07] Claim processed!
+[02:45:07] Round complete — browser stays open, continuing...
+[02:45:17] 
+--- Processing: Chidera261 ---
+[02:45:17] On faucet but not claimable yet (cooldown?) — will wait
+[02:45:17] Waiting for faucet timer countdown (no refresh)...
+[02:45:32] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:29,02,29 timer="3 Min"
+[02:45:47] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:14,02,14 timer="3 Min"
+[02:46:02] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:58,01,58 timer="3 Min"
+[02:46:17] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:43,01,43 timer="3 Min"
+[02:46:32] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:28,01,28 timer="3 Min"
+[02:46:47] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:13,01,13 timer="3 Min"
+[02:47:02] Wait 105s: claimBtn=false emoji=false secver=false cooldown=00:58,00,58 timer="3 Min"
+[02:47:17] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:43,00,43 timer="3 Min"
+[02:47:32] Wait 135s: claimBtn=false emoji=false secver=false cooldown=00:28,00,28 timer="3 Min"
+[02:47:47] Wait 150s: claimBtn=false emoji=false secver=false cooldown=00:13,00,13 timer="3 Min"
+[02:48:02] Wait 166s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[02:48:02] Timer finished — claim ready, claiming without refresh...
+[02:48:02] Checking faucet status... (attempt 1)
+[02:48:03] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[02:48:03] Solving emoji captcha...
+[02:48:04] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+997 / 1000
+
+AntiBot Links
+Click in order: 🐶 Dog, 🐱 Cat, 🐼 Panda
+🐶 Dog
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐱 Cat
+Wait 10 seconds
+🐼 Panda
+[02:48:04] Click order: Dog → Cat → Panda
+[02:48:05] Clicking Dog at (648, 360)
+[02:48:14] Clicking Cat at (762, 360)
+[02:48:17] Clicking Panda at (762, 597)
+[02:48:24] Solving Security Verification (least common icon)...
+[02:48:25] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[02:48:25] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-23T01-48-25-033Z.png (410x182.7611846923828)
+[02:48:27] Vision: ```json
+{"unique":"shield", "position": 2}
+```
+[02:48:27] Clicking position 2 "shield" at (700, 314)
+[02:48:30] Security verification passed
+[02:48:32] Clicking: Claim 5 Coins
+[02:48:43] Claim successful!
+[02:48:43] Claim processed!
+[02:48:43] Waiting for faucet timer countdown (no refresh)...
+[02:48:58] Wait 15s: claimBtn=true emoji=true secver=false cooldown=false timer="3 Min"
+[02:48:58] Timer finished — claim ready, claiming without refresh...
+[02:48:58] Checking faucet status... (attempt 1)
+[02:48:58] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[02:48:58] Solving emoji captcha...
+[02:48:58] Instruction: Invalid AntiBot Link order. Please click in the specified sequence!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+997 / 1000
+
+AntiBot Links
+Click in order: 🐱 Cat, 🐶 Dog, 🦊 Fox
+🐱 Cat
+Security Verification
+🐶 Dog
+Claim 5 Coins
+🦊 Fox
+[02:48:58] Click order: Cat → Dog → Fox
+[02:48:58] Clicking Cat at (762, 360)
+[02:49:00] Clicking Dog at (762, 360)
+[02:49:03] Clicking Fox at (762, 597)
+[02:49:10] Solving Turnstile...
+[02:49:14] Turnstile solved (token: 1.9QVgLg22otpkViwOR9...)
+[02:49:16] Clicking: Claim 5 Coins
+[02:49:26] Claim successful!
+[02:49:26] Claim processed!
+[02:49:26] Round complete — browser stays open, continuing...
+[02:49:36] 
+--- Processing: Chidera261 ---
+[02:49:37] Already on faucet and claimable — skipping login
+[02:49:41] Checking faucet status... (attempt 1)
+[02:49:41] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[02:49:41] Solving emoji captcha...
+[02:49:41] Instruction: AntiBot Links
+Click in order: 🐱 Cat, 🐶 Dog, 🦊 Fox
+Security Verification
+Auto earn with videos
+Install mobile app, watch videos and earn USDT. Paying from 0.01
+More details
+fomoearn.com
+Claim 5 Coins
+[02:49:41] Click order: Cat → Dog → Fox
+[02:49:41] Detected 2 tabs, closing extras...
+[02:49:42] Cat not found
+[02:49:42] Dog not found
+[02:49:42] Fox not found
+[02:49:44] Emoji captcha still present after clicks
+[02:49:46] Emoji captcha failed — reloading to start afresh
+[02:49:46] Reloading faucet page...
+[02:49:53] Reload complete
+[02:49:53] Checking faucet status... (attempt 2)
+[02:49:53] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[02:49:53] Solving emoji captcha...
+[02:49:53] Instruction: REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+997 / 1000
+
+AntiBot Links
+Click in order: 🦊 Fox, 🦁 Lion, 🐶 Dog
+🐶 Dog
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🦊 Fox
+Wait 5 seconds
+🦁 Lion
+[02:49:53] Click order: Fox → Lion → Dog
+[02:49:53] Clicking Fox at (762, 361)
+[02:49:56] Clicking Lion at (762, 597)
+[02:49:59] Clicking Dog at (762, 360)
+[02:50:05] Solving Security Verification (least common icon)...
+[02:50:06] Found 5 icons: 1@(638,315) 2@(700,315) 3@(762,315) 4@(825,315) 5@(887,315)
+[02:50:08] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-23T01-50-06-769Z.png (410x182.7611846923828)
+[02:50:09] Vision: ```json
+{"unique":"cube","position":5}
+```
+[02:50:09] Clicking position 5 "cube" at (887, 315)
+[02:50:12] Security verification passed
+[02:50:14] Clicking: Claim 5 Coins
+[02:50:25] Claim successful!
+[02:50:25] Claim processed!
+[02:50:25] Waiting for faucet timer countdown (no refresh)...
+[02:50:40] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:36,02,36 timer="3 Min"
+[02:50:55] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:21,02,21 timer="3 Min"
+[02:51:10] Wait 45s: claimBtn=false emoji=false secver=false cooldown=02:06,02,06 timer="3 Min"
+[02:51:25] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:51,01,51 timer="3 Min"
+[02:51:40] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:36,01,36 timer="3 Min"
+[02:51:55] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:21,01,21 timer="3 Min"
+[02:52:10] Wait 105s: claimBtn=false emoji=false secver=false cooldown=01:06,01,06 timer="3 Min"
+[02:52:25] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:51,00,51 timer="3 Min"
+[02:52:40] Wait 135s: claimBtn=false emoji=false secver=false cooldown=00:36,00,36 timer="3 Min"
+[02:52:55] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:21,00,21 timer="3 Min"
+[02:53:10] Wait 166s: claimBtn=false emoji=false secver=false cooldown=00:06,00,06 timer="3 Min"
+[02:53:25] Wait 181s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[02:53:25] CF appeared while waiting, solving...
+[02:53:26] CF state: verifying=false verifyHuman=true frame=true i=0
+[02:53:26] Clicking Verify you are human body...
+[02:53:26] DOM iframes (0): []
+[02:53:26] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/f/av0/rch/1xkur/0x4AAAAAA"]
+[02:53:26] No visible CF iframe found in DOM
+[02:53:26] Clicking checkbox fallback at (215, 336)
+[02:53:33] Clicking Verify you are human body...
+[02:53:33] DOM iframes (0): []
+[02:53:33] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/f/av0/rch/1xkur/0x4AAAAAA"]
+[02:53:33] No visible CF iframe found in DOM
+[02:53:33] Clicking checkbox fallback at (215, 336)
+[02:53:56] Wait 211s: claimBtn=true emoji=true secver=true cooldown=false timer="3 Min"
+[02:53:56] Timer finished — claim ready, claiming without refresh...
+[02:53:56] Checking faucet status... (attempt 1)
+[02:53:56] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[02:53:56] Solving emoji captcha...
+[02:53:56] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+996 / 1000
+
+AntiBot Links
+Click in order: 🐼 Panda, 🐻 Bear, 🐯 Tiger
+🐼 Panda
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐻 Bear
+Claim 5 Coins
+🐯 Tiger
+[02:53:56] Click order: Panda → Bear → Tiger
+[02:53:56] Clicking Panda at (762, 360)
+[02:53:58] Clicking Bear at (762, 360)
+[02:54:01] Clicking Tiger at (762, 597)
+[02:54:07] Solving Security Verification (least common icon)...
+[02:54:09] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[02:54:10] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-23T01-54-09-013Z.png (410x182.7611846923828)
+[02:54:11] Vision: ```json
+{"unique":"heart", "position":3}
+```
+[02:54:11] Clicking position 3 "heart" at (762, 314)
+[02:54:14] Security verification passed
+[02:54:16] Clicking: Claim 5 Coins
+[02:54:26] Claim successful!
+[02:54:26] Claim processed!
+[02:54:26] Round complete — browser stays open, continuing...
+[02:54:36] 
+--- Processing: Chidera261 ---
+[02:54:36] On faucet but not claimable yet (cooldown?) — will wait
+[02:54:36] Waiting for faucet timer countdown (no refresh)...
+[02:54:51] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:27,02,27 timer="3 Min"
+[02:55:06] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:12,02,12 timer="3 Min"
+[02:55:21] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:57,01,57 timer="3 Min"
+[02:55:37] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:42,01,42 timer="3 Min"
+[02:55:52] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:27,01,27 timer="3 Min"
+[02:56:07] Wait 91s: claimBtn=false emoji=false secver=false cooldown=01:12,01,12 timer="3 Min"
+[02:56:22] Wait 106s: claimBtn=false emoji=false secver=false cooldown=00:56,00,56 timer="3 Min"
+[02:56:37] Wait 121s: claimBtn=false emoji=false secver=false cooldown=00:41,00,41 timer="3 Min"
+[02:56:52] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:26,00,26 timer="3 Min"
+[02:57:07] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:11,00,11 timer="3 Min"
+[02:57:23] Wait 166s: claimBtn=false emoji=true secver=true cooldown=false timer="3 Min"
+[02:57:23] Timer finished — claim ready, claiming without refresh...
+[02:57:23] Checking faucet status... (attempt 1)
+[02:57:23] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[02:57:23] Solving emoji captcha...
+[02:57:23] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+995 / 1000
+
+AntiBot Links
+Click in order: 🦁 Lion, 🐱 Cat, 🐯 Tiger
+🦁 Lion
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🐱 Cat
+Wait 8 seconds
+🐯 Tiger
+[02:57:23] Click order: Lion → Cat → Tiger
+[02:57:23] Clicking Lion at (648, 360)
+[02:57:26] Clicking Cat at (762, 360)
+[02:57:29] Clicking Tiger at (762, 597)
+[02:57:36] Solving Security Verification (least common icon)...
+[02:57:37] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[02:57:39] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-23T01-57-37-818Z.png (410x182.7611846923828)
+[02:57:41] Vision: ```json
+{"unique":"lightning bolt", "position": 1}
+```
+[02:57:41] Clicking position 1 "lightning bolt" at (638, 314)
+[02:57:45] Security verification passed
+[02:57:47] Clicking: Claim 5 Coins
+[02:57:57] Claim successful!
+[02:57:57] Claim processed!
+[02:57:57] Waiting for faucet timer countdown (no refresh)...
+[02:58:12] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:39,02,39 timer="3 Min"
+[02:58:27] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:24,02,24 timer="3 Min"
+[02:58:42] Wait 45s: claimBtn=false emoji=false secver=false cooldown=02:09,02,09 timer="3 Min"
+[02:58:57] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:54,01,54 timer="3 Min"
+[02:59:12] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:39,01,39 timer="3 Min"
+[02:59:27] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:24,01,24 timer="3 Min"
+[02:59:42] Wait 105s: claimBtn=false emoji=false secver=false cooldown=01:08,01,08 timer="3 Min"
+[02:59:57] Wait 121s: claimBtn=false emoji=false secver=false cooldown=00:53,00,53 timer="3 Min"
+[03:00:13] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:38,00,38 timer="3 Min"
+[03:00:28] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:23,00,23 timer="3 Min"
+[03:00:43] Wait 166s: claimBtn=false emoji=false secver=false cooldown=00:08,00,08 timer="3 Min"
+[03:01:00] Wait 183s: claimBtn=false emoji=true secver=false cooldown=false timer="3 Min"
+[03:01:00] Timer finished — claim ready, claiming without refresh...
+[03:01:00] Checking faucet status... (attempt 1)
+[03:01:00] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[03:01:00] Solving emoji captcha...
+[03:01:00] Instruction: 198.00 Coins
+
+
+Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+994 / 1000
+
+AntiBot Links
+Click in order: 🦁 Lion, 🐱 Cat, 🐼 Panda
+🐼 Panda
+Security Verification
+🐱 Cat
+Wait 8 seconds
+🦁 Lion
+© 2026 RoseCrypto. All rights reserved.
+[03:01:00] Click order: Lion → Cat → Panda
+[03:01:00] Clicking Lion at (762, 597)
+[03:01:04] Clicking Cat at (762, 360)
+[03:01:07] Clicking Panda at (762, 360)
+[03:01:14] Solving Turnstile...
+[03:01:17] Turnstile solved (token: 1.NV3u-744UV3DBABlYf...)
+[03:01:19] Clicking: Claim 5 Coins
+[03:01:30] Claim successful!
+[03:01:30] Claim processed!
+[03:01:30] Round complete — browser stays open, continuing...
+[03:01:40] 
+--- Processing: Chidera261 ---
+[03:01:40] On faucet but not claimable yet (cooldown?) — will wait
+[03:01:40] Waiting for faucet timer countdown (no refresh)...
+[03:01:55] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:29,02,29 timer="3 Min"
+[03:02:10] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:14,02,14 timer="3 Min"
+[03:02:25] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:58,01,58 timer="3 Min"
+[03:02:40] Wait 61s: claimBtn=false emoji=false secver=false cooldown=01:43,01,43 timer="3 Min"
+[03:02:55] Wait 76s: claimBtn=false emoji=false secver=false cooldown=01:28,01,28 timer="3 Min"
+[03:03:10] Wait 91s: claimBtn=false emoji=false secver=false cooldown=01:13,01,13 timer="3 Min"
+[03:03:26] Wait 106s: claimBtn=false emoji=false secver=false cooldown=00:58,00,58 timer="3 Min"
+[03:03:41] Wait 122s: claimBtn=false emoji=false secver=false cooldown=00:42,00,42 timer="3 Min"
+[03:03:56] Wait 137s: claimBtn=false emoji=false secver=false cooldown=00:27,00,27 timer="3 Min"
+[03:04:12] Wait 152s: claimBtn=false emoji=false secver=false cooldown=00:12,00,12 timer="3 Min"
+[03:04:27] Wait 168s: claimBtn=false emoji=true secver=false cooldown=false timer="3 Min"
+[03:04:27] Timer finished — claim ready, claiming without refresh...
+[03:04:27] Checking faucet status... (attempt 1)
+[03:04:27] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[03:04:27] Solving emoji captcha...
+[03:04:28] Instruction: 203.00 Coins
+
+
+Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+993 / 1000
+
+AntiBot Links
+Click in order: 🐱 Cat, 🐰 Rabbit, 🐼 Panda
+🐼 Panda
+Security Verification
+🐰 Rabbit
+Wait 10 seconds
+🐱 Cat
+[03:04:28] Click order: Cat → Rabbit → Panda
+[03:04:28] Clicking Cat at (762, 662)
+[03:04:47] Clicking Rabbit at (762, 360)
+[03:04:50] Clicking Panda at (762, 360)
+[03:04:57] Solving Turnstile...
+[03:05:00] Turnstile solved (token: 1.eTTBmMy-6OdT6VtuST...)
+[03:05:02] Clicking: Claim 5 Coins
+[03:05:13] Claim successful!
+[03:05:13] Claim processed!
+[03:05:13] Waiting for faucet timer countdown (no refresh)...
+[03:05:28] Wait 15s: claimBtn=true emoji=true secver=false cooldown=false timer="3 Min"
+[03:05:28] Timer finished — claim ready, claiming without refresh...
+[03:05:28] Checking faucet status... (attempt 1)
+[03:05:28] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[03:05:28] Solving emoji captcha...
+[03:05:28] Instruction: Invalid AntiBot Link order. Please click in the specified sequence!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+993 / 1000
+
+AntiBot Links
+Click in order: 🐯 Tiger, 🐼 Panda, 🐻 Bear
+🐯 Tiger
+Security Verification
+🐼 Panda
+Claim 5 Coins
+🐻 Bear
+[03:05:28] Click order: Tiger → Panda → Bear
+[03:05:28] Clicking Tiger at (762, 360)
+[03:05:31] Clicking Panda at (762, 360)
+[03:05:34] Clicking Bear at (762, 597)
+[03:05:41] Solving Turnstile...
+[03:05:45] Turnstile solved (token: 1.8iKMIknz7ulD1MSpjP...)
+[03:05:47] Clicking: Claim 5 Coins
+[03:05:57] Claim successful!
+[03:05:57] Claim processed!
+[03:05:57] Round complete — browser stays open, continuing...
+[03:06:08] 
+--- Processing: Chidera261 ---
+[03:06:08] Already on faucet and claimable — skipping login
+[03:06:13] Checking faucet status... (attempt 1)
+[03:06:13] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[03:06:13] Solving emoji captcha...
+[03:06:13] Instruction: 203.00 Coins
+
+
+Invalid AntiBot Link order. Please click in the specified sequence!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+993 / 1000
+
+AntiBot Links
+Click in order: 🐯 Tiger, 🐼 Panda, 🐻 Bear
+Security Verification
+Claim 5 Coins
+© 2026 RoseCrypto. All rights reserved.
+[03:06:13] Click order: Tiger → Panda → Bear
+[03:06:13] Detected 2 tabs, closing extras...
+[03:06:14] Tiger not found
+[03:06:14] Panda not found
+[03:06:14] Bear not found
+[03:06:16] Emoji captcha still present after clicks
+[03:06:18] Emoji captcha failed — reloading to start afresh
+[03:06:18] Reloading faucet page...
+[03:06:31] Reload complete
+[03:06:31] Checking faucet status... (attempt 2)
+[03:06:31] State: {"hasClaimBtn":false,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":false,"hasSuccess":false,"alreadyClaimed":false}
+[03:06:31] Solving emoji captcha...
+[03:06:31] Instruction: 203.00 Coins
+
+
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+993 / 1000
+
+AntiBot Links
+Click in order: 🐰 Rabbit, 🦁 Lion, 🐱 Cat
+🐱 Cat
+Security Verification
+🦁 Lion
+Wait 6 seconds
+🐰 Rabbit
+© 2026 RoseCrypto. All rights reserved.
+[03:06:31] Click order: Rabbit → Lion → Cat
+[03:06:31] Clicking Rabbit at (762, 597)
+[03:06:34] Clicking Lion at (762, 360)
+[03:06:37] Clicking Cat at (762, 360)
+[03:06:45] Solving Turnstile...
+[03:06:51] Turnstile solved (token: 1.Kvbp5ftVITn-gsdFdX...)
+[03:06:53] Clicking: Claim 5 Coins
+[03:07:04] Claim successful!
+[03:07:04] Claim processed!
+[03:07:04] Waiting for faucet timer countdown (no refresh)...
+[03:07:19] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:38,02,38 timer="3 Min"
+[03:07:34] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:23,02,23 timer="3 Min"
+[03:07:49] Wait 45s: claimBtn=false emoji=false secver=false cooldown=02:08,02,08 timer="3 Min"
+[03:08:04] Wait 61s: claimBtn=false emoji=false secver=false cooldown=01:53,01,53 timer="3 Min"
+[03:08:19] Wait 76s: claimBtn=false emoji=false secver=false cooldown=01:38,01,38 timer="3 Min"
+[03:08:35] Wait 91s: claimBtn=false emoji=false secver=false cooldown=01:23,01,23 timer="3 Min"
+[03:08:50] Wait 106s: claimBtn=false emoji=false secver=false cooldown=01:08,01,08 timer="3 Min"
+[03:09:05] Wait 121s: claimBtn=false emoji=false secver=false cooldown=00:53,00,53 timer="3 Min"
+[03:09:20] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:38,00,38 timer="3 Min"
+[03:09:35] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:23,00,23 timer="3 Min"
+[03:09:50] Wait 166s: claimBtn=false emoji=false secver=false cooldown=00:08,00,08 timer="3 Min"
+[03:10:05] Wait 181s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:10:05] CF appeared while waiting, solving...
+[03:10:05] CF state: verifying=false verifyHuman=true frame=true i=0
+[03:10:07] Clicking Verify you are human body...
+[03:10:07] DOM iframes (0): []
+[03:10:07] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/f/av0/rch/wlqrq/0x4AAAAAA"]
+[03:10:07] No visible CF iframe found in DOM
+[03:10:07] Clicking checkbox fallback at (215, 336)
+[03:10:15] Clicking Verify you are human body...
+[03:10:15] DOM iframes (0): []
+[03:10:15] Frames: ["https://rosecrypto.space/faucet?success=1","https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/f/av0/rch/wlqrq/0x4AAAAAA"]
+[03:10:15] No visible CF iframe found in DOM
+[03:10:15] Clicking checkbox fallback at (215, 336)
+[03:10:38] Wait 214s: claimBtn=true emoji=true secver=true cooldown=false timer="3 Min"
+[03:10:38] Timer finished — claim ready, claiming without refresh...
+[03:10:38] Checking faucet status... (attempt 1)
+[03:10:38] State: {"hasClaimBtn":true,"needsEmoji":true,"needsVerification":false,"needsSecurityVer":true,"hasSuccess":false,"alreadyClaimed":false}
+[03:10:38] Solving emoji captcha...
+[03:10:38] Instruction: Faucet claimed successfully!
+REWARD
+
+5 Coins
+
+TIMER
+
+3 Min
+
+EXP
+
++2 EXP
+
+DAILY LIMIT
+
+992 / 1000
+
+AntiBot Links
+Click in order: 🦁 Lion, 🐱 Cat, 🐯 Tiger
+🐱 Cat
+Security Verification
+ Select the LEAST common icon (the unique one)
+Click the unique icon to complete
+🦁 Lion
+Claim 5 Coins
+🐯 Tiger
+[03:10:38] Click order: Lion → Cat → Tiger
+[03:10:38] Clicking Lion at (762, 360)
+[03:10:40] Clicking Cat at (762, 360)
+[03:10:43] Clicking Tiger at (762, 597)
+[03:10:51] Solving Security Verification (least common icon)...
+[03:10:52] Found 5 icons: 1@(638,314) 2@(700,314) 3@(762,314) 4@(825,314) 5@(887,314)
+[03:10:57] SecVer screenshot saved: /tmp/rosecrypto_secver_2026-09-23T02-10-52-466Z.png (410x182.7611846923828)
+[03:10:59] Vision: ```json
+{"unique":"heart", "position":4}
+```
+[03:10:59] Clicking position 4 "heart" at (825, 314)
+[03:11:02] Security verification passed
+[03:11:05] Clicking: Claim 5 Coins
+[03:11:15] Claim successful!
+[03:11:15] Claim processed!
+[03:11:15] Round complete — browser stays open, continuing...
+[03:11:25] 
+--- Processing: Chidera261 ---
+[03:11:25] On faucet but not claimable yet (cooldown?) — will wait
+[03:11:25] Waiting for faucet timer countdown (no refresh)...
+[03:11:40] Wait 15s: claimBtn=false emoji=false secver=false cooldown=02:27,02,27 timer="3 Min"
+[03:11:55] Wait 30s: claimBtn=false emoji=false secver=false cooldown=02:11,02,11 timer="3 Min"
+[03:12:10] Wait 45s: claimBtn=false emoji=false secver=false cooldown=01:56,01,56 timer="3 Min"
+[03:12:25] Wait 60s: claimBtn=false emoji=false secver=false cooldown=01:41,01,41 timer="3 Min"
+[03:12:40] Wait 75s: claimBtn=false emoji=false secver=false cooldown=01:26,01,26 timer="3 Min"
+[03:12:55] Wait 90s: claimBtn=false emoji=false secver=false cooldown=01:11,01,11 timer="3 Min"
+[03:13:10] Wait 105s: claimBtn=false emoji=false secver=false cooldown=00:56,00,56 timer="3 Min"
+[03:13:26] Wait 120s: claimBtn=false emoji=false secver=false cooldown=00:41,00,41 timer="3 Min"
+[03:13:41] Wait 136s: claimBtn=false emoji=false secver=false cooldown=00:26,00,26 timer="3 Min"
+[03:13:56] Wait 151s: claimBtn=false emoji=false secver=false cooldown=00:11,00,11 timer="3 Min"
+[03:14:11] Wait 166s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:14:26] Wait 181s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:14:41] Wait 196s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:14:56] Wait 211s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:15:11] Wait 226s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:15:26] Wait 241s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:15:41] Wait 256s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:15:56] Wait 271s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:16:11] Wait 286s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:16:26] Wait 301s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:16:42] Wait 316s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:16:57] Wait 332s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:17:12] Wait 347s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:17:27] Wait 362s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:17:42] Wait 377s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:18:06] Wait 400s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:18:21] Wait 415s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:18:36] Wait 431s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:18:51] Wait 446s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:19:06] Wait 461s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:19:21] Wait 476s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:19:36] Wait 491s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:19:51] Wait 506s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:20:06] Wait 521s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:20:21] Wait 536s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:20:36] Wait 551s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:20:51] Wait 566s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:21:06] Wait 581s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:21:21] Wait 596s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:21:36] Wait 611s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:21:36] Timer wait timed out (10 min)
+[03:21:36] Waiting for faucet timer countdown (no refresh)...
+[03:21:52] Wait 15s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:22:07] Wait 30s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:22:22] Wait 45s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:22:37] Wait 60s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:22:52] Wait 75s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:23:07] Wait 90s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:23:22] Wait 106s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:23:37] Wait 121s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:23:52] Wait 136s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:24:07] Wait 151s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:24:22] Wait 166s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:24:37] Wait 181s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:24:52] Wait 196s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:25:07] Wait 211s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:25:23] Wait 226s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:25:38] Wait 241s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:25:53] Wait 256s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+[03:26:08] Wait 271s: claimBtn=false emoji=false secver=false cooldown=false timer=""
+                                                                                                                                                                            

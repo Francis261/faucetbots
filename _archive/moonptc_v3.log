@@ -1,0 +1,33 @@
+logged in
+
+=== turnstile check ===
+{
+  "hasTurnstile": false,
+  "siteKey": "0x4AAAAAAEFiuCNTLp_xRBDo",
+  "cfIframes": []
+}
+
+=== clicking robot button ===
+clicked
+after click: {
+  "cfIframes": [],
+  "allIframes": [
+    {
+      "src": "",
+      "w": 125,
+      "h": 125
+    },
+    {
+      "src": "",
+      "w": 468,
+      "h": 60
+    },
+    {
+      "src": "",
+      "w": 180,
+      "h": 150
+    }
+  ],
+  "turnstile": false
+}
+screenshot saved

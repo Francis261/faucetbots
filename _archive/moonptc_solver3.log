@@ -1,0 +1,10 @@
+logged in
+challenge: {"session_id":"8595cf13161efa8df72b8fc58726d402","challenge":{"type":"rotation","id":"5bb35ba13abdad1a83fb1baf9de92d3d","image":"/api/faucet/rotation-captcha/variant/7850125d753e5611e8eedf2001443e39ec1448614f9c782e","crop":{"x":0.615,"y":0.7,"radius":0.095}},"tolerance":10}
+top 20 angles: 291:190.6, 292:190.6, 293:190.9, 290:191.1, 294:191.2, 289:191.5, 295:192.2, 288:192.5, 84:193.1, 287:193.1, 85:193.3, 296:193.9, 86:194.0, 83:194.1, 87:194.2, 286:194.3, 88:194.7, 297:195.0, 82:195.1, 285:195.2
+
+trying best angle: 291
+verify: {"error":"wrong","attempts_left":2}
+trying angle 292...
+result: {"error":"wrong","attempts_left":1}
+trying angle 293...
+result: {"error":"locked","locked_until":1789654529511}

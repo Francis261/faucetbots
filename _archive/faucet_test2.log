@@ -1,0 +1,22 @@
+Opening...
+RES 200 https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Hw5aXo.wof
+RES 200 https://www.google.com/recaptcha/api.js
+modal visible before click: false
+Clicking Login button...
+RES 200 https://www.gstatic.com/recaptcha/releases/XOqlk8PL_yVx6IdpLbpXdiLy/recaptcha__en.js
+RES 200 https://www.google.com/recaptcha/api2/anchor?ar=1&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0a
+modal visible after click: false
+modal classes: modal fade bd-example-modal-lg
+--- all frames ---
+  frame: https://claimfreecoins.io/tether-faucet/
+  frame: https://claimfreecoins.io/ads/320x100_2/?reload=300
+  frame: https://claimfreecoins.io/ads/728x90_3/?reload=300
+  frame: https://claimfreecoins.io/ads/320x100_3/?reload=300
+  frame: https://www.google.com/recaptcha/api2/anchor?ar=1&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4&co=aHR0
+  frame: 
+  frame: 
+g-recaptcha element count: 2
+RES 200 https://www.gstatic.com/recaptcha/releases/XOqlk8PL_yVx6IdpLbpXdiLy/styles__ltr.css
+.g-recaptcha innerHTML: <div style="width: 304px; height: 78px;"><div><iframe title="reCAPTCHA" width="304" height="78" role="presentation" name="a-3ykjxoqkuux3" frameborder="0" scrolling="no" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation allow-modals allow-popups-to-escape-sandbox allow-storage-access-by-user-activation" src="https://www.google.com/recaptcha/api2/anchor?ar=1&amp;k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4&amp;co=aHR0cHM6Ly9jbGFpbWZyZWVjb2lucy5pbzo0NDM.&amp;hl=en
+RES 200 https://www.gstatic.com/recaptcha/releases/XOqlk8PL_yVx6IdpLbpXdiLy/recaptcha__en.js
+RES 200 https://www.google.com/recaptcha/api2/webworker.js?hl=en&v=XOqlk8PL_yVx6IdpLbpXdiLy

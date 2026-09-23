@@ -1,0 +1,352 @@
+=== step 1: homepage ===
+url: https://moonptc.com/
+home text: MoonPTC | 🇺🇸 | English | ▾ | MoonPTC | Your gateway to effortless crypto earnings. Watch ads, complete shortlinks, collect bonuses. Withdraw to FaucetPay anytime. | Start Earning | New here? Just enter your email and start — account is created automatically. | MoonPTC in Numbers | 16,178 | Total Users | 34,768 | Withdrawals Sent | July 9, 2026 | Online Since | How It Works | 1 | Sign Up | Enter your FaucetPay email to create your account instantly. No password needed. | 2 | Earn | Complete tasks: faucet claims, view PTC ads, shortlinks, and offerwall offers. | 3 | Level Up | Earn XP with every action. Unlock permanent earnings bo
+buttons: [
+ {
+  "tag": "A",
+  "text": "MoonPTC",
+  "id": "",
+  "href": "https://moonptc.com/",
+  "cls": "flex items-center gap-3 group"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "🇺🇸\nEnglish\n▾",
+  "id": "",
+  "href": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "A",
+  "text": "FaucetPay",
+  "id": "",
+  "href": "https://faucetpay.io/?r=494017",
+  "cls": "text-slate-300 hover:text-white underlin"
+ },
+ {
+  "tag": "INPUT",
+  "text": "",
+  "id": "",
+  "href": "",
+  "cls": "w-full px-5 py-4 rounded-xl bg-white/[0."
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Start Earning",
+  "id": "",
+  "href": "",
+  "cls": "w-full px-8 py-4 rounded-xl bg-gradient-"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "What is MoonPTC?\n▼",
+  "id": "",
+  "href": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "How do I earn?\n▼",
+  "id": "",
+  "href": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "What is the minimum withdrawal?\n▼",
+  "id": "",
+  "href": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "How does the level system work?\n▼",
+  "id": "",
+  "href": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "What is the referral commission?\n▼",
+  "id": "",
+  "href": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "How often can I claim from the faucet?\n▼",
+  "id": "",
+  "href": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "INPUT",
+  "text": "",
+  "id": "",
+  "href": "",
+  "cls": "flex-1 px-4 py-3 rounded-xl bg-white/[0."
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Start Earning Now",
+  "id": "",
+  "href": "",
+  "cls": "px-6 py-3 rounded-xl bg-gradient-to-r fr"
+ },
+ {
+  "tag": "A",
+  "text": "Terms & Conditions",
+  "id": "",
+  "href": "https://moonptc.com/terms",
+  "cls": "hover:text-white transition-colors"
+ },
+ {
+  "tag": "A",
+  "text": "Privacy Policy",
+  "id": "",
+  "href": "https://moonptc.com/privacy",
+  "cls": "hover:text-white transition-colors"
+ },
+ {
+  "tag": "A",
+  "text": "Contact",
+  "id": "",
+  "href": "https://moonptc.com/contact",
+  "cls": "hover:text-white transition-colors"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "🇺🇸\nEnglish\n▾",
+  "id": "",
+  "href": "",
+  "cls": "w-full flex items-center justify-between"
+ }
+]
+
+=== step 2: login ===
+login url: https://moonptc.com/
+login text: MoonPTC | 🇺🇸 | English | ▾ | MoonPTC | Your gateway to effortless crypto earnings. Watch ads, complete shortlinks, collect bonuses. Withdraw to FaucetPay anytime. | Start Earning | New here? Just enter your email and start — account is created automatically. | MoonPTC in Numbers | 16,178 | Total Users | 34,768 | Withdrawals Sent | July 9, 2026 | Online Since | How It Works | 1 | Sign Up | Enter your FaucetPay email to create your account instantly. No password needed. | 2 | Earn | Complete tasks: faucet claims, view PTC ads, shortlinks, and offerwall offers. | 3 | Level Up | Earn XP with every action. Unlock permanent earnings bo
+login inputs: [
+ {
+  "tag": "INPUT",
+  "type": "email",
+  "name": "",
+  "id": "",
+  "placeholder": "Enter your FaucetPay email",
+  "cls": "w-full px-5 py-4 rounded-xl bg-white/[0."
+ },
+ {
+  "tag": "INPUT",
+  "type": "email",
+  "name": "",
+  "id": "",
+  "placeholder": "Enter your FaucetPay email",
+  "cls": "flex-1 px-4 py-3 rounded-xl bg-white/[0."
+ }
+]
+login buttons: [
+ {
+  "tag": "A",
+  "text": "MoonPTC",
+  "id": "",
+  "cls": "flex items-center gap-3 group"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "🇺🇸\nEnglish\n▾",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "A",
+  "text": "FaucetPay",
+  "id": "",
+  "cls": "text-slate-300 hover:text-white underlin"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Start Earning",
+  "id": "",
+  "cls": "w-full px-8 py-4 rounded-xl bg-gradient-"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "What is MoonPTC?\n▼",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "How do I earn?\n▼",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "What is the minimum withdrawal?\n▼",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "How does the level system work?\n▼",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "What is the referral commission?\n▼",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "How often can I claim from the faucet?\n▼",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Start Earning Now",
+  "id": "",
+  "cls": "px-6 py-3 rounded-xl bg-gradient-to-r fr"
+ },
+ {
+  "tag": "A",
+  "text": "Terms & Conditions",
+  "id": "",
+  "cls": "hover:text-white transition-colors"
+ },
+ {
+  "tag": "A",
+  "text": "Privacy Policy",
+  "id": "",
+  "cls": "hover:text-white transition-colors"
+ },
+ {
+  "tag": "A",
+  "text": "Contact",
+  "id": "",
+  "cls": "hover:text-white transition-colors"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "🇺🇸\nEnglish\n▾",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ }
+]
+
+=== step 3: faucet ===
+faucet url: https://moonptc.com/
+faucet text: MoonPTC | 🇺🇸 | English | ▾ | MoonPTC | Your gateway to effortless crypto earnings. Watch ads, complete shortlinks, collect bonuses. Withdraw to FaucetPay anytime. | Start Earning | New here? Just enter your email and start — account is created automatically. | MoonPTC in Numbers | 16,178 | Total Users | 34,768 | Withdrawals Sent | July 9, 2026 | Online Since | How It Works | 1 | Sign Up | Enter your FaucetPay email to create your account instantly. No password needed. | 2 | Earn | Complete tasks: faucet claims, view PTC ads, shortlinks, and offerwall offers. | 3 | Level Up | Earn XP with every action. Unlock permanent earnings boosts at higher levels. | 4 | Withdraw | Cash out your earnings to FaucetPay in 9 different cryptocurrencies anytime. | Supported Cryptocurrencies | Withdraw your earnings in any of these cryptocurrencies vi
+faucet buttons: [
+ {
+  "tag": "A",
+  "text": "MoonPTC",
+  "id": "",
+  "cls": "flex items-center gap-3 group"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "🇺🇸\nEnglish\n▾",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "A",
+  "text": "FaucetPay",
+  "id": "",
+  "cls": "text-slate-300 hover:text-white underlin"
+ },
+ {
+  "tag": "INPUT",
+  "text": "",
+  "id": "",
+  "cls": "w-full px-5 py-4 rounded-xl bg-white/[0."
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Start Earning",
+  "id": "",
+  "cls": "w-full px-8 py-4 rounded-xl bg-gradient-"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "What is MoonPTC?\n▼",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "How do I earn?\n▼",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "What is the minimum withdrawal?\n▼",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "How does the level system work?\n▼",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "What is the referral commission?\n▼",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "How often can I claim from the faucet?\n▼",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ },
+ {
+  "tag": "INPUT",
+  "text": "",
+  "id": "",
+  "cls": "flex-1 px-4 py-3 rounded-xl bg-white/[0."
+ },
+ {
+  "tag": "BUTTON",
+  "text": "Start Earning Now",
+  "id": "",
+  "cls": "px-6 py-3 rounded-xl bg-gradient-to-r fr"
+ },
+ {
+  "tag": "A",
+  "text": "Terms & Conditions",
+  "id": "",
+  "cls": "hover:text-white transition-colors"
+ },
+ {
+  "tag": "A",
+  "text": "Privacy Policy",
+  "id": "",
+  "cls": "hover:text-white transition-colors"
+ },
+ {
+  "tag": "A",
+  "text": "Contact",
+  "id": "",
+  "cls": "hover:text-white transition-colors"
+ },
+ {
+  "tag": "BUTTON",
+  "text": "🇺🇸\nEnglish\n▾",
+  "id": "",
+  "cls": "w-full flex items-center justify-between"
+ }
+]
+captcha info: {
+ "iframes": [],
+ "hasTurnstile": false,
+ "hasRecaptcha": false,
+ "turnstileHtml": ""
+}

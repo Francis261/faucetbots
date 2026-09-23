@@ -1,0 +1,60 @@
+{
+  "prompt": "Select all images with\na fire hydrant",
+  "tiles": [
+    {
+      "idx": 0,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA6pWOtuKXTHbmYDTkMiZoyiOqWe2CJ0XAksrKHmIKS78FnpnwApOcrcL5zobPxl7bBEdi86gS_Bs4g9xOK_c567zdNY0HexPMBPMWeabgQQCLMJwOEfdCHNds2j_eulpPWTwLNJx5oDicdOpGr0NsG5CKgWLcxKVAJOs0Og35Jb_r6zejeOxdwo9oCjP11e_p-OMt3OiTy3jaH5RilFXJOyw4aRTI-rRwFMTYp8y7tcwwxlbGw&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789622737310-0.png",
+      "hash": 4.7122764168831215e+21
+    },
+    {
+      "idx": 1,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA6pWOtuKXTHbmYDTkMiZoyiOqWe2CJ0XAksrKHmIKS78FnpnwApOcrcL5zobPxl7bBEdi86gS_Bs4g9xOK_c567zdNY0HexPMBPMWeabgQQCLMJwOEfdCHNds2j_eulpPWTwLNJx5oDicdOpGr0NsG5CKgWLcxKVAJOs0Og35Jb_r6zejeOxdwo9oCjP11e_p-OMt3OiTy3jaH5RilFXJOyw4aRTI-rRwFMTYp8y7tcwwxlbGw&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789622737310-1.png",
+      "hash": 4.7122764168831215e+21
+    },
+    {
+      "idx": 2,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA6pWOtuKXTHbmYDTkMiZoyiOqWe2CJ0XAksrKHmIKS78FnpnwApOcrcL5zobPxl7bBEdi86gS_Bs4g9xOK_c567zdNY0HexPMBPMWeabgQQCLMJwOEfdCHNds2j_eulpPWTwLNJx5oDicdOpGr0NsG5CKgWLcxKVAJOs0Og35Jb_r6zejeOxdwo9oCjP11e_p-OMt3OiTy3jaH5RilFXJOyw4aRTI-rRwFMTYp8y7tcwwxlbGw&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789622737310-2.png",
+      "hash": 4.7122764168831215e+21
+    },
+    {
+      "idx": 3,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA6pWOtuKXTHbmYDTkMiZoyiOqWe2CJ0XAksrKHmIKS78FnpnwApOcrcL5zobPxl7bBEdi86gS_Bs4g9xOK_c567zdNY0HexPMBPMWeabgQQCLMJwOEfdCHNds2j_eulpPWTwLNJx5oDicdOpGr0NsG5CKgWLcxKVAJOs0Og35Jb_r6zejeOxdwo9oCjP11e_p-OMt3OiTy3jaH5RilFXJOyw4aRTI-rRwFMTYp8y7tcwwxlbGw&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789622737310-3.png",
+      "hash": 4.7122764168831215e+21
+    },
+    {
+      "idx": 4,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA6pWOtuKXTHbmYDTkMiZoyiOqWe2CJ0XAksrKHmIKS78FnpnwApOcrcL5zobPxl7bBEdi86gS_Bs4g9xOK_c567zdNY0HexPMBPMWeabgQQCLMJwOEfdCHNds2j_eulpPWTwLNJx5oDicdOpGr0NsG5CKgWLcxKVAJOs0Og35Jb_r6zejeOxdwo9oCjP11e_p-OMt3OiTy3jaH5RilFXJOyw4aRTI-rRwFMTYp8y7tcwwxlbGw&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789622737310-4.png",
+      "hash": 4.7122764168831215e+21
+    },
+    {
+      "idx": 5,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA6pWOtuKXTHbmYDTkMiZoyiOqWe2CJ0XAksrKHmIKS78FnpnwApOcrcL5zobPxl7bBEdi86gS_Bs4g9xOK_c567zdNY0HexPMBPMWeabgQQCLMJwOEfdCHNds2j_eulpPWTwLNJx5oDicdOpGr0NsG5CKgWLcxKVAJOs0Og35Jb_r6zejeOxdwo9oCjP11e_p-OMt3OiTy3jaH5RilFXJOyw4aRTI-rRwFMTYp8y7tcwwxlbGw&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789622737310-5.png",
+      "hash": 4.7122764168831215e+21
+    },
+    {
+      "idx": 6,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA6pWOtuKXTHbmYDTkMiZoyiOqWe2CJ0XAksrKHmIKS78FnpnwApOcrcL5zobPxl7bBEdi86gS_Bs4g9xOK_c567zdNY0HexPMBPMWeabgQQCLMJwOEfdCHNds2j_eulpPWTwLNJx5oDicdOpGr0NsG5CKgWLcxKVAJOs0Og35Jb_r6zejeOxdwo9oCjP11e_p-OMt3OiTy3jaH5RilFXJOyw4aRTI-rRwFMTYp8y7tcwwxlbGw&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789622737310-6.png",
+      "hash": 4.7122764168831215e+21
+    },
+    {
+      "idx": 7,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA6pWOtuKXTHbmYDTkMiZoyiOqWe2CJ0XAksrKHmIKS78FnpnwApOcrcL5zobPxl7bBEdi86gS_Bs4g9xOK_c567zdNY0HexPMBPMWeabgQQCLMJwOEfdCHNds2j_eulpPWTwLNJx5oDicdOpGr0NsG5CKgWLcxKVAJOs0Og35Jb_r6zejeOxdwo9oCjP11e_p-OMt3OiTy3jaH5RilFXJOyw4aRTI-rRwFMTYp8y7tcwwxlbGw&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789622737310-7.png",
+      "hash": 4.7122764168831215e+21
+    },
+    {
+      "idx": 8,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA6pWOtuKXTHbmYDTkMiZoyiOqWe2CJ0XAksrKHmIKS78FnpnwApOcrcL5zobPxl7bBEdi86gS_Bs4g9xOK_c567zdNY0HexPMBPMWeabgQQCLMJwOEfdCHNds2j_eulpPWTwLNJx5oDicdOpGr0NsG5CKgWLcxKVAJOs0Og35Jb_r6zejeOxdwo9oCjP11e_p-OMt3OiTy3jaH5RilFXJOyw4aRTI-rRwFMTYp8y7tcwwxlbGw&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789622737310-8.png",
+      "hash": 4.7122764168831215e+21
+    }
+  ],
+  "id": 1789622737310
+}

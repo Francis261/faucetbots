@@ -1,0 +1,70 @@
+=== login ===
+logged in, url: https://moonptc.com/dashboard
+
+=== faucet ===
+
+=== clicking I am not a robot ===
+robot btn visible: true
+btn html: <button type="button" class="relative w-full max-w-[320px] rounded-xl border bg-white/[0.03] backdrop-blur px-4 py-3.5 flex items-center gap-3 select-none transition-colors duration-200 border-white/1
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 10000ms exceeded.
+Call log:
+[2m  - waiting for locator('button:has-text("I\'m not a robot")')[22m
+[2m    - locator resolved to <button type="button" class="relative w-full max-w-[320px] rounded-xl border bg-white/[0.03] backdrop-blur px-4 py-3.5 flex items-center gap-3 select-none transition-colors duration-200 border-white/10 hover:border-white/20 cursor-pointer">…</button>[22m
+[2m  - attempting click action[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <div data-format="3" class="cc-2524ce9fed438356" data-cc-id="2524ce9fed438356"></div> intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <div data-format="3" class="cc-2524ce9fed438356" data-cc-id="2524ce9fed438356"></div> intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m      - waiting 100ms[22m
+[2m    17 × waiting for element to be visible, enabled and stable[22m
+[2m       - element is visible, enabled and stable[22m
+[2m       - scrolling into view if needed[22m
+[2m       - done scrolling[22m
+[2m       - <div data-format="3" class="cc-2524ce9fed438356" data-cc-id="2524ce9fed438356"></div> intercepts pointer events[22m
+[2m     - retrying click action[22m
+[2m       - waiting 500ms[22m
+
+    at /home/francis/adbch/moonptc_click.mjs:47:16 {
+  log: [
+    `  - waiting for locator('button:has-text("I\\'m not a robot")')`,
+    '    - locator resolved to <button type="button" class="relative w-full max-w-[320px] rounded-xl border bg-white/[0.03] backdrop-blur px-4 py-3.5 flex items-center gap-3 select-none transition-colors duration-200 border-white/10 hover:border-white/20 cursor-pointer">…</button>',
+    '  - attempting click action',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <div data-format="3" class="cc-2524ce9fed438356" data-cc-id="2524ce9fed438356"></div> intercepts pointer events',
+    '    - retrying click action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <div data-format="3" class="cc-2524ce9fed438356" data-cc-id="2524ce9fed438356"></div> intercepts pointer events',
+    '    - retrying click action',
+    '      - waiting 100ms',
+    '    17 × waiting for element to be visible, enabled and stable',
+    '       - element is visible, enabled and stable',
+    '       - scrolling into view if needed',
+    '       - done scrolling',
+    '       - <div data-format="3" class="cc-2524ce9fed438356" data-cc-id="2524ce9fed438356"></div> intercepts pointer events',
+    '     - retrying click action',
+    '       - waiting 500ms'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.14.1

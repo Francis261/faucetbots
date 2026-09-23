@@ -1,0 +1,13 @@
+logged in
+clicking robot button via JS...
+state after click: {"hasTurnstile":false,"cfIframeCount":0,"cfIframeSrcs":[]}
+waiting for captcha token...
+waiting... 0 btn disabled: true
+waiting... 5 btn disabled: true
+waiting... 10 btn disabled: true
+waiting... 15 btn disabled: true
+waiting... 20 btn disabled: true
+waiting... 25 btn disabled: true
+waiting... 30 btn disabled: true
+waiting... 35 btn disabled: true
+waiting... 40 btn disabled: true

@@ -1,0 +1,19 @@
+logged in
+=== checking rotation mechanism ===
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.evaluate: TypeError: Converting circular structure to JSON
+    --> starting at object with constructor 'HTMLDivElement'
+    |     property '__reactFiber$zoqbuvlh6di' -> object with constructor 'x3'
+    --- property 'stateNode' closes the circle
+    at JSON.stringify (<anonymous>)
+    at eval (eval at evaluate (:311:30), <anonymous>:33:29)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at /home/francis/adbch/moonptc_mech.mjs:40:30 {
+  log: []
+}
+
+Node.js v24.14.1

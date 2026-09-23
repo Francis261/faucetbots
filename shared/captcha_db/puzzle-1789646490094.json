@@ -1,0 +1,102 @@
+{
+  "prompt": "Select all squares with\ncrosswalks",
+  "tiles": [
+    {
+      "idx": 0,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-0.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 1,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-1.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 2,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-2.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 3,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-3.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 4,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-4.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 5,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-5.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 6,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-6.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 7,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-7.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 8,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-8.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 9,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-9.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 10,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-10.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 11,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-11.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 12,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-12.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 13,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-13.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 14,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-14.png",
+      "hash": 4.6869141465279905e+21
+    },
+    {
+      "idx": 15,
+      "url": "https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7jM60ByGm3HT5yYOLGhaOTpIrWL-Gc-DQF1NcM5F4PlehVGQYuYECLYd2c4mbn7_ZT_F-nC3q0S1YQSP6GD_4n9yZCjUVCBwU1tstM3trvH6PGuGBlhGd3dat3aP5_TzF-t59ZaRLL0qjFPOaCP4DSFLJjgYWrS0cMF9bfhmVwHX1LCYP1rFuF3T8IwTrkWEvn5v9g&k=6LfwaSgTAAAAAJJNz6oAdimVHmIe3s4fHj4D0at4",
+      "file": "captcha_db/tiles/1789646490094-15.png",
+      "hash": 4.6869141465279905e+21
+    }
+  ],
+  "id": 1789646490094
+}

@@ -1,0 +1,7 @@
+[]
+
+globals: {
+  "ccnsUnits": "{\"_queue\":[]}",
+  "ccnsPop": true,
+  "ccnsInit": true
+}

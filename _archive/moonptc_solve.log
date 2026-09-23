@@ -1,0 +1,76 @@
+logged in
+=== solving rotation puzzle ===
+{
+  "circleCenter": {
+    "x": 191.5,
+    "y": 197
+  },
+  "circleRadius": 43,
+  "bestAngles": [
+    {
+      "angle": 0,
+      "score": 151.36666666666667
+    },
+    {
+      "angle": 1,
+      "score": 151.36666666666667
+    },
+    {
+      "angle": 2,
+      "score": 151.36666666666667
+    },
+    {
+      "angle": 3,
+      "score": 151.36666666666667
+    },
+    {
+      "angle": 4,
+      "score": 151.36666666666667
+    },
+    {
+      "angle": 5,
+      "score": 151.36666666666667
+    },
+    {
+      "angle": 6,
+      "score": 151.36666666666667
+    },
+    {
+      "angle": 7,
+      "score": 151.36666666666667
+    },
+    {
+      "angle": 8,
+      "score": 151.36666666666667
+    },
+    {
+      "angle": 9,
+      "score": 151.36666666666667
+    }
+  ],
+  "worstAngles": [
+    {
+      "angle": 355,
+      "score": 151.36666666666667
+    },
+    {
+      "angle": 356,
+      "score": 151.36666666666667
+    },
+    {
+      "angle": 357,
+      "score": 151.36666666666667
+    },
+    {
+      "angle": 358,
+      "score": 151.36666666666667
+    },
+    {
+      "angle": 359,
+      "score": 151.36666666666667
+    }
+  ]
+}
+
+Best angle: 0
+set slider to 0 and saved screenshot

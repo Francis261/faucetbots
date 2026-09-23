@@ -1,0 +1,28 @@
+screenshot taken, viewport: { width: 1280, height: 720 }
+captcha box: {"x":441.31341552734375,"y":534.8059692382812,"width":382.08953857421875,"height":69.776123046875}
+widget tree: [
+ {
+  "tag": "DIV",
+  "cls": "cf-turnstile",
+  "id": "",
+  "style": ""
+ },
+ {
+  "tag": "DIV",
+  "cls": "",
+  "id": "",
+  "style": ""
+ },
+ {
+  "tag": "DIV",
+  "cls": "",
+  "id": "",
+  "style": ""
+ },
+ {
+  "tag": "INPUT",
+  "cls": "",
+  "id": "cf-chl-widget-178b1_response",
+  "style": ""
+ }
+]

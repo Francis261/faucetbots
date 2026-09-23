@@ -1,0 +1,100 @@
+[13:42:17] === 1XFaucet PTC Bot Started ===
+[13:42:40] Already logged in!
+[13:42:40] 
+=== Round 1 ===
+[13:42:40] Fetching tasks...
+[13:42:59] Window tasks: 0
+[13:43:01] Iframe tasks: 1
+[13:43:01] Total tasks: 1
+[13:43:01] 
+--- Task 1/1: Litecoin Farm ---
+[13:43:01] Iframe task: Litecoin Farm (15s, https://1xfaucet.com/ptc/view/27)
+[13:43:13]   11s left...
+[13:43:23]   1s left...
+[13:43:23] Iframe task duration complete
+[13:43:25] Checking for verification...
+[13:43:28] Modal detected - waiting for Turnstile to load...
+[13:43:30] Verify form made visible
+[13:43:32] Turnstile frame found
+[13:43:32] Solving Turnstile...
+[13:43:35] Clicking Turnstile widget at (515, 227)
+[13:43:51] Turnstile not solved yet (attempt 1)
+[13:43:56] Clicking Turnstile widget at (515, 227)
+[13:44:12] Turnstile not solved yet (attempt 2)
+[13:44:17] Clicking Turnstile widget at (515, 227)
+[13:44:34] Turnstile not solved yet (attempt 3)
+[13:44:39] Clicking Turnstile widget at (515, 227)
+[13:44:55] Turnstile not solved yet (attempt 4)
+[13:45:00] Clicking Turnstile widget at (515, 227)
+[13:45:17] Turnstile not solved yet (attempt 5)
+[13:45:22] Clicking Turnstile widget at (515, 227)
+[13:45:38] Turnstile not solved yet (attempt 6)
+[13:45:43] Clicking Turnstile widget at (515, 227)
+[13:46:00] Turnstile not solved yet (attempt 7)
+[13:46:05] Clicking Turnstile widget at (515, 227)
+[13:46:09] Turnstile solved!
+[13:46:09] Clicking Verify button...
+[13:46:09] Verify button clicked
+[13:46:16] Done: Litecoin Farm
+[13:46:34] 
+Round 1 complete: 1/1 tasks done
+[13:46:34] Waiting 10 min before next round...
+[13:56:34] 
+=== Round 2 ===
+[13:56:34] Fetching tasks...
+[13:56:55] Window tasks: 0
+[13:56:57] Iframe tasks: 0
+[13:56:57] Total tasks: 0
+[13:56:57] No tasks available. Waiting 5 min...
+[14:01:57] 
+=== Round 3 ===
+[14:01:57] Fetching tasks...
+[14:02:14] Window tasks: 0
+[14:02:17] Iframe tasks: 0
+[14:02:17] Total tasks: 0
+[14:02:17] No tasks available. Waiting 5 min...
+[14:07:17] 
+=== Round 4 ===
+[14:07:17] Fetching tasks...
+[14:07:31] Window tasks: 0
+[14:07:33] Iframe tasks: 0
+[14:07:33] Total tasks: 0
+[14:07:33] No tasks available. Waiting 5 min...
+[14:12:33] 
+=== Round 5 ===
+[14:12:33] Fetching tasks...
+[14:12:56] Window tasks: 0
+[14:12:58] Iframe tasks: 0
+[14:12:58] Total tasks: 0
+[14:12:58] No tasks available. Waiting 5 min...
+[14:17:58] 
+=== Round 6 ===
+[14:17:58] Fetching tasks...
+[14:18:15] Window tasks: 0
+[14:18:18] Iframe tasks: 0
+[14:18:18] Total tasks: 0
+[14:18:18] No tasks available. Waiting 5 min...
+[14:23:18] 
+=== Round 7 ===
+[14:23:18] Fetching tasks...
+[14:23:36] Window tasks: 0
+[14:23:40] Iframe tasks: 0
+[14:23:40] Total tasks: 0
+[14:23:40] No tasks available. Waiting 5 min...
+[14:28:40] 
+=== Round 8 ===
+[14:28:40] Fetching tasks...
+[14:28:41] Navigation error: page.goto: Target page, context or browser has bee
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.title: Target page, context or browser has been closed
+    at waitForCloudflare (/home/francis/adbch/1xfaucet/ptc_bot.mjs:54:30)
+    at getAllTasks (/home/francis/adbch/1xfaucet/ptc_bot.mjs:145:9)
+    at async run (/home/francis/adbch/1xfaucet/ptc_bot.mjs:500:19)
+    at async file:///home/francis/adbch/1xfaucet/ptc_bot.mjs:564:1 {
+  log: []
+}
+
+Node.js v24.14.1

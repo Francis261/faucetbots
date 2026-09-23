@@ -1,0 +1,7 @@
+{
+  "ollama": {
+    "host": "https://ollama.com",
+    "api_key": "b3be06fa11184ba2a874259bb0b505f7.6v336cULw7DZ8EMHdPq6OPlc",
+    "model": "gemma4:31b"
+  }
+}

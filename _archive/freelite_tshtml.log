@@ -1,0 +1,26 @@
+turnstile frame url: https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/8bwvw/0x4AAAAAAEgWVhRZYiLL1CiF/auto
+frame html length: 246664
+--- html snippet ---
+<!DOCTYPE html><html lang="en-US" dir="ltr"><head><meta http-equiv="x-ua-compatible" content="IE=Edge,chrome=1"><meta http-equiv="content-security-policy" content="default-src 'none'; script-src 'nonce-hNJe5zkmPhMQM8JNmevFn3' 'unsafe-eval'; script-src-attr 'none'; worker-src blob:; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self' https://hagen.challenges.cloudflare.com https://brunhild.challenges.cloudflare.com; frame-src 'self' blob:; child-src 'self' blob:; form-action 'none'; base-uri 'self'; trusted-types FHMZS9 default; require-trusted-types-for 'script'"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><title>Checking your Browser…</title><style id="UwwC7">@keyframes spin{100%{transform:rotate(360deg)}}@keyframes scale{0%, 100%{transform:none}50%{transform:scale3d(1, 1, 1)}}@keyframes stroke{100%{stroke-dashoffset:0}}@keyframes scale-up-center{0%{transform:scale(.01)}100%{transform:scale(1)}}@keyframes success-badge-orbit-in{0%{transform:rotate(-12deg) scale(.6);opacity:0}70%{transform:rotate(2deg) scale(1.06);opacity:1}100%{transform:rotate(0) scale(1);opacity:1}}@keyframes success-orbit-resolve{0%{transform:rotate(-80deg) scale(.6);opacity:0}20%{opacity:1}75%{opacity:.8}100%{transform:rotate(280deg) scale(.5);opacity:0}}@keyframes failure-orbit-break{0%{transform:rotate(-60deg) scale(.7);opacity:0}22%{opacity:1}68%{transform:rotate(190deg) scale(1);opacity:.8}100%{transform:rotate(225deg) scale(.48);opacity:0}}@keyframes failure-badge-settle{0%{transform:scale(.68);opacity:0}72%{transform:scale(1.04);opacity:1}100%{transform:scale(1);opacity:1}}@keyframes failure-mark-rise{0%{transform:translateY(2px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes unspin{40%{stroke-width:1px;stroke-linecap:square;stroke-dashoffset:192}100%{stroke-width:0}}#PAdD9{width:30px;height:30px;display:flex;border-radius:50%;box-shadow:inset 0 0 0 #228b49;stroke-width:1px;fill:#fff;stroke:#fff;stroke-miterlimit:10;grid-area:1/1;transform-origin:center;animation:success-badge-orbit-in .36s .26s cubic-bezier(.34, 1.56, .64, 1) both;stroke-width:6px}#PAdD9 .mGPdy9{animation:stroke .28s .41s cubic-bezier(.65, 0, .45, 1) forwards;box-shadow:inset 0 0 0 #228b49;stroke-dasharray:242;stroke-dashoffset:242}.WRFD6{stroke-dashoffset:0;stroke-width:2;stroke-miterlimit:10;stroke:#228b49;fill:#228b49}#ZvYSd8{width:30px;height:30px;grid-area:1/1;overflow:visible}#ZvYSd8 g{transform-box:fill-box;transform-origin:center;animation:success-orbit-resolve .62s cubic-bezier(.2, .7, .2, 1) both}.agcy9{opacity:.3;fill:none;stroke:#228b49;stroke-width:1}.TEnz3{fill:#228b49}.TsxKS6{stroke-width:3px;stroke-linecap:round;stroke:#228b49;stroke-dasharray:0,100,0;stroke-dashoffset:200;stroke-miterlimit:1;stroke-linejoin:round}#ILoo3,#yuOn2{width:30px;height:30px;display:flex;border-radius:50%;box-shadow:inset 0 0 0 #b20f03;stroke-width:1px;fill:#fff;stroke:#fff;stroke-miterlimit:10}.clJ
+frame elements: [
+ {
+  "tag": "HTML",
+  "cls": "",
+  "id": "",
+  "w": 301,
+  "h": 66,
+  "x": 0,
+  "y": 0,
+  "role": ""
+ },
+ {
+  "tag": "BODY",
+  "cls": "",
+  "id": "",
+  "w": 301,
+  "h": 66,
+  "x": 0,
+  "y": 0,
+  "role": ""
+ }
+]

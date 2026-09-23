@@ -1,0 +1,45 @@
+[02:04:05] Starting faucet bot: 1 rounds, 60s interval
+[02:04:08] === Round 1: loading https://claimfreecoins.io/tether-faucet/ ===
+[02:04:24] email entered. Opening modal...
+[02:04:27] modal visible: true
+[02:04:27] clicking recaptcha checkbox...
+[02:04:35] checkbox click err: locator.click: Timeout 5000ms exceeded.
+Call log:
+[2m  - waiting for locator('.
+[02:04:42] checkbox click err: locator.click: Timeout 5000ms exceeded.
+Call log:
+[2m  - waiting for locator('.
+[02:04:49] checkbox click err: locator.click: Timeout 5000ms exceeded.
+Call log:
+[2m  - waiting for locator('.
+[02:04:56] checkbox click err: locator.click: Timeout 5000ms exceeded.
+Call log:
+[2m  - waiting for locator('.
+[02:04:58] recaptcha did NOT become good
+[02:05:04] --- page text tail ---
+    Faucets
+    PTC Sites
+    Mining
+    Casinos
+    Claim Free USDT
+    This faucet requires a FaucetPay account to claim.
+    Claim 2500 satoshi every minute
+    You have 10 claims left today.
+    Login
+    20% Referral Commission
+    Share this link with your friends to earn 20% commission.
+    Recent Payouts
+    User	Reward	Date
+    deni670540@anogz.com	2500 satoshi	2026-09-17 01:04:09
+    azhar650987@deltajohnsons.com	2500 satoshi	2026-09-17 01:04:07
+    edi8928@tgmail.my.id	2500 satoshi	2026-09-17 01:03:59
+    ravinp2000@gmail.com	2500 satoshi	2026-09-17 01:03:53
+    l37nyjk45u@ghostrelay.me	2500 satoshi	2026-09-17 01:03:50
+    nilam3788@tuyulgaple.my.id	2500 satoshi	2026-09-17 01:03:50
+    usyi7716@tgmail.my.id	2500 satoshi	2026-09-17 01:03:49
+    ashqn@telegmail.com	2500 satoshi	2026-09-17 01:03:48
+    putra919821@disefl.com	2500 satoshi	2026-09-17 01:03:43
+    olga2479@tuyulgaple.my.id	2500 satoshi	2026-09-17 01:03:36
+    Copyright© 2026 Claim Free USDT
+    Powered by Claim Free Coins
+[02:05:04] DONE

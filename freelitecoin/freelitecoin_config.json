@@ -1,0 +1,10 @@
+{
+  "email": "francisdominic986532@gmail.com",
+  "url": "https://freelitecoin.online/index.php?ref=24084",
+  "mine_url": "https://freelitecoin.online/mine.php",
+  "dashboard_url": "https://freelitecoin.online/dashboard.php",
+  "turnstile_sitekey": "0x4AAAAAAEgWVhRZYiLL1CiF",
+  "captcha_type": "turnstile",
+  "withdraw_threshold": 0.0001,
+  "roll_interval_sec": 15
+}

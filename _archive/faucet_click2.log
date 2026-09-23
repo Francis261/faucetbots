@@ -1,0 +1,27 @@
+page state: {"hasAddress":true,"hasLoginBtn":true,"url":"https://claimfreecoins.io/tether-faucet/"}
+modal present: 1
+frames[0]: [
+  'https://claimfreecoins.io/tether-faucet/',
+  'https://claimfreecoins.io/ads/320x100_2/?reload=300',
+  'https://claimfreecoins.io/ads/728x90_3/?reload=300',
+  'https://claimfreecoins.io/ads/320x100_3/?reload=300',
+  ''
+]
+frames[1]: [
+  'https://claimfreecoins.io/tether-faucet/',
+  'https://claimfreecoins.io/ads/320x100_2/?reload=300',
+  'https://claimfreecoins.io/ads/728x90_3/?reload=300',
+  'https://claimfreecoins.io/ads/320x100_3/?reload=300',
+  'https://www.google.com/recaptcha/api2/anchor?ar=1&k=6LfwaSgTAAAAAJJNz6',
+  '',
+  '',
+  ''
+]
+checkbox: {"x":12.95522403717041,"y":22.477611541748047,"w":28,"h":28,"cls":"recaptcha-checkbox goog-inline-block recaptcha-checkbox-unchecked rc-anchor-checkbox"}
+anchor body: I'm not a robot
+This site is exceeding reCAPTCHA Enterprise free quota.
+reCAPTCH
+anchor iframe page-rect: {"x":480.3581848144531,"y":129.3582000732422,"w":304,"h":78}
+absolute click at 507.3, 165.8
+after click: {"cls":"recaptcha-checkbox goog-inline-block recaptcha-checkbox-unchecked rc-anchor-checkbox recaptcha-checkbox-disabled recaptcha-checkbox-loading","body":"I'm not a robot\nThis site is exceeding reCAPTCHA Enterprise "}
+g-recaptcha-response len: 0

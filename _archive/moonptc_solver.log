@@ -1,0 +1,10 @@
+logged in
+=== step 1: get challenge ===
+challenge: {"session_id":"c7d5f057d247e6f62d2bd546776dddd6","challenge":{"type":"rotation","id":"89e85c75ce4ce247beaecb6f35076fc9","image":"/api/faucet/rotation-captcha/variant/a887af9c9ab0876c7f4186cf4f4dad7f388637f7dd780b8d","crop":{"x":0.345,"y":0.45,"radius":0.1}},"tolerance":10}
+
+=== step 2: solve puzzle ===
+best angles: [{"angle":32,"score":178.31666666666666},{"angle":24,"score":178.39444444444445},{"angle":26,"score":178.76111111111112},{"angle":30,"score":178.80555555555554},{"angle":34,"score":178.83333333333334},{"angle":28,"score":178.96666666666667},{"angle":36,"score":178.99444444444444},{"angle":38,"score":179.25555555555556},{"angle":31,"score":179.55555555555554},{"angle":33,"score":179.64444444444445}]
+best angle: 32
+
+=== step 3: verify ===
+verify result: {"error":"wrong","attempts_left":2}

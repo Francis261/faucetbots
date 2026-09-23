@@ -1,0 +1,4 @@
+bot.log
+node_modules
+.git
+*.md

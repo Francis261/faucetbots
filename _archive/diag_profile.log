@@ -1,0 +1,38 @@
+Opening /index/enter with REAL PROFILE...
+RES 403 https://adbtc.top/index/enter
+iter 1/40 (5s) title="Just a moment..." clicked=false
+RES 200 https://adbtc.top/cdn-cgi/challenge-platform/h/g/orchestrate/chl_page/v1?ray=a2bffa567eb49
+RES 200 https://adbtc.top/cdn-cgi/challenge-platform/h/g/fo/284455662:1786874705:yF3VAVvSon383U0yK
+RES 200 https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/8xpih
+RES 200 https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/fo/34407835:1786874706:23
+RES 401 https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/pat/a2bffa718eefd5ac/1786
+RES 204 https://brunhild.challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/i/a2bffa718eefd5
+RES 200 https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/ci/a2bffa718eefd5ac/17868
+RES 200 https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/fo/34407835:1786874706:23
+RES 200 https://adbtc.top/cdn-cgi/challenge-platform/h/g/fo/284455662:1786874705:yF3VAVvSon383U0yK
+RES 200 https://adbtc.top/index/enter
+RES 200 https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/64h2j
+iter 3/40 (15s) title="adBTC" clicked=false
+RES 200 https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/fo/34407835:1786874706:23
+RES 401 https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/pat/a2bffaa4f822d0b7/1786
+RES 204 https://brunhild.challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/i/a2bffaa4f822d0
+RES 200 https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/ci/a2bffaa4f822d0b7/17868
+RES 200 https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/fo/34407835:1786874706:23
+iter 5/40 (25s) title="adBTC" clicked=false
+RES 200 https://adbtc.top/index
+iter 7/40 (35s) title="adBTC" clicked=false
+iter 9/40 (45s) title="adBTC" clicked=false
+iter 11/40 (55s) title="adBTC" clicked=false
+iter 13/40 (65s) title="adBTC" clicked=false
+iter 15/40 (75s) title="adBTC" clicked=false
+iter 17/40 (85s) title="adBTC" clicked=false
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.waitForTimeout: Target page, context or browser has been closed
+    at /home/francis/adbch/diag_profile.mjs:81:14 {
+  log: []
+}
+
+Node.js v24.14.1

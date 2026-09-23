@@ -1,0 +1,29 @@
+anchor: true
+clicked at 507 166
+poll 4: tiles=0 body=""
+poll 5: tiles=0 body=""
+poll 6: tiles=18 body="Select all images with
+bicycles
+	
+	
+
+
+	
+	
+
+
+	
+	
+VERIFY"
+TILES DATA: {"prompt":"Select all images with\nbicycles","heights":[{"cls":"rc-imageselect-tile","x":5,"y":125,"w":130,"h":130},{"cls":"rc-image-tile-target","x":7,"y":127,"w":126,"h":126},{"cls":"rc-imageselect-tile","x":135,"y":125,"w":130,"h":130},{"cls":"rc-image-tile-target","x":137,"y":127,"w":126,"h":126},{"cls":"rc-imageselect-tile","x":265,"y":125,"w":130,"h":130},{"cls":"rc-image-tile-target","x":267,"y":127,"w":126,"h":126},{"cls":"rc-imageselect-tile","x":5,"y":255,"w":130,"h":130},{"cls":"rc-image-tile-target","x":7,"y":257,"w":126,"h":126},{"cls":"rc-imageselect-tile","x":135,"y":255,"w":130,"h":130}]}
+--- BFRAME HTML (stripped) ---
+<!DOCTYPE html><html dir="ltr" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>reCAPTCHA</title>
+
+<link rel="stylesheet" type="text/css" href="https://www.gstatic.com/recaptcha/releases/zqB-6Xpbd3lCIvi7Tr2D0pob/styles__ltr.css">
+
+</head>
+<body style="height: 100%;"><input type="hidden" id="recaptcha-token" value="0cAFcWeA5UTKS_gX1TcO0RLIr-r4Pl6pS5_S7qre4oKagPLKT7-WylOJLqNfW7qZRujbeh-1rYWrWmDcO5uzgngf2AefbcR5UbpYXRTnlNlo30ElI_ALcVVxb98buKsKXn1vEpcwFkn7wkGKC39xrBeEd3q8GNcOO0OLDotsvl3PTnjwjb8z4Wrq2E4wb9EV6GS3VW6rXgpqZ1qM6zepNYcQ8HCIElu7zpZoOqxW-G5WBO_ZFPDIhD4Sh6frtjbi2CgF1XzEymWPfKkVRwDpdbpvdyNOUXYnTos8Ytc4TqFrEV1GX3IgFpHWCNszRyrO4Z3k1Kds55x1_boVovxMwhPF-si5b1P4O4zkURBJYrDdkatXSvSenWWmwNgLfnXKYZ04tsVxctzYW1osfT1BGvhm0LIy4b6UPLflVR9RE3goZUXFdYkpwECizCZFktzN6NjAicqn1003F444Hj03UJ4PhDo4xIqVljo4Llhfqdk7icp0d2OVQHwe5RLcsQOnKG5K9ehH56cnoJUzX-xW0cfOlM0qi0GuV2l6pcJg6qELzJDER3pTi6h1HRZcil_0dy4dvxYM9suZWDl2ibYs1m_aQ4Tw_LGEkYoQLMJgeJKrY4nKY0S6U3TH4-BoG_iDCQVMKiUd4GnB9BkTlsPDCj0DFtDTmbV8Q1pahN57neTPPM1aJYyyaOaakVnUiiuu2ZlHjIce7w8YtlXtHcPHu1s8d1ktT0u-2aVrTuAQwOA6i8zJPiwOnBV-lW_pZ6ZmYK7npra3H_5DR6b7DbIs3C08BzZIJy-wdnholTXDiVXyLdDU1htfj2hp29L0o7JGNMYuEmYoCOVe2hABL-aXua-qgj_37j0WXcFpPAYtQxuZ9rUUOIUzNY5Xn5IOz3ZfcvT4dSOlOT-vlvuucTSo0sBxFYfKz243q7khBmbGvLklzyjIJ8BKktvHhnUtYJ5sJMy4nTfMRmXgQZmI4eY-IZLJS_74iKMClsB3oXfvfBi7LG8tJ153RTWcO7E1zH1kS5D00hVyoZT8sMCupSEtBWdzp7i_bXKVnY4r57A2xVaeEPC4g2tjwXxXb3bQUCPgmYFf3hg9edOAeCC-De0w-gwaGIpPAVVfDctezsrIRtSBpEEeGbPfNquS81ChVdfyD_sLAOhRQ2dPjhMucWY5T8WwIM9LpNyS3SADAIm8DFbSjEpNR31IjpMqPSmhFPRaVlq67rGLh-HubBIv1FVFD9ARFx-rklHIZSOUFAQdgEzDIHi4coLT5qSPxHz92CBKSQ-OUp3t62Ci1nJPFfDXZ3rCqwwd5vE1ks7V4joDAyQZUUl57Y-sJHpXxVJ2h7Ug1BjXGdeQWB14q0bO-xW4eIA8dvXjcbG8gHMGxKoRYpYJARwI58nDknRMTlTAMgmURsNRRGEl3jGzlXb42ad5CX19P4sLOMSX5-Fiep9hB4ZZTkA6o-WcNXzKJGUy6qxElkKlrnf0Yy9LEka8rJJYjNhhWBhGElU_rvCHhdth3_kYl9teiS6iNq8c-vIqsxkG3xoWyrYBeGn_j1fxXMmJwLjd26lK_kuJqph4BPJmCnNSO4xScMvz1gvHDQ2XTLyljZrfwpNpMaI3QjCf2GUf6z7F7P_6RMbowCu2VT3_JrS_cDxFGVVwwsDPUJApTVpeqGJtai_dPmQvriztk9aWUcQRXf52WF4pcvUDurTJvavuIpXrJhiHoVti0-DNLPS6s2_15RFS80oLwJtzgJAnD6cdYMq069SIND9eyYt7ImqzV6NF7aB5P8j0fuE3tmFOZk77sCQcEO_4aWnKOLCopyxbtz9E2jog_jwb7AwaUYw_68FDXSbqjoZVFQ4_jauC4e3ueeRJXAAjVmZmu5ACJ2OpAZIIVWUsXMSfwskHkgb-tjNhZ95-IURaEp0aPbBBEyyj6LnV-qcadwIFMZkGIS04veHueTXLz3bdGQXxsOl8jof-syf8E5m-NQrbnVdtbq3cVfnvnu_8wvlm67N-z89fXEklUS7oD9r7UV5EqOIdEKJ8TU0-__ZbLr2pqlwK8HFcnPDUmlngxPRx3qaJNvz6XN5jURRRy3I8B1ixQsMWi0ndcLbgu4_jjmwIBM6bmUFIVMttwwI1As0d5ZEcgjY6Zv8x4nzsQm_2d8JXobW0rF6_gambhuKjoLuUmy3pKAdj3hEaHCmqtwgVUHHqj9J7csb0x4PucK3908MTdY4OTVCoL-cX6gBvKzdIdrau9WE3lXo_M-a3DQ38Fzv1kWrm-U47A2YuzliLe_JF9XnBlCsqCvfC5DmBGzAsryeojHvkuenEjMoKjQdqHdFfvpdIvloxqUKrVpPCA9h7vj4PMj5qJPAOYfckny5np3rVqE-TwfmQwlDeUcSInrq1VYu8aaa_ze7E6z1EW9134VIsm9ESBndHpBNoDPCCNE2Z3CV8X_Bi2E6yHWuRe0ZQei6NqYHJ6REpq3XwuaKawPByzTke_HyE53ccL6Jh-cxjNNb3OBTv7wbYec9AwWecoPk_gqlH_AtPdaKEAxty1u_wt61NkSU40QNCefvHd8nwAhsGSquUeq-Coc5ILO3dGKG8IOlvguFeiWGReLfUGcCpXMUf3lQ_VQAvCebpIR8ylOKRBh_8oxzq0T139QaoxYIHOyOVrMNb6Y3hDodK0J1VN70h7I1-P5fx0ZtHVSfjE65cUuv7COFd3VAKnespwJhPTRwHh6j1F0G7ZtebeEeuoph_IrEep9WS5QmtUD7uZly8Y9w5MeDpH8Acs0Pr6d_j3Wbr6PsfeIEccJDJDJNrRMNauQ1DLx3Bh_03cBA46VRJQvC7n8KOv7kven27pkyeyAGmauW5yMjh0ZTmA6heeRLQ_28Vebjm4WalN3T24WvSJ7fuEtGHKeq9xNonsnEVMZVlxyQpH9e2EReX7XWk4a94rib2vraZbIrg0nZeOiIL9MZLberYds7R7qyeCx43VKCkodin_OIMrlNi3HLaicoSsigJYuniNzDwdSSMQ6bHm52i4ia3XeN80ylx_gVrHzWhx_Mt4EHMqjlK9Ps6l4qrUL7e0uJLL-l_zxYiqoUszjT1L7TyyheQ5GTNr3U-1sC1SrWEJaQ0V_RWnhMFLB3md3cPpcRfUjb5zI9rcqcm8R--pkXaKNWeUT4koiE3_pKFiCtJRbClrgK6bhdXAMrWXUmoJsWEbFw0hojOVwIPOb3DC3ua0i9mz4nxpsJVsksP-aWfxG68WrUa_mRwEmYZ6RF6FZ3aLM6J3emzatB-L7iKk4kfiEViTULDhNvAC9iycCgy-PBWPUPMQYNGvqJzU7Oixz7saqWmP9hC4JUQfAp0lNWKTNYfg4m63HKAqxlHoItRpGA-norgqOhpP9SxRGZnF3XqIy0kfkqUi1t7pfygHfT_qHFG57bWaX4yiNmWuBoCZdw2g-iIUFJR4umGJQe1RkWihnYWcP1wqRz5ddOWUhAPN4">
+<div style=""><div id="rc-imageselect" aria-modal="true" role="dialog"><div class="rc-imageselect-response-field"></div><span class="rc-imageselect-tabloop-begin" tabindex="0"></span><div class="rc-imageselect-payload"><div class="rc-imageselect-instructions"><div class="rc-imageselect-desc-wrapper"><div class="rc-imageselect-desc-no-canonical" style="width: 352px; font-size: 16px;">Select all images with <strong style="font-size: 28px;">bicycles</strong></div></div><div class="rc-imageselect-progress"></div></div><div class="rc-imageselect-challenge"><div id="rc-imageselect-target" class="rc-imageselect-target" dir="ltr" role="presentation" aria-hidden="true"><table class="rc-imageselect-table-33"><tbody><tr><td role="button" id="0" tabindex="0" class="rc-imageselect-tile" aria-label="Image challenge"><div class="rc-image-tile-target"><div class="rc-image-tile-wrapper" style="width: 126px; height: 126px"><img class="rc-image-tile-33" src="https://www.google.com/recaptcha/api2/payload?p=06AFcWeA7BKb4lrksWGn9XhBxUXeulYD6QcvK5NbN0rqcbvtfyNDwLAe2Yk8djAtCjGw7XSZdflNbTScxWyjqsh9ZKA5opuCDi-5GXNyCWFnre4W

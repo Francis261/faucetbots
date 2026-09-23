@@ -1,0 +1,14 @@
+{
+  "name": "rosecrypto-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --unhandled-rejections=warn bot.mjs",
+    "add": "node bot.mjs add",
+    "list": "node bot.mjs list"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0"
+  }
+}

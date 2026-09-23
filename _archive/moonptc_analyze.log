@@ -1,0 +1,63 @@
+logged in
+=== analyzing puzzle for rotation angle ===
+{
+  "yellowPixelCount": 592,
+  "circleCenter": {
+    "x": 191.5,
+    "y": 197
+  },
+  "circleRadius": 43,
+  "topContrasts": [
+    {
+      "angle": 140,
+      "contrast": 320
+    },
+    {
+      "angle": 75,
+      "contrast": 256
+    },
+    {
+      "angle": 105,
+      "contrast": 199
+    },
+    {
+      "angle": 130,
+      "contrast": 157
+    },
+    {
+      "angle": 310,
+      "contrast": 134
+    },
+    {
+      "angle": 170,
+      "contrast": 107
+    },
+    {
+      "angle": 305,
+      "contrast": 96
+    },
+    {
+      "angle": 100,
+      "contrast": 70
+    },
+    {
+      "angle": 165,
+      "contrast": 67
+    },
+    {
+      "angle": 175,
+      "contrast": 65
+    }
+  ],
+  "sampleCount": 72
+}
+
+=== trying rotation angles ===
+saved angle 0
+saved angle 45
+saved angle 90
+saved angle 135
+saved angle 180
+saved angle 225
+saved angle 270
+saved angle 315

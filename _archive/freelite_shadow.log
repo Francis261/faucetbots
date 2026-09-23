@@ -1,0 +1,34 @@
+shadow tree: [
+ {
+  "tag": "DIV",
+  "path": ".cf-turnstile",
+  "cls": "cf-turnstile",
+  "id": "",
+  "role": ""
+ },
+ {
+  "tag": "DIV",
+  "path": ".cf-turnstile/DIV",
+  "cls": "",
+  "id": "",
+  "role": ""
+ },
+ {
+  "tag": "DIV",
+  "path": ".cf-turnstile/DIV/DIV",
+  "cls": "",
+  "id": "",
+  "role": ""
+ },
+ {
+  "tag": "INPUT",
+  "path": ".cf-turnstile/DIV/DIV",
+  "cls": "",
+  "id": "cf-chl-widget-ohltu_response",
+  "role": ""
+ }
+]
+frames: [
+  'https://freelitecoin.online/',
+  'https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0'
+]

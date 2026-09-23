@@ -1,0 +1,33 @@
+services:
+  rosecrypto-bot:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: rosecrypto-bot:latest
+    container_name: rosecrypto-bot
+    restart: unless-stopped
+    ports:
+      - "6080:6080"   # noVNC web UI
+      - "5901:5901"   # raw VNC (optional)
+    environment:
+      - RESOLUTION=1280x800
+      - VNC_PASSWORD=rosecrypto
+      - START_BOT=1
+      - TZ=Europe/London
+      - CHROME_PATH=/usr/bin/chromium-browser
+      - CHROME_CHANNEL=chromium
+    volumes:
+      # Persist Chrome profile (login session) across rebuilds
+      - rosecrypto-profile:/home/bot/.rosecrypto-chrome-profile
+      # Persist accounts + live log on host
+      - ../accounts.json:/app/accounts.json
+      - rosecrypto-log:/app/log
+      # Bot writes log to stdout too; bind host log file if desired
+      - ../bot.log:/app/bot.log
+    shm_size: "1gb"
+    security_opt:
+      - seccomp:unconfined
+
+volumes:
+  rosecrypto-profile:
+  rosecrypto-log:

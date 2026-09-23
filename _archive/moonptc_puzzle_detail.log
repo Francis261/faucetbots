@@ -1,0 +1,65 @@
+logged in
+=== analyzing rotation puzzle ===
+{
+  "canvases": [
+    {
+      "index": 0,
+      "width": 1280,
+      "height": 720,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 1280,
+        "h": 720.23876953125
+      },
+      "style": "pointer-events: none;",
+      "cls": "fixed inset-0 w-full h-full -z-10",
+      "parentCls": "min-h-screen relative",
+      "sampleCount": 100,
+      "hasYellow": false
+    },
+    {
+      "index": 1,
+      "width": 384,
+      "height": 384,
+      "rect": {
+        "x": 447.9104309082031,
+        "y": 156.3731231689453,
+        "w": 384.1791076660156,
+        "h": 384.1791076660156
+      },
+      "style": "",
+      "cls": "block w-full h-full",
+      "parentCls": "relative w-full aspect-square overflow-hidden rounded-xl border border-white/10 ",
+      "sampleCount": 121,
+      "hasYellow": true
+    }
+  ],
+  "sliders": [
+    {
+      "index": 0,
+      "min": "0",
+      "max": "360",
+      "value": "0",
+      "step": "1",
+      "rect": {
+        "x": 450.9552001953125,
+        "y": 553.5074462890625,
+        "width": 378.08953857421875,
+        "height": 24,
+        "top": 553.5074462890625,
+        "right": 829.0447387695312,
+        "bottom": 577.5074462890625,
+        "left": 450.9552001953125
+      },
+      "cls": "w-full h-6 appearance-none bg-transparent cursor-pointer\n            [&::-webkit"
+    }
+  ],
+  "rotationAngle": null
+}
+saved canvas 0
+saved canvas 1
+
+=== checking rotation API ===
+rotation API: {"error":"not_found"}
+slider: { value: '0', min: '0', max: '360' }

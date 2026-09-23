@@ -1,0 +1,54 @@
+  [console] warning Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://challenges.cloudflare.com') does not match the recipient window's
+  [console] warning No available adapters.
+  [poll 0] turnstile iframe: no
+  [poll 1] turnstile iframe: no
+  [poll 2] turnstile iframe: no
+  [poll 3] turnstile iframe: no
+  [reqfail] https://hagen.challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/i/a3c4b6c9cd4fd159/y28lOfRTPF net::ERR_ABORTED
+  [poll 4] turnstile iframe: no
+  [poll 5] turnstile iframe: no
+  [console] warning OTS parsing error: Size of decompressed WOFF 2.0 is less than compressed size
+  [poll 6] turnstile iframe: no
+  [poll 7] turnstile iframe: no
+  [poll 8] turnstile iframe: no
+  [poll 9] turnstile iframe: no
+  [poll 10] turnstile iframe: no
+  [poll 11] turnstile iframe: no
+  [poll 12] turnstile iframe: no
+  [poll 13] turnstile iframe: no
+  [console] error %c%d font-size:0;color:transparent NaN
+  [console] error %c%d font-size:0;color:transparent NaN
+  [console] warning %c%d font-size:0;color:transparent NaN
+  [console] warning %c%d font-size:0;color:transparent NaN
+  [poll 14] turnstile iframe: no
+  [poll 15] turnstile iframe: no
+  [poll 16] turnstile iframe: no
+  [poll 17] turnstile iframe: no
+  [poll 18] turnstile iframe: no
+  [poll 19] turnstile iframe: no
+  [poll 20] turnstile iframe: no
+  [poll 21] turnstile iframe: no
+  [poll 22] turnstile iframe: no
+  [poll 23] turnstile iframe: no
+  [poll 24] turnstile iframe: no
+  [poll 25] turnstile iframe: no
+  [poll 26] turnstile iframe: no
+  [poll 27] turnstile iframe: no
+  [poll 28] turnstile iframe: no
+  [poll 29] turnstile iframe: no
+  [poll 30] turnstile iframe: no
+  [poll 31] turnstile iframe: no
+  [poll 32] turnstile iframe: no
+  [poll 33] turnstile iframe: no
+  [poll 34] turnstile iframe: no
+  [poll 35] turnstile iframe: no
+  [poll 36] turnstile iframe: no
+  [poll 37] turnstile iframe: no
+  [poll 38] turnstile iframe: no
+  [poll 39] turnstile iframe: no
+turnstile outerHTML: <div class="cf-turnstile" data-sitekey="0x4AAAAAAEgWVhRZYiLL1CiF"><div><div></div><input type="hidden" name="cf-turnstile-response" id="cf-chl-widget-6or93_response"></div></div>
+turnstile frame found: https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0/rch/6or93/0x4AAAAAA
+frame text: ""
+click result: clicked
+  [console] warning No available adapters.
+turnstile token len: 0

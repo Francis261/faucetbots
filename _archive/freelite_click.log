@@ -1,0 +1,41 @@
+ts frame: true https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/av0
+frame body HTML length: 0
+frame checks: {
+ "inputs": [],
+ "labels": [],
+ "visible": [
+  {
+   "tag": "HTML",
+   "id": "",
+   "cls": "",
+   "w": 301,
+   "h": 66
+  },
+  {
+   "tag": "BODY",
+   "id": "",
+   "cls": "",
+   "w": 301,
+   "h": 66
+  }
+ ]
+}
+captcha-wrap box: {"x":441.31341552734375,"y":534.8059692382812,"width":382.08953857421875,"height":69.776123046875}
+saved captcha screenshot
+full screenshot saved
+iframe el info: null
+wait[0] token=0
+wait[1] token=0
+wait[2] token=0
+wait[3] token=0
+wait[4] token=0
+wait[5] token=0
+wait[6] token=0
+wait[7] token=0
+wait[8] token=0
+wait[9] token=0
+wait[10] token=0
+wait[11] token=0
+wait[12] token=0
+wait[13] token=0
+wait[14] token=0

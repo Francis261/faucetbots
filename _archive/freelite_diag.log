@@ -1,0 +1,30 @@
+=== step 1: homepage ===
+email filled
+turnstile widget: null
+captcha-wrap html: 
+                <div class="cf-turnstile" data-sitekey="0x4AAAAAAEgWVhRZYiLL1CiF"><div><div></div><input type="hidden" name="cf-turnstile-response" id="cf-chl-widget-f8d83_response"></div></div>
+            
+=== step 3: mine.php ===
+mine url: https://freelitecoin.online/index.php
+mine text: ⚡ Instant to FaucetPay | Free LTC Every Minute | No signup • No KYC • Straight to your wallet | 127 people claimed in the last hour | You will receive | 0.00018 LTC | ≈ 0.25 – 0.30 LTC per day | Next claim in | 0:56 | RECENT CLAIMS | t***@gmail.com | +0.00002 LTC | d***@gmail.com | +0.00002 LTC | y***@gmail.com | +0.00002 LTC | k***@gmail.com | +0.00002 LTC | Claim Now → | Instant • No fees | FaucetPay | No KYC | Every 60s | Instant | If you claim every minute | ≈ 0.26 LTC / day | Real results may vary | 🔥 Today claimed: 1.847 LTC  •  Online: 405
+mine buttons: [
+ {
+  "tag": "BUTTON",
+  "text": "Claim Now →",
+  "id": "",
+  "cls": "",
+  "onclick": ""
+ }
+]
+=== step 4: dashboard.php ===
+dash url: https://freelitecoin.online/index.php
+dash text: ⚡ Instant to FaucetPay | Free LTC Every Minute | No signup • No KYC • Straight to your wallet | 127 people claimed in the last hour | You will receive | 0.00018 LTC | ≈ 0.25 – 0.30 LTC per day | Next claim in | 0:56 | RECENT CLAIMS | u***@gmail.com | +0.00002 LTC | l***@gmail.com | +0.00002 LTC | b***@outlook.com | +0.00002 LTC | b***@outlook.com | +0.00002 LTC | Claim Now → | Instant • No fees | FaucetPay | No KYC | Every 60s | Instant | If you claim every minute | ≈ 0.26 LTC / day | Real results may vary | 🔥 Today claimed: 1.847 LTC  •  Online
+dash buttons: [
+ {
+  "tag": "BUTTON",
+  "text": "Claim Now →",
+  "id": "",
+  "cls": "",
+  "onclick": ""
+ }
+]
