@@ -289,23 +289,24 @@ jobs:
           if [ -n "${VNC_PASSWORD:-}" ]; then
             if x11vnc -storepasswd "$VNC_PASSWORD" /tmp/.vncpass >/tmp/vncpass.log 2>&1; then
               setsid nohup x11vnc -display :99 -rfbport 5900 -localhost \
-                -rfbauth /tmp/.vncpass -shared -forever -nopn \
+                -rfbauth /tmp/.vncpass -shared -forever \
                 >/tmp/x11vnc.log 2>&1 < /dev/null &
             else
               echo "x11vnc -storepasswd failed; continuing with -nopw"
               setsid nohup x11vnc -display :99 -rfbport 5900 -localhost \
-                -nopw -shared -forever -nopn \
+                -nopw -shared -forever \
                 >/tmp/x11vnc.log 2>&1 < /dev/null &
             fi
           else
             setsid nohup x11vnc -display :99 -rfbport 5900 -localhost \
-              -nopw -shared -forever -nopn \
+              -nopw -shared -forever \
               >/tmp/x11vnc.log 2>&1 < /dev/null &
           fi
           echo $! > /tmp/x11vnc.pid
 
+          # x11vnc 0.9.16 can take several seconds to bind; do not pass -nopn (removed/unsupported)
           X11_OK=0
-          for _ in $(seq 1 20); do
+          for _ in $(seq 1 60); do
             if ! kill -0 "$(cat /tmp/x11vnc.pid)" 2>/dev/null; then break; fi
             if (exec 3<>/dev/tcp/127.0.0.1/5900) 2>/dev/null; then
               exec 3>&- 2>/dev/null || true

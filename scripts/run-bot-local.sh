@@ -108,19 +108,20 @@ if [ "$XVFB_OK" != 1 ]; then
   log "Xvfb failed:"; cat /tmp/xvfb.log 2>/dev/null || true; exit 1
 fi
 
+# no -nopn (unsupported on x11vnc 0.9.16); no -listen (reverse mode)
 if [ -n "$VNC_PASSWORD" ] && x11vnc -storepasswd "$VNC_PASSWORD" /tmp/.vncpass >/dev/null 2>&1; then
   setsid nohup x11vnc -display "$DISPLAY_NUM" -rfbport "$VNC_PORT" -localhost \
-    -rfbauth /tmp/.vncpass -shared -forever -nopn -quiet \
+    -rfbauth /tmp/.vncpass -shared -forever -quiet \
     >/tmp/x11vnc.log 2>&1 < /dev/null &
 else
   setsid nohup x11vnc -display "$DISPLAY_NUM" -rfbport "$VNC_PORT" -localhost \
-    -nopw -shared -forever -nopn -quiet \
+    -nopw -shared -forever -quiet \
     >/tmp/x11vnc.log 2>&1 < /dev/null &
 fi
 echo $! > /tmp/x11vnc.pid
 
 X11_OK=0
-for _ in $(seq 1 20); do
+for _ in $(seq 1 60); do
   if ! kill -0 "$(cat /tmp/x11vnc.pid)" 2>/dev/null; then break; fi
   if (exec 3<>/dev/tcp/127.0.0.1/"$VNC_PORT") 2>/dev/null; then
     exec 3>&- 2>/dev/null || true
