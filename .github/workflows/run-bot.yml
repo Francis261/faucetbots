@@ -138,15 +138,31 @@ jobs:
           EMAIL: ${{ github.event.inputs.email }}
           PASSWORD: ${{ github.event.inputs.password }}
           USERNAME: ${{ github.event.inputs.username }}
+          LOGIN_EMAIL: ${{ github.event.inputs.email }}
+          LOGIN_PASSWORD: ${{ github.event.inputs.password }}
+          LOGIN_USERNAME: ${{ github.event.inputs.username }}
         run: |
           set -euo pipefail
+          # GitHub blanks empty optional inputs; normalize
+          EMAIL="${EMAIL:-${LOGIN_EMAIL:-}}"
+          PASSWORD="${PASSWORD:-${LOGIN_PASSWORD:-}}"
+          USERNAME="${USERNAME:-${LOGIN_USERNAME:-}}"
           case "$BOT" in
             onlyfaucet)
+              if [ -z "$EMAIL" ]; then echo "onlyfaucet requires email"; exit 1; fi
               node onlyfaucet/bot.mjs add "$EMAIL"
               node onlyfaucet/bot.mjs list
               ;;
             rosecrypto)
+              # export so the node snippet sees them; username may fall back to email
               ROSE_USER="${USERNAME:-$EMAIL}"
+              if [ -z "$ROSE_USER" ]; then
+                echo "rosecrypto requires a username (or email as fallback)"; exit 1
+              fi
+              if [ -z "$PASSWORD" ]; then
+                echo "rosecrypto requires a password (pass the password input)"; exit 1
+              fi
+              export ROSE_USER PASSWORD
               node -e '
                 const fs = require("fs");
                 const p = "rosecrypto/accounts.json";
@@ -163,9 +179,12 @@ jobs:
               ;;
             1xfaucet)
               # sqlite account + config.json (bot still uses manual login via VNC for Turnstile)
+              if [ -z "$EMAIL" ]; then echo "1xfaucet requires email"; exit 1; fi
+              if [ -z "$PASSWORD" ]; then echo "1xfaucet requires password"; exit 1; fi
               mkdir -p "$HOME/adbch/1xfaucet"
               node 1xfaucet/accounts.mjs add "$EMAIL" "$PASSWORD" || true
               node 1xfaucet/accounts.mjs list || true
+              export EMAIL PASSWORD
               node -e '
                 const fs = require("fs");
                 const p = "1xfaucet/config.json";

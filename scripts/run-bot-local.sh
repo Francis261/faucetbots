@@ -30,17 +30,21 @@ case "$BOT" in
     ;;
   rosecrypto)
     ROSE_USER="${USERNAME:-$EMAIL}"
-    PASSWORD="$PASSWORD" ROSE_USER="$ROSE_USER" node -e '
+    if [ -z "$ROSE_USER" ]; then echo "rosecrypto requires username or EMAIL"; exit 1; fi
+    if [ -z "$PASSWORD" ]; then echo "rosecrypto requires PASSWORD"; exit 1; fi
+    export ROSE_USER PASSWORD
+    node -e '
       const fs = require("fs");
       const p = "rosecrypto/accounts.json";
       const u = process.env.ROSE_USER;
       const pw = process.env.PASSWORD || "";
-      if (!u || !pw) { console.error("need password"); process.exit(1); }
+      if (!u || !pw) { console.error("rosecrypto requires email/username + password"); process.exit(1); }
       let arr = [];
       try { arr = JSON.parse(fs.readFileSync(p, "utf8")); } catch {}
       arr = arr.filter(a => a.username !== u);
       arr.push({ username: u, password: pw, claims: 0, lastClaim: null });
       fs.writeFileSync(p, JSON.stringify(arr, null, 2));
+      console.log("rosecrypto account ready:", u);
     '
     ;;
   1xfaucet)
