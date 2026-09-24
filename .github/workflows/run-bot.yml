@@ -216,12 +216,13 @@ jobs:
 
           if [ -n "${VNC_PASSWORD:-}" ]; then
             x11vnc -storepasswd "$VNC_PASSWORD" /tmp/.vncpass >/dev/null 2>&1 || true
+            # no -ncache: it makes the framebuffer 11x taller and noVNC shrinks the desktop to a sliver
             x11vnc -display :99 -rfbport 5900 -localhost -listen 127.0.0.1 \
-              -rfbauth /tmp/.vncpass -shared -forever -ncache 10 -ncache_cr \
+              -rfbauth /tmp/.vncpass -shared -forever -nopn \
               >/tmp/x11vnc.log 2>&1 &
           else
             x11vnc -display :99 -rfbport 5900 -localhost -listen 127.0.0.1 \
-              -nopw -shared -forever -ncache 10 -ncache_cr \
+              -nopw -shared -forever -nopn \
               >/tmp/x11vnc.log 2>&1 &
           fi
           echo $! > /tmp/x11vnc.pid
@@ -272,7 +273,7 @@ jobs:
             echo "**Open this URL in your browser to view/control the VM desktop:**"
             echo ""
             echo "\`\`\`"
-            echo "$NOVNC_URL/vnc.html?autoconnect=true&resize=scale&scale=local"
+            echo "$NOVNC_URL/vnc.html?autoconnect=true&resize=scale&scale=local&viewOnly=false"
             echo "\`\`\`"
             echo ""
             echo "- Bot: \`$BOT\`"
@@ -283,7 +284,7 @@ jobs:
             fi
             echo "- Local noVNC: http://127.0.0.1:6080/vnc.html"
           } >> "$GITHUB_STEP_SUMMARY"
-          echo "noVNC via Cloudflare: $NOVNC_URL/vnc.html?autoconnect=true&resize=scale&scale=local"
+          echo "noVNC via Cloudflare: $NOVNC_URL/vnc.html?autoconnect=true&resize=scale&scale=local&viewOnly=false"
 
       - name: Prepare Chrome env for bots
         run: |
@@ -344,7 +345,7 @@ jobs:
       - name: Keep VM alive and stream logs
         run: |
           set -euo pipefail
-          echo "Running for ${RUN_MINUTES} minutes. noVNC: ${NOVNC_URL}/vnc.html?autoconnect=true&resize=scale&scale=local"
+          echo "Running for ${RUN_MINUTES} minutes. noVNC: ${NOVNC_URL}/vnc.html?autoconnect=true&resize=scale&scale=local&viewOnly=false"
           END=$(( $(date +%s) + RUN_MINUTES * 60 ))
           while [ "$(date +%s)" -lt "$END" ]; do
             if ! kill -0 "$(cat /tmp/bot.pid 2>/dev/null || echo 0)" 2>/dev/null; then
