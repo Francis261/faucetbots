@@ -44,6 +44,21 @@ export function listAccounts() {
 
 export function getAvailableAccount() {
   const now = new Date().toISOString();
+  const preferred = process.env.LOGIN_EMAIL || process.env.EMAIL;
+  if (preferred) {
+    const row = getDB().prepare(`
+      SELECT * FROM accounts
+      WHERE email = ?
+      AND status IN ('active', 'error')
+      AND (next_available_at IS NULL OR next_available_at <= ?)
+    `).get(preferred, now);
+    if (row) return row;
+    // Preferred account not ready — do not fall through to committed accounts
+    const any = getDB().prepare(`
+      SELECT * FROM accounts WHERE email = ?
+    `).get(preferred);
+    if (any) return null;
+  }
   return getDB().prepare(`
     SELECT * FROM accounts
     WHERE status IN ('active', 'error')

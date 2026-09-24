@@ -23,33 +23,62 @@ fi
 export DISPLAY="$DISPLAY_NUM"
 cd "$REPO_ROOT"
 
-# Credentials
+# Credentials — REPLACE committed stores so only this run's account is used
+export LOGIN_EMAIL="$EMAIL" LOGIN_PASSWORD="$PASSWORD" LOGIN_USERNAME="${USERNAME:-$EMAIL}"
 case "$BOT" in
   onlyfaucet)
-    node onlyfaucet/bot.mjs add "$EMAIL"
+    if [ -z "$EMAIL" ]; then echo "onlyfaucet requires EMAIL"; exit 1; fi
+    node -e '
+      const fs = require("fs");
+      fs.writeFileSync("onlyfaucet/accounts.json", JSON.stringify([{ email: process.env.EMAIL, claims: 0, lastClaim: null }], null, 2));
+      console.log("onlyfaucet accounts.json ->", process.env.EMAIL);
+    '
     ;;
   rosecrypto)
     ROSE_USER="${USERNAME:-$EMAIL}"
     if [ -z "$ROSE_USER" ]; then echo "rosecrypto requires username or EMAIL"; exit 1; fi
     if [ -z "$PASSWORD" ]; then echo "rosecrypto requires PASSWORD"; exit 1; fi
-    export ROSE_USER PASSWORD
+    export ROSE_USER PASSWORD LOGIN_USERNAME="$ROSE_USER"
     node -e '
       const fs = require("fs");
-      const p = "rosecrypto/accounts.json";
       const u = process.env.ROSE_USER;
       const pw = process.env.PASSWORD || "";
       if (!u || !pw) { console.error("rosecrypto requires email/username + password"); process.exit(1); }
-      let arr = [];
-      try { arr = JSON.parse(fs.readFileSync(p, "utf8")); } catch {}
-      arr = arr.filter(a => a.username !== u);
-      arr.push({ username: u, password: pw, claims: 0, lastClaim: null });
-      fs.writeFileSync(p, JSON.stringify(arr, null, 2));
-      console.log("rosecrypto account ready:", u);
+      fs.writeFileSync("rosecrypto/accounts.json", JSON.stringify([{ username: u, password: pw, claims: 0, lastClaim: null }], null, 2));
+      console.log("rosecrypto accounts.json ->", u);
     '
     ;;
   1xfaucet)
-    node 1xfaucet/accounts.mjs add "$EMAIL" "$PASSWORD" || true
-    EMAIL="$EMAIL" PASSWORD="$PASSWORD" node -e '
+    if [ -z "$EMAIL" ]; then echo "1xfaucet requires EMAIL"; exit 1; fi
+    if [ -z "$PASSWORD" ]; then echo "1xfaucet requires PASSWORD"; exit 1; fi
+    export EMAIL PASSWORD
+    node -e '
+      const Database = require("better-sqlite3");
+      const { join } = require("path");
+      const dbPath = join(process.env.HOME, "adbch", "1xfaucet", "accounts.db");
+      const db = new Database(dbPath);
+      db.pragma("journal_mode = WAL");
+      db.exec(`CREATE TABLE IF NOT EXISTS accounts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        status TEXT DEFAULT '\''active'\'',
+        last_claim_at TEXT,
+        next_available_at TEXT,
+        total_claims INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('\''now'\'')),
+        updated_at TEXT DEFAULT (datetime('\''now'\''))
+      );`);
+      db.prepare("DELETE FROM accounts WHERE email <> ?").run(process.env.EMAIL);
+      db.prepare(`
+        INSERT INTO accounts (email, password, status, next_available_at, updated_at)
+        VALUES (?, ?, '\''active'\'', NULL, datetime('\''now'\''))
+        ON CONFLICT(email) DO UPDATE SET password=excluded.password, status='\''active'\'', next_available_at=NULL, updated_at=datetime('\''now'\'')
+      `).run(process.env.EMAIL, process.env.PASSWORD);
+      console.log("1xfaucet accounts.db ->", process.env.EMAIL);
+      db.close();
+    '
+    node -e '
       const fs = require("fs");
       const p = "1xfaucet/config.json";
       const cfg = JSON.parse(fs.readFileSync(p, "utf8"));
@@ -59,6 +88,7 @@ case "$BOT" in
     ;;
   *) echo "Unknown BOT=$BOT"; exit 1;;
 esac
+echo "Active credentials: bot=$BOT email=${EMAIL:-} username=${USERNAME:-}"
 
 # Desktop
 DISP="${DISPLAY_NUM#:}"

@@ -30,7 +30,17 @@ function acquireLock() {
 
 function loadAccounts() {
   if (!existsSync(ACCOUNTS_FILE)) return [];
-  try { return JSON.parse(readFileSync(ACCOUNTS_FILE, 'utf8')); } catch { return []; }
+  try {
+    const arr = JSON.parse(readFileSync(ACCOUNTS_FILE, 'utf8'));
+    // Prefer the account selected when dispatching the bot (workflow / env)
+    const preferred = process.env.LOGIN_USERNAME || process.env.LOGIN_EMAIL || process.env.EMAIL;
+    if (preferred) {
+      const hit = arr.filter(a => a.username === preferred);
+      const rest = arr.filter(a => a.username !== preferred);
+      return hit.length ? [...hit, ...rest] : arr;
+    }
+    return arr;
+  } catch { return []; }
 }
 
 function saveAccounts(accounts) {

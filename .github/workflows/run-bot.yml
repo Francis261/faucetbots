@@ -143,18 +143,33 @@ jobs:
           LOGIN_USERNAME: ${{ github.event.inputs.username }}
         run: |
           set -euo pipefail
-          # GitHub blanks empty optional inputs; normalize
           EMAIL="${EMAIL:-${LOGIN_EMAIL:-}}"
           PASSWORD="${PASSWORD:-${LOGIN_PASSWORD:-}}"
           USERNAME="${USERNAME:-${LOGIN_USERNAME:-}}"
+          # Make run credentials visible to the bot process later via GITHUB_ENV
+          {
+            echo "LOGIN_EMAIL=${EMAIL}"
+            echo "LOGIN_PASSWORD=${PASSWORD}"
+            echo "LOGIN_USERNAME=${USERNAME}"
+          } >> "$GITHUB_ENV"
+
+          # Committed account stores from the repo must not win over dispatch inputs.
+          # Always REPLACE the selected bot's store with only this run's credentials.
           case "$BOT" in
             onlyfaucet)
               if [ -z "$EMAIL" ]; then echo "onlyfaucet requires email"; exit 1; fi
-              node onlyfaucet/bot.mjs add "$EMAIL"
+              export LOGIN_EMAIL="$EMAIL"
+              node -e '
+                const fs = require("fs");
+                const p = "onlyfaucet/accounts.json";
+                const email = process.env.LOGIN_EMAIL;
+                if (!email) { console.error("missing email"); process.exit(1); }
+                fs.writeFileSync(p, JSON.stringify([{ email, claims: 0, lastClaim: null }], null, 2));
+                console.log("onlyfaucet accounts.json -> only", email);
+              '
               node onlyfaucet/bot.mjs list
               ;;
             rosecrypto)
-              # export so the node snippet sees them; username may fall back to email
               ROSE_USER="${USERNAME:-$EMAIL}"
               if [ -z "$ROSE_USER" ]; then
                 echo "rosecrypto requires a username (or email as fallback)"; exit 1
@@ -162,42 +177,80 @@ jobs:
               if [ -z "$PASSWORD" ]; then
                 echo "rosecrypto requires a password (pass the password input)"; exit 1
               fi
-              export ROSE_USER PASSWORD
+              export ROSE_USER PASSWORD LOGIN_USERNAME="$ROSE_USER"
               node -e '
                 const fs = require("fs");
                 const p = "rosecrypto/accounts.json";
                 const u = process.env.ROSE_USER;
                 const pw = process.env.PASSWORD || "";
                 if (!u || !pw) { console.error("rosecrypto requires email/username + password"); process.exit(1); }
-                let arr = [];
-                try { arr = JSON.parse(fs.readFileSync(p, "utf8")); } catch {}
-                arr = arr.filter(a => a.username !== u);
-                arr.push({ username: u, password: pw, claims: 0, lastClaim: null });
-                fs.writeFileSync(p, JSON.stringify(arr, null, 2));
-                console.log("rosecrypto account ready:", u);
+                fs.writeFileSync(p, JSON.stringify([{ username: u, password: pw, claims: 0, lastClaim: null }], null, 2));
+                console.log("rosecrypto accounts.json -> only", u);
               '
+              node rosecrypto/bot.mjs list || true
               ;;
             1xfaucet)
-              # sqlite account + config.json (bot still uses manual login via VNC for Turnstile)
               if [ -z "$EMAIL" ]; then echo "1xfaucet requires email"; exit 1; fi
               if [ -z "$PASSWORD" ]; then echo "1xfaucet requires password"; exit 1; fi
               mkdir -p "$HOME/adbch/1xfaucet"
-              node 1xfaucet/accounts.mjs add "$EMAIL" "$PASSWORD" || true
-              node 1xfaucet/accounts.mjs list || true
+              export EMAIL PASSWORD LOGIN_EMAIL="$EMAIL" LOGIN_PASSWORD="$PASSWORD"
+              # Rebuild the sqlite store so only this run's account remains active.
+              node -e '
+                const { createRequire } = require("module");
+                const require2 = createRequire(process.cwd() + "/package.json");
+                let Database;
+                try { Database = require("better-sqlite3"); }
+                catch { Database = require2("better-sqlite3"); }
+                const { join } = require("path");
+                const dbPath = join(process.env.HOME, "adbch", "1xfaucet", "accounts.db");
+                const db = new Database(dbPath);
+                db.pragma("journal_mode = WAL");
+                db.exec(`
+                  CREATE TABLE IF NOT EXISTS accounts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email TEXT UNIQUE NOT NULL,
+                    password TEXT NOT NULL,
+                    status TEXT DEFAULT '\''active'\'',
+                    last_claim_at TEXT,
+                    next_available_at TEXT,
+                    total_claims INTEGER DEFAULT 0,
+                    created_at TEXT DEFAULT (datetime('\''now'\'')),
+                    updated_at TEXT DEFAULT (datetime('\''now'\''))
+                  );
+                `);
+                const email = process.env.EMAIL;
+                const password = process.env.PASSWORD;
+                db.prepare("DELETE FROM accounts WHERE email <> ?").run(email);
+                db.prepare(`
+                  INSERT INTO accounts (email, password, status, next_available_at, updated_at)
+                  VALUES (?, ?, '\''active'\'', NULL, datetime('\''now'\''))
+                  ON CONFLICT(email) DO UPDATE SET
+                    password=excluded.password,
+                    status='\''active'\'',
+                    next_available_at=NULL,
+                    updated_at=datetime('\''now'\'')
+                `).run(email, password);
+                const rows = db.prepare("SELECT email, status FROM accounts ORDER BY id").all();
+                console.log("1xfaucet accounts.db ->", JSON.stringify(rows));
+                db.close();
+              '
               export EMAIL PASSWORD
               node -e '
                 const fs = require("fs");
                 const p = "1xfaucet/config.json";
                 const cfg = JSON.parse(fs.readFileSync(p, "utf8"));
-                cfg.email = process.env.EMAIL || cfg.email;
-                cfg.password = process.env.PASSWORD || cfg.password;
+                cfg.email = process.env.EMAIL;
+                cfg.password = process.env.PASSWORD;
                 fs.writeFileSync(p, JSON.stringify(cfg, null, 2) + "\n");
-                console.log("1xfaucet config updated");
+                console.log("1xfaucet config.json email/password updated");
               '
               ;;
             *)
               echo "Unknown bot: $BOT"; exit 1;;
           esac
+
+          echo "Active credentials for this run:"
+          echo "  bot=$BOT email=${EMAIL:-} username=${USERNAME:-} password_set=$([ -n "$PASSWORD" ] && echo yes || echo no)"
 
       - name: Start Xvfb + x11vnc + noVNC
         run: |
@@ -307,17 +360,65 @@ jobs:
           echo "DISPLAY=:99" >> "$GITHUB_ENV"
           # Clear any stale bot locks from the runner image
           rm -f /tmp/onlyfaucet.lock /tmp/rosecrypto.lock /tmp/1xfaucet_bot.lock 2>/dev/null || true
-          # Drop committed accounts that aren't this run's login (avoid wrong account)
-          case "$BOT" in
-            onlyfaucet) ;;
-            rosecrypto) ;;
-            1xfaucet) ;;
-          esac
+          # Safety: drop any leftover committed accounts that aren't this run's login
+          if [ -n "${LOGIN_EMAIL:-}" ]; then
+            case "$BOT" in
+              onlyfaucet)
+                node -e '
+                  const fs = require("fs");
+                  const p = "onlyfaucet/accounts.json";
+                  const email = process.env.LOGIN_EMAIL;
+                  if (fs.existsSync(p)) {
+                    const arr = JSON.parse(fs.readFileSync(p, "utf8"));
+                    const keep = arr.filter(a => a.email === email);
+                    if (JSON.stringify(keep) !== JSON.stringify(arr)) {
+                      fs.writeFileSync(p, JSON.stringify(keep, null, 2));
+                      console.log("onlyfaucet: dropped non-run accounts");
+                    }
+                  }
+                '
+                ;;
+              1xfaucet)
+                node -e '
+                  let Database;
+                  try { Database = require("better-sqlite3"); }
+                  catch { Database = require(require("path").join(process.env.HOME, "adbch", "node_modules", "better-sqlite3")); }
+                  const { join } = require("path");
+                  const db = new Database(join(process.env.HOME, "adbch", "1xfaucet", "accounts.db"));
+                  db.prepare("DELETE FROM accounts WHERE email <> ?").run(process.env.LOGIN_EMAIL);
+                  db.close();
+                ' || true
+                ;;
+            esac
+          fi
+          if [ -n "${LOGIN_USERNAME:-}" ] || [ -n "${LOGIN_EMAIL:-}" ]; then
+            if [ "$BOT" = "rosecrypto" ]; then
+              export LOGIN_USERNAME="${LOGIN_USERNAME:-$LOGIN_EMAIL}"
+              node -e '
+                const fs = require("fs");
+                const p = "rosecrypto/accounts.json";
+                const u = process.env.LOGIN_USERNAME;
+                if (fs.existsSync(p) && u) {
+                  const arr = JSON.parse(fs.readFileSync(p, "utf8"));
+                  const keep = arr.filter(a => a.username === u);
+                  if (JSON.stringify(keep) !== JSON.stringify(arr)) {
+                    fs.writeFileSync(p, JSON.stringify(keep, null, 2));
+                    console.log("rosecrypto: dropped non-run accounts");
+                  }
+                }
+              '
+            fi
+          fi
 
       - name: Start selected bot
         run: |
           set -euo pipefail
           export DISPLAY=:99
+          # Ensure run credentials are in the bot process environment
+          export LOGIN_EMAIL="${LOGIN_EMAIL:-}"
+          export LOGIN_PASSWORD="${LOGIN_PASSWORD:-}"
+          export LOGIN_USERNAME="${LOGIN_USERNAME:-${USERNAME:-}}"
+          echo "Starting $BOT with LOGIN_EMAIL=${LOGIN_EMAIL:-} LOGIN_USERNAME=${LOGIN_USERNAME:-}"
           mkdir -p /tmp/bot-logs
           case "$BOT" in
             onlyfaucet)
@@ -329,7 +430,7 @@ jobs:
               echo $! > /tmp/bot.pid
               ;;
             1xfaucet)
-              # waits for manual login via noVNC (Turnstile), then claims
+              # waits for manual login via noVNC (Turnstile), then claims for LOGIN_EMAIL
               setsid nohup node 1xfaucet/bot.mjs > /tmp/bot-logs/1xfaucet.log 2>&1 < /dev/null &
               echo $! > /tmp/bot.pid
               ;;
