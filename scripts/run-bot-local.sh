@@ -90,28 +90,81 @@ case "$BOT" in
 esac
 echo "Active credentials: bot=$BOT email=${EMAIL:-} username=${USERNAME:-}"
 
-# Desktop
+# Desktop — setsid so daemons survive script/job boundaries
 DISP="${DISPLAY_NUM#:}"
 rm -f "/tmp/.X${DISP}-lock" "/tmp/.X11-unix/X${DISP}" 2>/dev/null || true
-Xvfb "$DISPLAY_NUM" -screen 0 "$RESOLUTION"x24 -ac >/tmp/xvfb.log 2>&1 &
-sleep 1
+mkdir -p /tmp/.X11-unix 2>/dev/null || true
+# no x11vnc -listen (reverse mode); no +extension RANDR
+setsid nohup Xvfb "$DISPLAY_NUM" -screen 0 "$RESOLUTION"x24 -ac >/tmp/xvfb.log 2>&1 < /dev/null &
+echo $! > /tmp/xvfb.pid
 
-if [ -n "$VNC_PASSWORD" ]; then
-  x11vnc -storepasswd "$VNC_PASSWORD" /tmp/.vncpass >/dev/null 2>&1 || true
-  x11vnc -display "$DISPLAY_NUM" -rfbport "$VNC_PORT" -rfbauth /tmp/.vncpass -shared -forever -nopn -quiet \
-    >/tmp/x11vnc.log 2>&1 &
+XVFB_OK=0
+for _ in $(seq 1 20); do
+  if [ -S "/tmp/.X11-unix/X${DISP}" ]; then XVFB_OK=1; break; fi
+  if ! kill -0 "$(cat /tmp/xvfb.pid)" 2>/dev/null; then break; fi
+  sleep 0.5
+done
+if [ "$XVFB_OK" != 1 ]; then
+  log "Xvfb failed:"; cat /tmp/xvfb.log 2>/dev/null || true; exit 1
+fi
+
+if [ -n "$VNC_PASSWORD" ] && x11vnc -storepasswd "$VNC_PASSWORD" /tmp/.vncpass >/dev/null 2>&1; then
+  setsid nohup x11vnc -display "$DISPLAY_NUM" -rfbport "$VNC_PORT" -localhost \
+    -rfbauth /tmp/.vncpass -shared -forever -nopn -quiet \
+    >/tmp/x11vnc.log 2>&1 < /dev/null &
 else
-  x11vnc -display "$DISPLAY_NUM" -rfbport "$VNC_PORT" -nopw -shared -forever -nopn -quiet \
-    >/tmp/x11vnc.log 2>&1 &
+  setsid nohup x11vnc -display "$DISPLAY_NUM" -rfbport "$VNC_PORT" -localhost \
+    -nopw -shared -forever -nopn -quiet \
+    >/tmp/x11vnc.log 2>&1 < /dev/null &
+fi
+echo $! > /tmp/x11vnc.pid
+
+X11_OK=0
+for _ in $(seq 1 20); do
+  if ! kill -0 "$(cat /tmp/x11vnc.pid)" 2>/dev/null; then break; fi
+  if (exec 3<>/dev/tcp/127.0.0.1/"$VNC_PORT") 2>/dev/null; then
+    exec 3>&- 2>/dev/null || true
+    X11_OK=1
+    break
+  fi
+  sleep 0.5
+done
+if [ "$X11_OK" != 1 ]; then
+  log "x11vnc failed:"; cat /tmp/x11vnc.log 2>/dev/null || true; exit 1
 fi
 
 NOVNC_WEB=""
-for d in /usr/share/novnc /usr/share/webapps/novnc; do
-  [ -f "$d/vnc.html" ] && NOVNC_WEB="$d" && break
+for d in /usr/share/novnc /usr/share/webapps/novnc /usr/share/novnc/web /usr/share/novnc/share; do
+  if [ -f "$d/vnc.html" ] || [ -f "$d/vnc_lite.html" ] || [ -f "$d/index.html" ]; then
+    NOVNC_WEB="$d"
+    break
+  fi
 done
-websockify --web "$NOVNC_WEB" "$NOVNC_PORT" "127.0.0.1:$VNC_PORT" >/tmp/websockify.log 2>&1 &
+if [ -z "$NOVNC_WEB" ]; then
+  log "noVNC web not found under /usr/share/novnc"; exit 1
+fi
+setsid nohup websockify --web "$NOVNC_WEB" "$NOVNC_PORT" "127.0.0.1:$VNC_PORT" >/tmp/websockify.log 2>&1 < /dev/null &
+echo $! > /tmp/websockify.pid
 
-cloudflared tunnel --url "http://127.0.0.1:$NOVNC_PORT" --no-autoupdate >/tmp/cloudflared.log 2>&1 &
+NOVNC_OK=0
+for _ in $(seq 1 30); do
+  if ! kill -0 "$(cat /tmp/websockify.pid)" 2>/dev/null; then break; fi
+  if curl -sf -o /dev/null "http://127.0.0.1:$NOVNC_PORT/vnc.html" \
+    || curl -sf -o /dev/null "http://127.0.0.1:$NOVNC_PORT/vnc_lite.html" \
+    || curl -sf -o /dev/null "http://127.0.0.1:$NOVNC_PORT/"; then
+    NOVNC_OK=1
+    break
+  fi
+  sleep 0.5
+done
+if [ "$NOVNC_OK" != 1 ]; then
+  log "noVNC/websockify not responding on :$NOVNC_PORT"
+  cat /tmp/websockify.log 2>/dev/null || true
+  exit 1
+fi
+
+setsid nohup cloudflared tunnel --url "http://127.0.0.1:$NOVNC_PORT" --no-autoupdate >/tmp/cloudflared.log 2>&1 < /dev/null &
+echo $! > /tmp/cloudflared.pid
 for i in $(seq 1 40); do
   NOVNC_URL=$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' /tmp/cloudflared.log | head -1 || true)
   [ -n "$NOVNC_URL" ] && break
