@@ -1,0 +1,366 @@
+name: Run Faucet Bot (VM + noVNC)
+
+on:
+  workflow_dispatch:
+    inputs:
+      bot:
+        description: Which bot to run
+        required: true
+        type: choice
+        options:
+          - onlyfaucet
+          - rosecrypto
+          - 1xfaucet
+        default: onlyfaucet
+      email:
+        description: Login email / FaucetPay email / 1xfaucet email
+        required: true
+        type: string
+      password:
+        description: Password (required for rosecrypto and 1xfaucet; leave blank for onlyfaucet)
+        required: false
+        type: string
+        default: ""
+      username:
+        description: Username (rosecrypto only; leave blank to use email)
+        required: false
+        type: string
+        default: ""
+      vnc_password:
+        description: Optional noVNC/VNC password (blank = no password)
+        required: false
+        type: string
+        default: ""
+      run_minutes:
+        description: How long to keep the VM alive (minutes)
+        required: false
+        type: string
+        default: "180"
+
+concurrency:
+  group: run-bot-${{ github.event.inputs.bot }}
+  cancel-in-progress: false
+
+jobs:
+  run-bot:
+    name: ${{ github.event.inputs.bot }} on VM
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    env:
+      BOT: ${{ github.event.inputs.bot }}
+      LOGIN_EMAIL: ${{ github.event.inputs.email }}
+      LOGIN_PASSWORD: ${{ github.event.inputs.password }}
+      LOGIN_USERNAME: ${{ github.event.inputs.username }}
+      VNC_PASSWORD: ${{ github.event.inputs.vnc_password }}
+      RUN_MINUTES: ${{ github.event.inputs.run_minutes }}
+      DISPLAY: ":99"
+      RESOLUTION: "1280x800"
+      NOVNC_PORT: "6080"
+      VNC_PORT: "5900"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system packages (Chrome deps, X, noVNC, tools)
+        run: |
+          set -euo pipefail
+          sudo apt-get update -y
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            xvfb x11vnc xterm novnc websockify dbus-x11 \
+            wget curl ca-certificates gnupg \
+            libnss3 libatk-bridge2.0-0 libgtk-3-0 libgbm1 libasound2 \
+            libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libpangocairo-1.0-0 \
+            fonts-liberation python3-pip jq procps xauth
+
+      - name: Install Google Chrome
+        run: |
+          set -euo pipefail
+          if ! command -v google-chrome >/dev/null 2>&1; then
+            wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+            sudo apt-get install -y /tmp/chrome.deb || sudo dpkg -i /tmp/chrome.deb || true
+            sudo apt-get install -f -y
+          fi
+          google-chrome --version || google-chrome-stable --version
+
+      - name: Install Chromium (Playwright + system fallback)
+        run: |
+          set -euo pipefail
+          # Playwright's Chromium (bots default to channel: chrome, this is backup)
+          npx playwright install --with-deps chromium || npx playwright install chromium || true
+          # Ubuntu chromium may be snap; try deb package only if available
+          if ! command -v chromium-browser >/dev/null 2>&1 && ! command -v chromium >/dev/null 2>&1; then
+            echo "System chromium not present — Playwright chromium will be used if CHROME_PATH set"
+          fi
+          chromium --version 2>/dev/null || chromium-browser --version 2>/dev/null || true
+
+      - name: Install Python deps (onlyfaucet vision helpers)
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install pillow numpy opencv-python-headless
+
+      - name: npm install
+        run: npm ci || npm install
+
+      - name: Install cloudflared
+        run: |
+          set -euo pipefail
+          CF_VERSION=$(curl -s https://api.github.com/repos/cloudflare/cloudflared/releases/latest | jq -r .tag_name)
+          CF_VERSION="${CF_VERSION#version-}"
+          wget -q -O /tmp/cloudflared.deb "https://github.com/cloudflare/cloudflared/releases/download/version-${CF_VERSION}/cloudflared-linux-amd64.deb" \
+            || wget -q -O /tmp/cloudflared.deb "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb"
+          sudo dpkg -i /tmp/cloudflared.deb || sudo apt-get install -f -y
+          cloudflared --version
+
+      - name: Layout HOME paths expected by bots
+        run: |
+          set -euo pipefail
+          # bots resolve some paths as $HOME/adbch/...
+          if [ ! -e "$HOME/adbch" ]; then
+            ln -s "$GITHUB_WORKSPACE" "$HOME/adbch"
+          fi
+          mkdir -p "$HOME/adbch"
+
+      - name: Write credentials for selected bot
+        env:
+          BOT: ${{ github.event.inputs.bot }}
+          EMAIL: ${{ github.event.inputs.email }}
+          PASSWORD: ${{ github.event.inputs.password }}
+          USERNAME: ${{ github.event.inputs.username }}
+        run: |
+          set -euo pipefail
+          case "$BOT" in
+            onlyfaucet)
+              node onlyfaucet/bot.mjs add "$EMAIL"
+              node onlyfaucet/bot.mjs list
+              ;;
+            rosecrypto)
+              ROSE_USER="${USERNAME:-$EMAIL}"
+              node -e '
+                const fs = require("fs");
+                const p = "rosecrypto/accounts.json";
+                const u = process.env.ROSE_USER;
+                const pw = process.env.PASSWORD || "";
+                if (!u || !pw) { console.error("rosecrypto requires email/username + password"); process.exit(1); }
+                let arr = [];
+                try { arr = JSON.parse(fs.readFileSync(p, "utf8")); } catch {}
+                arr = arr.filter(a => a.username !== u);
+                arr.push({ username: u, password: pw, claims: 0, lastClaim: null });
+                fs.writeFileSync(p, JSON.stringify(arr, null, 2));
+                console.log("rosecrypto account ready:", u);
+              '
+              ;;
+            1xfaucet)
+              # sqlite account + config.json (bot still uses manual login via VNC for Turnstile)
+              mkdir -p "$HOME/adbch/1xfaucet"
+              node 1xfaucet/accounts.mjs add "$EMAIL" "$PASSWORD" || true
+              node 1xfaucet/accounts.mjs list || true
+              node -e '
+                const fs = require("fs");
+                const p = "1xfaucet/config.json";
+                const cfg = JSON.parse(fs.readFileSync(p, "utf8"));
+                cfg.email = process.env.EMAIL || cfg.email;
+                cfg.password = process.env.PASSWORD || cfg.password;
+                fs.writeFileSync(p, JSON.stringify(cfg, null, 2) + "\n");
+                console.log("1xfaucet config updated");
+              '
+              ;;
+            *)
+              echo "Unknown bot: $BOT"; exit 1;;
+          esac
+
+      - name: Start Xvfb + x11vnc + noVNC
+        run: |
+          set -euo pipefail
+          export DISPLAY=:99
+          rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true
+          mkdir -p /tmp/.X11-unix && sudo chmod 1777 /tmp/.X11-unix || true
+
+          # -ac disables access control (CI-only VM; VNC sits on localhost + CF tunnel)
+          Xvfb :99 -screen 0 1280x800x24 -ac +extension RANDR >/tmp/xvfb.log 2>&1 &
+          echo $! > /tmp/xvfb.pid
+          sleep 2
+          if ! kill -0 "$(cat /tmp/xvfb.pid)" 2>/dev/null; then
+            echo "Xvfb failed:"; cat /tmp/xvfb.log; exit 1
+          fi
+
+          if [ -n "${VNC_PASSWORD:-}" ]; then
+            x11vnc -storepasswd "$VNC_PASSWORD" /tmp/.vncpass >/dev/null 2>&1 || true
+            x11vnc -display :99 -rfbport 5900 -localhost -listen 127.0.0.1 \
+              -rfbauth /tmp/.vncpass -shared -forever -ncache 10 -ncache_cr \
+              >/tmp/x11vnc.log 2>&1 &
+          else
+            x11vnc -display :99 -rfbport 5900 -localhost -listen 127.0.0.1 \
+              -nopw -shared -forever -ncache 10 -ncache_cr \
+              >/tmp/x11vnc.log 2>&1 &
+          fi
+          echo $! > /tmp/x11vnc.pid
+          sleep 2
+          if ! kill -0 "$(cat /tmp/x11vnc.pid)" 2>/dev/null; then
+            echo "x11vnc failed:"; cat /tmp/x11vnc.log; exit 1
+          fi
+
+          NOVNC_WEB=""
+          for d in /usr/share/novnc /usr/share/webapps/novnc /usr/share/novnc/web; do
+            if [ -f "$d/vnc.html" ] || [ -f "$d/index.html" ]; then
+              NOVNC_WEB="$d"
+              break
+            fi
+          done
+          if [ -z "$NOVNC_WEB" ]; then
+            echo "noVNC web not found"; ls -la /usr/share/novnc 2>/dev/null || true; exit 1
+          fi
+          echo "noVNC web: $NOVNC_WEB"
+
+          websockify --web "$NOVNC_WEB" 6080 127.0.0.1:5900 >/tmp/websockify.log 2>&1 &
+          echo $! > /tmp/websockify.pid
+          sleep 2
+          curl -sf http://127.0.0.1:6080/vnc.html >/dev/null && echo "noVNC local OK" || {
+            echo "noVNC not responding"; cat /tmp/websockify.log; cat /tmp/x11vnc.log; exit 1;
+          }
+
+      - name: Start Cloudflare quick tunnel
+        run: |
+          set -euo pipefail
+          # quick tunnel → random *.trycloudflare.com URL
+          cloudflared tunnel --url http://127.0.0.1:6080 --no-autoupdate >/tmp/cloudflared.log 2>&1 &
+          echo $! > /tmp/cloudflared.pid
+
+          NOVNC_URL=""
+          for i in $(seq 1 40); do
+            NOVNC_URL=$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' /tmp/cloudflared.log | head -1 || true)
+            if [ -n "$NOVNC_URL" ]; then break; fi
+            sleep 1
+          done
+          if [ -z "$NOVNC_URL" ]; then
+            echo "Failed to get tunnel URL"; cat /tmp/cloudflared.log; exit 1
+          fi
+          echo "NOVNC_URL=$NOVNC_URL" >> "$GITHUB_ENV"
+          {
+            echo "## noVNC desktop"
+            echo ""
+            echo "**Open this URL in your browser to view/control the VM desktop:**"
+            echo ""
+            echo "\`\`\`"
+            echo "$NOVNC_URL/vnc.html?autoconnect=true&resize=scale"
+            echo "\`\`\`"
+            echo ""
+            echo "- Bot: \`$BOT\`"
+            if [ -n "${VNC_PASSWORD:-}" ]; then
+              echo "- VNC password: (set)"
+            else
+              echo "- VNC password: none"
+            fi
+            echo "- Local noVNC: http://127.0.0.1:6080/vnc.html"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "noVNC via Cloudflare: $NOVNC_URL/vnc.html?autoconnect=true&resize=scale"
+
+      - name: Prepare Chrome env for bots
+        run: |
+          set -euo pipefail
+          # Prefer system Google Chrome (bots use channel: chrome)
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "CHROME_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+            echo "CHROME_CHANNEL=chrome" >> "$GITHUB_ENV"
+          elif command -v google-chrome-stable >/dev/null 2>&1; then
+            echo "CHROME_PATH=$(command -v google-chrome-stable)" >> "$GITHUB_ENV"
+            echo "CHROME_CHANNEL=chrome" >> "$GITHUB_ENV"
+          else
+            # fallback: playwright chromium
+            CHROME_BIN=$(find "$HOME/.cache/ms-playwright" -type f -name chrome -path '*/chrome-linux/*' 2>/dev/null | head -1 || true)
+            if [ -n "$CHROME_BIN" ]; then
+              echo "CHROME_PATH=$CHROME_BIN" >> "$GITHUB_ENV"
+              echo "CHROME_CHANNEL=chromium" >> "$GITHUB_ENV"
+            fi
+          fi
+          echo "DISPLAY=:99" >> "$GITHUB_ENV"
+          # Clear any stale bot locks from the runner image
+          rm -f /tmp/onlyfaucet.lock /tmp/rosecrypto.lock /tmp/1xfaucet_bot.lock 2>/dev/null || true
+          # Drop committed accounts that aren't this run's login (avoid wrong account)
+          case "$BOT" in
+            onlyfaucet) ;;
+            rosecrypto) ;;
+            1xfaucet) ;;
+          esac
+
+      - name: Start selected bot
+        run: |
+          set -euo pipefail
+          export DISPLAY=:99
+          mkdir -p /tmp/bot-logs
+          case "$BOT" in
+            onlyfaucet)
+              setsid nohup node onlyfaucet/bot.mjs > /tmp/bot-logs/onlyfaucet.log 2>&1 < /dev/null &
+              echo $! > /tmp/bot.pid
+              ;;
+            rosecrypto)
+              setsid nohup node --unhandled-rejections=warn rosecrypto/bot.mjs > /tmp/bot-logs/rosecrypto.log 2>&1 < /dev/null &
+              echo $! > /tmp/bot.pid
+              ;;
+            1xfaucet)
+              # waits for manual login via noVNC (Turnstile), then claims
+              setsid nohup node 1xfaucet/bot.mjs > /tmp/bot-logs/1xfaucet.log 2>&1 < /dev/null &
+              echo $! > /tmp/bot.pid
+              ;;
+          esac
+          sleep 5
+          echo "Bot PID: $(cat /tmp/bot.pid)"
+          echo "=== early bot log ==="
+          tail -n 40 /tmp/bot-logs/*.log || true
+          if ! kill -0 "$(cat /tmp/bot.pid)" 2>/dev/null; then
+            echo "Bot exited early"; cat /tmp/bot-logs/*.log; exit 1
+          fi
+
+      - name: Keep VM alive and stream logs
+        run: |
+          set -euo pipefail
+          echo "Running for ${RUN_MINUTES} minutes. noVNC: ${NOVNC_URL}/vnc.html?autoconnect=true&resize=scale"
+          END=$(( $(date +%s) + RUN_MINUTES * 60 ))
+          while [ "$(date +%s)" -lt "$END" ]; do
+            if ! kill -0 "$(cat /tmp/bot.pid 2>/dev/null || echo 0)" 2>/dev/null; then
+              echo "Bot process died — dumping logs and exiting"
+              tail -n 200 /tmp/bot-logs/*.log || true
+              exit 1
+            fi
+            echo "---- $(date -u +%H:%M:%S) bot tail ----"
+            tail -n 8 /tmp/bot-logs/*.log 2>/dev/null || true
+            # warn near end
+            REMAIN=$(( END - $(date +%s) ))
+            if [ "$REMAIN" -lt 300 ] && [ "$REMAIN" -gt 295 ]; then
+              echo "Less than 5 minutes remaining"
+            fi
+            sleep 30
+          done
+          echo "Run window finished"
+
+      - name: Collect diagnostics
+        if: always()
+        run: |
+          mkdir -p artifacts
+          cp -a /tmp/bot-logs/. artifacts/ 2>/dev/null || true
+          cp -a /tmp/cloudflared.log artifacts/ 2>/dev/null || true
+          cp -a /tmp/x11vnc.log artifacts/ 2>/dev/null || true
+          cp -a /tmp/websockify.log artifacts/ 2>/dev/null || true
+          cp -a /tmp/xvfb.log artifacts/ 2>/dev/null || true
+          cp -a /tmp/onlyfaucet-shots/. artifacts/shots/ 2>/dev/null || true
+          ls -la artifacts || true
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bot-logs-${{ github.event.inputs.bot }}
+          path: artifacts
+          if-no-files-found: ignore
+          retention-days: 7

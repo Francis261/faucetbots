@@ -239,6 +239,36 @@ async function waitForCloudflare(page, maxSec = 60) {
 }
 
 async function clickChallengeBody(page) {
+  // Prefer Playwright frame.frameElement() — CF widget often lives in shadow DOM,
+  // so document.querySelectorAll('iframe') returns nothing.
+  for (const frame of page.frames()) {
+    try {
+      const url = frame.url() || '';
+      if (!url.includes('challenges.cloudflare.com') && !url.includes('turnstile') && !url.includes('cloudflare') && !url.includes('cf-')) continue;
+      const el = await frame.frameElement().catch(() => null);
+      if (!el) continue;
+      const box = await el.boundingBox().catch(() => null);
+      if (!box || box.width <= 0 || box.height <= 0) continue;
+      const local = await frame.evaluate(() => {
+        const input = document.querySelector('input[type="checkbox"]');
+        if (input) {
+          const r = input.getBoundingClientRect();
+          if (r.width > 0) return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+        }
+        const body = document.body?.getBoundingClientRect();
+        const h = body && body.height > 10 ? body.height : 65;
+        return { x: 25, y: h / 2 };
+      }).catch(() => ({ x: 25, y: 32 }));
+      const pageX = box.x + local.x;
+      const pageY = box.y + local.y;
+      log(`Clicking CF via frameElement at (${Math.round(pageX)}, ${Math.round(pageY)}) box=${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}x${Math.round(box.height)}`);
+      await page.mouse.move(pageX, pageY, { steps: 8 });
+      await sleep(300);
+      await page.mouse.click(pageX, pageY);
+      return true;
+    } catch {}
+  }
+
   // Log all iframes and frames for debugging
   const allIframes = await page.evaluate(() => {
     return [...document.querySelectorAll('iframe')].map(f => {
@@ -277,40 +307,6 @@ async function clickChallengeBody(page) {
 
   if (iframePos) {
     log(`CF iframe at (${Math.round(iframePos.x)},${Math.round(iframePos.y)}) ${Math.round(iframePos.w)}x${Math.round(iframePos.h)}`);
-  } else {
-    log('No visible CF iframe found in DOM');
-  }
-
-  // Try clicking checkbox inside the CF frame
-  if (iframePos) {
-    for (const frame of page.frames()) {
-      try {
-        const url = frame.url() || '';
-        if (!url.includes('challenges.cloudflare.com') && !url.includes('turnstile') && !url.includes('cloudflare') && !url.includes('cf-')) continue;
-
-        const local = await frame.evaluate(() => {
-          const input = document.querySelector('input[type="checkbox"]');
-          if (input) {
-            const r = input.getBoundingClientRect();
-            if (r.width > 0) return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
-          }
-          // Checkbox is typically ~20px from left, vertical center
-          return { x: 25, y: 32 };
-        }).catch(() => null);
-
-        if (local) {
-          const pageX = iframePos.x + local.x;
-          const pageY = iframePos.y + local.y;
-          log(`Clicking checkbox at (${Math.round(pageX)}, ${Math.round(pageY)})`);
-          await page.mouse.move(pageX, pageY, { steps: 5 });
-          await sleep(200);
-          await page.mouse.click(pageX, pageY);
-          return true;
-        }
-      } catch {}
-    }
-
-    // Frame content unreadable — click checkbox position on the iframe element
     const pageX = iframePos.x + 25;
     const pageY = iframePos.y + iframePos.h / 2;
     log(`Clicking iframe checkbox area at (${Math.round(pageX)}, ${Math.round(pageY)})`);
