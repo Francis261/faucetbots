@@ -9,7 +9,7 @@ PASSWORD="${PASSWORD:-}"
 USERNAME="${USERNAME:-}"
 VNC_PASSWORD="${VNC_PASSWORD:-}"
 DISPLAY_NUM="${DISPLAY:-:99}"
-RESOLUTION="${RESOLUTION:-1280x800}"
+RESOLUTION="${RESOLUTION:-1920x1080}"
 NOVNC_PORT="${NOVNC_PORT:-6080}"
 VNC_PORT="${VNC_PORT:-5900}"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -87,7 +87,7 @@ for i in $(seq 1 40); do
   [ -n "$NOVNC_URL" ] && break
   sleep 1
 done
-log "noVNC: ${NOVNC_URL:-http://127.0.0.1:$NOVNC_PORT}/vnc.html?autoconnect=true&resize=scale"
+log "noVNC: ${NOVNC_URL:-http://127.0.0.1:$NOVNC_PORT}/vnc.html?autoconnect=true&resize=scale&scale=local"
 
 # Bot
 case "$BOT" in

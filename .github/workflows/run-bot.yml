@@ -54,7 +54,7 @@ jobs:
       VNC_PASSWORD: ${{ github.event.inputs.vnc_password }}
       RUN_MINUTES: ${{ github.event.inputs.run_minutes }}
       DISPLAY: ":99"
-      RESOLUTION: "1280x800"
+      RESOLUTION: "1920x1080"
       NOVNC_PORT: "6080"
       VNC_PORT: "5900"
 
@@ -207,7 +207,7 @@ jobs:
           mkdir -p /tmp/.X11-unix && sudo chmod 1777 /tmp/.X11-unix || true
 
           # -ac disables access control (CI-only VM; VNC sits on localhost + CF tunnel)
-          Xvfb :99 -screen 0 1280x800x24 -ac +extension RANDR >/tmp/xvfb.log 2>&1 &
+          Xvfb :99 -screen 0 1920x1080x24 -ac +extension RANDR >/tmp/xvfb.log 2>&1 &
           echo $! > /tmp/xvfb.pid
           sleep 2
           if ! kill -0 "$(cat /tmp/xvfb.pid)" 2>/dev/null; then
@@ -272,7 +272,7 @@ jobs:
             echo "**Open this URL in your browser to view/control the VM desktop:**"
             echo ""
             echo "\`\`\`"
-            echo "$NOVNC_URL/vnc.html?autoconnect=true&resize=scale"
+            echo "$NOVNC_URL/vnc.html?autoconnect=true&resize=scale&scale=local"
             echo "\`\`\`"
             echo ""
             echo "- Bot: \`$BOT\`"
@@ -283,7 +283,7 @@ jobs:
             fi
             echo "- Local noVNC: http://127.0.0.1:6080/vnc.html"
           } >> "$GITHUB_STEP_SUMMARY"
-          echo "noVNC via Cloudflare: $NOVNC_URL/vnc.html?autoconnect=true&resize=scale"
+          echo "noVNC via Cloudflare: $NOVNC_URL/vnc.html?autoconnect=true&resize=scale&scale=local"
 
       - name: Prepare Chrome env for bots
         run: |
@@ -344,7 +344,7 @@ jobs:
       - name: Keep VM alive and stream logs
         run: |
           set -euo pipefail
-          echo "Running for ${RUN_MINUTES} minutes. noVNC: ${NOVNC_URL}/vnc.html?autoconnect=true&resize=scale"
+          echo "Running for ${RUN_MINUTES} minutes. noVNC: ${NOVNC_URL}/vnc.html?autoconnect=true&resize=scale&scale=local"
           END=$(( $(date +%s) + RUN_MINUTES * 60 ))
           while [ "$(date +%s)" -lt "$END" ]; do
             if ! kill -0 "$(cat /tmp/bot.pid 2>/dev/null || echo 0)" 2>/dev/null; then
