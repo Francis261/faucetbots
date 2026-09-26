@@ -41,6 +41,10 @@ concurrency:
   group: run-bot-${{ github.event.inputs.bot }}
   cancel-in-progress: false
 
+permissions:
+  contents: read
+  actions: write
+
 jobs:
   run-bot:
     name: ${{ github.event.inputs.bot }} on VM
@@ -131,6 +135,8 @@ jobs:
             ln -s "$GITHUB_WORKSPACE" "$HOME/adbch"
           fi
           mkdir -p "$HOME/adbch"
+          # Job start for round-loop deadline (GitHub-hosted jobs cap at 360 min)
+          echo "JOB_START_TS=$(date +%s)" >> "$GITHUB_ENV"
 
       - name: Write credentials for selected bot
         env:
@@ -490,27 +496,121 @@ jobs:
             echo "Bot exited early"; cat /tmp/bot-logs/*.log; exit 1
           fi
 
-      - name: Keep VM alive and stream logs
+      - name: Keep VM alive and loop rounds
         run: |
           set -euo pipefail
-          echo "Running for ${RUN_MINUTES} minutes. noVNC: ${NOVNC_URL}/vnc.html?autoconnect=true&resize=scale&scale=local&viewOnly=false"
-          END=$(( $(date +%s) + RUN_MINUTES * 60 ))
-          while [ "$(date +%s)" -lt "$END" ]; do
+
+          case "${RUN_MINUTES}" in
+            ''|*[!0-9]*) echo "run_minutes must be a positive integer (got '${RUN_MINUTES}')"; exit 1;;
+          esac
+          if [ "${RUN_MINUTES}" -lt 1 ]; then echo "run_minutes must be >= 1"; exit 1; fi
+
+          JOB_START_TS="${JOB_START_TS:-$(date +%s)}"
+          # GitHub-hosted job limit is 360 min; stop before the hard kill so artifacts upload.
+          HARD_END=$(( JOB_START_TS + 360 * 60 - 180 ))
+          echo "Job deadline: $(date -u -d "@${HARD_END}" +%H:%M:%S)Z (round=${RUN_MINUTES}m)"
+
+          start_bot() {
+            rm -f /tmp/onlyfaucet.lock /tmp/rosecrypto.lock /tmp/1xfaucet_bot.lock 2>/dev/null || true
+            case "$BOT" in
+              onlyfaucet)
+                setsid nohup node onlyfaucet/bot.mjs >> /tmp/bot-logs/onlyfaucet.log 2>&1 < /dev/null &
+                ;;
+              rosecrypto)
+                setsid nohup node --unhandled-rejections=warn rosecrypto/bot.mjs >> /tmp/bot-logs/rosecrypto.log 2>&1 < /dev/null &
+                ;;
+              1xfaucet)
+                setsid nohup node 1xfaucet/bot.mjs >> /tmp/bot-logs/1xfaucet.log 2>&1 < /dev/null &
+                ;;
+              *)
+                echo "Unknown BOT=$BOT"; return 1;;
+            esac
+            echo $! > /tmp/bot.pid
+            echo "restarted bot pid=$(cat /tmp/bot.pid)"
+          }
+
+          ROUND=1
+          while [ "$(date +%s)" -lt "$HARD_END" ]; do
+            echo ""
+            echo "========== ROUND ${ROUND} =========="
+            echo "noVNC: ${NOVNC_URL}/vnc.html?autoconnect=true&resize=scale&scale=local&viewOnly=false"
+
             if ! kill -0 "$(cat /tmp/bot.pid 2>/dev/null || echo 0)" 2>/dev/null; then
-              echo "Bot process died — dumping logs and exiting"
-              tail -n 200 /tmp/bot-logs/*.log || true
-              exit 1
+              echo "Bot not running at start of round — starting it"
+              start_bot
+              sleep 5
+              if ! kill -0 "$(cat /tmp/bot.pid)" 2>/dev/null; then
+                echo "Bot failed to start"; tail -n 200 /tmp/bot-logs/*.log || true; exit 1
+              fi
             fi
-            echo "---- $(date -u +%H:%M:%S) bot tail ----"
-            tail -n 8 /tmp/bot-logs/*.log 2>/dev/null || true
-            # warn near end
-            REMAIN=$(( END - $(date +%s) ))
-            if [ "$REMAIN" -lt 300 ] && [ "$REMAIN" -gt 295 ]; then
-              echo "Less than 5 minutes remaining"
+
+            END=$(( $(date +%s) + RUN_MINUTES * 60 ))
+            if [ "$END" -gt "$HARD_END" ]; then END="$HARD_END"; fi
+
+            while [ "$(date +%s)" -lt "$END" ]; do
+              if ! kill -0 "$(cat /tmp/bot.pid 2>/dev/null || echo 0)" 2>/dev/null; then
+                echo "Bot process died mid-round — restarting and continuing"
+                tail -n 100 /tmp/bot-logs/*.log || true
+                start_bot
+                sleep 5
+                if ! kill -0 "$(cat /tmp/bot.pid)" 2>/dev/null; then
+                  echo "Bot failed to restart"; tail -n 200 /tmp/bot-logs/*.log || true; exit 1
+                fi
+              fi
+              echo "---- $(date -u +%H:%M:%S) r${ROUND} bot tail ----"
+              tail -n 8 /tmp/bot-logs/*.log 2>/dev/null || true
+              REMAIN=$(( END - $(date +%s) ))
+              if [ "$REMAIN" -lt 300 ] && [ "$REMAIN" -gt 295 ]; then
+                echo "Less than 5 minutes remaining in round ${ROUND}"
+              fi
+              sleep 30
+            done
+
+            if [ "$(date +%s)" -ge "$HARD_END" ]; then
+              echo "Job deadline reached — stopping this round loop"
+              break
             fi
-            sleep 30
+            echo "Round ${ROUND} finished — starting next round with same settings"
+            ROUND=$(( ROUND + 1 ))
           done
-          echo "Run window finished"
+          echo "Keep-alive finished after ${ROUND} round(s)"
+
+          # Auto-restart: dispatch a fresh run with identical inputs so the bot
+          # keeps going past this job's 6h GitHub-hosted limit.
+          echo "Dispatching next run with same settings..."
+          {
+            echo "## Round loop"
+            echo ""
+            echo "Job deadline reached after **${ROUND}** round(s)."
+            echo "Re-dispatching \`${BOT}\` with the same inputs."
+          } >> "$GITHUB_STEP_SUMMARY"
+          jq -n \
+            --arg ref "${GITHUB_REF_NAME:-main}" \
+            --arg bot "${BOT}" \
+            --arg email "${LOGIN_EMAIL:-}" \
+            --arg password "${LOGIN_PASSWORD:-}" \
+            --arg username "${LOGIN_USERNAME:-}" \
+            --arg vnc_password "${VNC_PASSWORD:-}" \
+            --arg run_minutes "${RUN_MINUTES}" \
+            '{ref:$ref, inputs:{
+              bot:$bot, email:$email, password:$password, username:$username,
+              vnc_password:$vnc_password, run_minutes:$run_minutes
+            }}' > /tmp/redisp.json
+          HTTP_CODE=$(curl -sS -o /tmp/redisp.out -w '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/run-bot.yml/dispatches" \
+            --data @/tmp/redisp.json || true)
+          if [ "$HTTP_CODE" = "204" ]; then
+            echo "Next run dispatched (HTTP 204)"
+            echo "Next run queued with same settings." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "WARNING: re-dispatch failed (HTTP ${HTTP_CODE})"
+            cat /tmp/redisp.out 2>/dev/null || true
+            echo "Re-dispatch failed — start a new run manually." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Collect diagnostics
         if: always()
