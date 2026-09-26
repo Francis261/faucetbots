@@ -2112,8 +2112,15 @@ async function runLoop(email) {
       if (result === 'aborted') {
         aborts++;
         log(`Puzzle abandoned safely (${aborts}) — nothing submitted, retrying without penalty`);
-        if (aborts >= 3) { aborts = 0; await sleep(60000); }
-        else await sleep(5000);
+        // Every aborted cycle re-claims, and the claim re-opens a widget.
+        // Bursts of widget OPENs are what trip the site's temp block (observed:
+        // 3 opens in ~7 min => 1h block, issued lazily on the next faucet page
+        // load; a single open+abandon never blocked).  Aborting itself is free
+        // — but space the re-opens hard.
+        const backoff = [30000, 120000, 600000];
+        const wait = backoff[Math.min(aborts - 1, backoff.length - 1)];
+        log(`Open-rate protection: waiting ${Math.round(wait / 1000)}s before re-claim`);
+        await sleep(wait);
         continue;
       }
 
