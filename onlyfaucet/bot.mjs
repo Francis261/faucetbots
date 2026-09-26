@@ -2,6 +2,7 @@ import { chromium } from 'playwright';
 import { existsSync, readFileSync, writeFileSync, unlinkSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
 const BASE_URL = 'https://onlyfaucet.com';
 const FAUCET_URL = `${BASE_URL}/faucet/currency/usdt`;
@@ -16,6 +17,37 @@ const VISION_MODEL = 'gemma4:31b';
 
 function log(msg) { console.log(`[${new Date().toLocaleTimeString('en-GB')}] ${msg}`); }
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// The widget force-fails itself 50s after it appears (answer='-1,-1', form
+// submit) — that counts as a failed CAPTCHA attempt, and 3 of those = ban.
+// Track when the current widget appeared so we can always bail out in time.
+const FORCE_FAIL_MS = 50000;
+const BAIL_MS = 43000;          // 7s of headroom for reload + Cloudflare
+const widgetClock = { shownAt: 0 };
+
+function markWidgetShown() { if (!widgetClock.shownAt) widgetClock.shownAt = Date.now(); }
+function widgetAgeMs() { return widgetClock.shownAt ? Date.now() - widgetClock.shownAt : 0; }
+function pastBailWindow() { return widgetClock.shownAt > 0 && widgetAgeMs() > BAIL_MS; }
+function clearWidgetClock() { widgetClock.shownAt = 0; }
+
+// Abandon the current puzzle WITHOUT submitting: reloading before the 50s
+// mark means no attempt is recorded (forceFail only fires while the page lives).
+// `ret` lets a caller bail safely AND still report a real failure (e.g. the
+// site already recorded a rejected attempt).
+async function bailOutOfPuzzle(page, reason, ret = 'aborted') {
+  log(`BAILOUT (${reason}) after ${widgetAgeMs()}ms — reloading before forceFail, no attempt recorded (returns ${ret})`);
+  clearWidgetClock();
+  try { await page.goto(FAUCET_URL, { waitUntil: 'domcontentloaded', timeout: 30000 }); } catch {}
+  await sleep(3000);
+  await ensureCleared(page);
+  return ret;
+}
+
+// One Verify per claimFaucet() call. A rejected Verify is a real attempt and
+// the site hands back a brand-new puzzle immediately, so an auto-retry inside
+// the same call is exactly how you get from 1 failure to a 3-strike ban.
+// runLoop gates the next call on the captcha-failure ladder instead.
+const submitGuard = { used: false };
 
 function parseJSON(text) {
   const match = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/);
@@ -139,6 +171,68 @@ function bumpClaim(email) {
   return 0;
 }
 
+// Piece geometry from the widget's own captcha_image response header.
+// {x,y} is the piece CENTER in canvas coordinates (450x280); sprite is the
+// exact silhouette used to draw it — a perfect template for finding the hole.
+const CANVAS_W = 450, CANVAS_H = 280;
+let captchaGeom = null;
+let pageGeomHooked = new WeakSet();
+
+function attachGeomCapture(page) {
+  if (!page || pageGeomHooked.has(page)) return;
+  pageGeomHooked.add(page);
+  page.on('response', (res) => {
+    if (!res.url().includes('/faucet/captcha_image')) return;
+    (async () => {
+      const hdr = res.headers()['x-captcha-piece'];
+      if (!hdr) { log('captcha_image response without X-Captcha-Piece'); return; }
+      let g = null;
+      try { g = JSON.parse(Buffer.from(hdr, 'base64').toString('utf8')); } catch (e) {
+        log(`geom parse failed: ${e.message}`);
+      }
+      if (!g || g.x == null || g.y == null) return;
+      let spritePath = null;
+      if (g.sprite) {
+        try {
+          spritePath = `${SHOT_DIR}/sprite-${Date.now()}.png`;
+          writeFileSync(spritePath, Buffer.from(String(g.sprite).replace(/^data:image\/png;base64,/, ''), 'base64'));
+        } catch (e) { spritePath = null; }
+      }
+      captchaGeom = { x: Number(g.x), y: Number(g.y), spritePath, at: Date.now() };
+      log(`Captcha geometry: piece center canvas(${captchaGeom.x},${captchaGeom.y}) sprite=${spritePath}`);
+    })().catch(e => log(`geom capture error: ${e.message}`));
+  });
+}
+function freshGeom(maxAgeMs = 120000) {
+  return captchaGeom && Date.now() - captchaGeom.at < maxAgeMs ? captchaGeom : null;
+}
+
+// Save the pristine background captured by the init-script hook above, but only
+// when it belongs to the puzzle we are looking at: it must be recent AND within
+// 20s of the X-Captcha-Piece header (same widget load), otherwise a stale bg
+// would be matched against the wrong sprite and we would read a phantom hole.
+let lastBgSaved = { at: null, path: null };
+async function freshBgPath(page, geomAt) {
+  try {
+    const b = await page.evaluate(() => window.__ofBg || null);
+    if (!b || !b.b64) return null;
+    if (Date.now() - b.at > 120000) return null;
+    if (geomAt && Math.abs(b.at - geomAt) > 20000) {
+      log(`bg/geom skew ${((b.at - geomAt) / 1000).toFixed(1)}s — ignoring bg`);
+      return null;
+    }
+    if (lastBgSaved.at === b.at && lastBgSaved.path) return lastBgSaved.path;
+    const p = `${SHOT_DIR}/bg-${b.at}.png`;
+    writeFileSync(p, Buffer.from(b.b64, 'base64'));
+    lastBgSaved = { at: b.at, path: p };
+    log(`bg captured ${b.size}B -> ${p} (geom skew ${geomAt ? ((b.at - geomAt) / 1000).toFixed(1) : '?'}s)`);
+    return p;
+  } catch (e) {
+    log(`bg capture error: ${e.message.slice(0, 100)}`);
+    return null;
+  }
+}
+
 async function launchBrowser() {
   mkdirSync(PROFILE, { recursive: true });
   mkdirSync(SHOT_DIR, { recursive: true });
@@ -148,7 +242,160 @@ async function launchBrowser() {
     viewport: { width: 1280, height: 800 },
   });
   await ctx.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => undefined }));
+  // Record the widget's pristine background PNG.  The widget builds it with
+  // URL.createObjectURL; capturing those exact bytes lets the chain detector
+  // run at native 450x280 canvas resolution instead of on a scaled screenshot
+  // (z ~5-8 vs ~3-5, and no host-border mapping error).  Only 450x280 PNGs
+  // are kept, so ad/asset blobs can never masquerade as the puzzle bg.
+  await ctx.addInitScript(() => {
+    try {
+      const orig = URL.createObjectURL.bind(URL);
+      URL.createObjectURL = (obj) => {
+        try {
+          if (obj instanceof Blob && obj.size > 24) {
+            obj.arrayBuffer().then((buf) => {
+              try {
+                const u = new Uint8Array(buf);
+                if (!(u[0] === 0x89 && u[1] === 0x50 && u[2] === 0x4e && u[3] === 0x47)) return;
+                const dv = new DataView(buf);
+                if (dv.getUint32(16) !== 450 || dv.getUint32(20) !== 280) return;
+                let bin = '';
+                const CH = 0x8000;
+                for (let i = 0; i < u.length; i += CH) bin += String.fromCharCode.apply(null, u.subarray(i, i + CH));
+                window.__ofBg = { b64: btoa(bin), size: u.length, at: Date.now() };
+              } catch (e) { /* ignore */ }
+            }).catch(() => {});
+          }
+        } catch (e) { /* ignore */ }
+        return orig(obj);
+      };
+    } catch (e) { /* ignore */ }
+  });
+  ctx.on('page', attachGeomCapture);
+  for (const p of ctx.pages()) attachGeomCapture(p);
   return ctx;
+}
+
+// Exact page<->canvas mapping from the widget host box (incl. border/padding).
+// Retries: the widget DOM is re-rendering while we measure it (and ad-driven
+// layout shifts can destroy the execution context mid-evaluate), and a null
+// here silently downgrades the whole pipeline to the scaled screenshot path —
+// the native-res background (the trusted input) is only used when we know
+// where the canvas sits inside the clip.
+async function getCanvasTransform(page) {
+  for (let i = 0; i < 4; i++) {
+    try {
+      const t = await page.evaluate(() => {
+        const h = document.querySelector('[id^="h_"]');
+        if (!h) return null;
+        const r = h.getBoundingClientRect();
+        if (r.width <= 40 || r.height <= 40) return null;
+        const cs = getComputedStyle(h);
+        const f = (v) => parseFloat(v) || 0;
+        const insetL = f(cs.borderLeftWidth) + f(cs.paddingLeft);
+        const insetT = f(cs.borderTopWidth) + f(cs.paddingTop);
+        const insetR = f(cs.borderRightWidth) + f(cs.paddingRight);
+        const insetB = f(cs.borderBottomWidth) + f(cs.paddingBottom);
+        return {
+          hostX: r.x, hostY: r.y, hostW: r.width, hostH: r.height,
+          insetL, insetT, insetR, insetB,
+          canvasX: r.x + insetL, canvasY: r.y + insetT,
+          canvasW: Math.max(1, r.width - insetL - insetR),
+          canvasH: Math.max(1, r.height - insetT - insetB),
+        };
+      });
+      if (t) return t;
+    } catch (e) { /* context destroyed mid-render; retry */ }
+    await new Promise(r => setTimeout(r, 250));
+  }
+  return null;
+}
+
+function canvasToPage(t, cx, cy) {
+  return { x: t.canvasX + (cx / CANVAS_W) * t.canvasW, y: t.canvasY + (cy / CANVAS_H) * t.canvasH };
+}
+
+// Human-ish drag of the puzzle piece: grab at fromC, ease to toC, small settle
+// wiggle, release.  Kept at module level (page passed in) so the offline local
+// rehearsal harness (local_drag.mjs) can exercise the EXACT production code.
+//
+// Robustness (verify6's drag silently missed the widget once on the live page):
+//   - re-measure the canvas transform right before pressing — ads shift the
+//     layout between the caller's measurement and the actual mouse press;
+//   - hit-test the press point: it must land on the widget host (h_*), not an
+//     ad/overlay that slid in on top;
+//   - after pointerdown, confirm the widget took the grab (pt_ is written only
+//     when the widget's own distance test passed) before moving, otherwise
+//     lift and retry with a fresh measurement.
+// Returns true when the press sequence completed.
+async function dragCanvas(page, tr, fromC, toC) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const t = (await getCanvasTransform(page).catch(() => null)) || tr;
+    if (!t) { log('drag: no canvas transform'); return false; }
+    const f = canvasToPage(t, fromC.x, fromC.y);
+    const to = canvasToPage(t, toC.x, toC.y);
+    const hit = await page.evaluate(([x, y]) => {
+      const el = document.elementFromPoint(x, y);
+      if (!el) return null;
+      const id = el.id || '';
+      // closed shadow root retargets hit tests to the host; accept a direct
+      // canvas hit too in case the browser pierces it
+      return (id.startsWith('h_') || el.tagName === 'CANVAS') ? 'ok' : (id || el.tagName);
+    }, [f.x, f.y]).catch(() => 'err');
+    if (hit !== 'ok') {
+      log(`drag: press point blocked by "${hit}" (attempt ${attempt + 1})`);
+      await sleep(400);
+      continue;
+    }
+    const grabWasEmpty = await page.evaluate(() => {
+      const el = document.querySelector('[id^="pt_"]');
+      return !(el && el.value);
+    }).catch(() => true);
+
+    await page.mouse.move(f.x, f.y, { steps: 6 });
+    await sleep(100 + Math.random() * 150);
+    await page.mouse.down();
+    await sleep(60 + Math.random() * 100);
+
+    // The widget writes pt_ only when pointerdown passed its grab test
+    // (within pieceR*1.15 of the piece) — an empty-to-empty pt_ means the
+    // press landed but was rejected (stale coords / widget state).
+    const grabOk = await page.evaluate((wasEmpty) => {
+      const el = document.querySelector('[id^="pt_"]');
+      return !wasEmpty || !!(el && el.value);
+    }, grabWasEmpty).catch(() => true);
+    if (!grabOk) {
+      await page.mouse.up();
+      log(`drag: widget rejected the grab (attempt ${attempt + 1}) — re-measure`);
+      await sleep(400);
+      continue;
+    }
+
+    const steps = 16 + Math.floor(Math.random() * 8);
+    for (let i = 1; i <= steps; i++) {
+      const u = i / steps;
+      const ease = u * u * (3 - 2 * u);
+      const mx = f.x + (to.x - f.x) * ease + (Math.random() - 0.5) * 2;
+      const my = f.y + (to.y - f.y) * ease + (Math.random() - 0.5) * 2;
+      await page.mouse.move(mx, my);
+      await sleep(25 + Math.random() * 35);
+    }
+    // Small settle wiggle on target to register drop
+    await page.mouse.move(to.x + (Math.random() - 0.5) * 4, to.y + (Math.random() - 0.5) * 4, { steps: 3 });
+    await sleep(80);
+    await page.mouse.up();
+    await sleep(700);
+    return true;
+  }
+  log('drag: press never engaged the widget');
+  return false;
+}
+
+// Detection runs in screenshot-clip space; convert to canvas (450x280) coords.
+function clipToCanvas(t, clip, x, y) {
+  const hostRelX = x + (clip.x - t.hostX) - t.insetL;
+  const hostRelY = y + (clip.y - t.hostY) - t.insetT;
+  return { x: hostRelX * CANVAS_W / t.canvasW, y: hostRelY * CANVAS_H / t.canvasH };
 }
 
 async function gotoRetry(page, url, tries = 5) {
@@ -790,6 +1037,8 @@ async function handlePuzzle(page, attempt = 0) {
     const st = await getPageState(page);
     if (st.captchaError) await dismissSweetAlert(page);
     if (st.puzzle || st.hRect) {
+      markWidgetShown();
+      if (pastBailWindow()) return await bailOutOfPuzzle(page, 'widget detection too slow');
       box = await getPuzzleBox(page);
       if (box) {
         // Ensure canvas content rendered: screenshot must not be tiny/blank
@@ -813,6 +1062,7 @@ async function handlePuzzle(page, attempt = 0) {
       if (cb.cbRect) {
         await page.mouse.click(cb.cbRect.x, cb.cbRect.y);
         cbClicks++;
+        clearWidgetClock(); // a fresh captcha_image => fresh 50s countdown
         log(`Clicked verification checkbox (${cbClicks}/2)`);
       }
     }
@@ -820,6 +1070,7 @@ async function handlePuzzle(page, attempt = 0) {
     if (i === 7 && !box && cbClicks >= 2) {
       log('Widget stuck after checkbox retries — reloading faucet page');
       await gotoRetry(page, FAUCET_URL, 3);
+      clearWidgetClock();
       await sleep(2000);
       const st2 = await getPageState(page);
       if (st2.success || st2.cooldown) return true;
@@ -876,55 +1127,102 @@ function findPiecePy(path) {
   }
 }
 
-function findHolePy(path) {
+// The screenshot covers the widget HOST box (border+padding included); the
+// canvas sits inset inside it.  Map that to image px so the chain detector
+// scales/offsets the sprite template correctly.  null => "assume the whole
+// image is the canvas" (what find_hole.py has always done).
+function canvasRectFor(clip, t) {
+  if (!clip || !t || !(t.canvasW > 50) || !(t.canvasH > 50)) return null;
+  const x = (clip.x - t.hostX) + t.insetL;
+  const y = (clip.y - t.hostY) + t.insetT;
+  if (x < -16 || y < -16) return null;
+  if (x + t.canvasW > clip.width + 16 || y + t.canvasH > clip.height + 16) return null;
+  return `${x.toFixed(1)},${y.toFixed(1)},${t.canvasW.toFixed(1)},${t.canvasH.toFixed(1)}`;
+}
+
+function chainDetect(img, rect, g) {
+  const argv = ['python3', join(import.meta.dirname, 'find_chain.py'), img,
+    '--sprite', g.spritePath, '--geom', `${g.x},${g.y}`];
+  if (rect) argv.push('--rect', rect);
+  try {
+    const out = execFileSync(argv[0], argv.slice(1), { encoding: 'utf8', timeout: 30000 }).trim();
+    if (!out) return null;
+    return JSON.parse(out);
+  } catch (e) {
+    log(`find_chain error on ${img.split('/').pop()}: ${e.message.slice(0, 120)}`);
+    return null;
+  }
+}
+
+// The captured background IS the canvas (450x280 == canvas coords), but every
+// downstream step — gate maths against vision, drag targets, clipToCanvas —
+// works in screenshot/clip px, so translate the reading through the canvas
+// rect we computed inside the clip.
+function canvasDetToClip(d, rect) {
+  if (!d || !rect) return d;
+  const [rx, ry, rw, rh] = rect.split(',').map(Number);
+  if (!(rw > 0) || !(rh > 0)) return d;
+  const sx = rw / CANVAS_W, sy = rh / CANVAS_H;
+  const mx = (v) => (v == null ? v : Math.round((rx + v * sx) * 10) / 10);
+  const my = (v) => (v == null ? v : Math.round((ry + v * sy) * 10) / 10);
+  const out = { ...d, src: 'bg' };
+  out.targetX = mx(d.targetX);
+  out.targetY = my(d.targetY);
+  for (const k of ['pieceX', 'grabX', 'grabAltX', 'chainX']) out[k] = mx(d[k]);
+  for (const k of ['pieceY', 'grabY', 'grabAltY', 'chainY']) out[k] = my(d[k]);
+  out.cands = (d.cands || []).map(c => ({ ...c, x: mx(c.x), y: my(c.y) }));
+  return out;
+}
+
+// Chain detector first (dash chain tracing the hole, matched with the piece's
+// own silhouette from X-Captcha-Piece).  Its z/score semantics are honest
+// matched-filter statistics, unlike find_hole.py's morphological guesses, so
+// a weak chain read means WEAK — we never silently upgrade it with the
+// flakier detector; the confidence gate decides whether it is usable.
+function findHolePy(path, rect, bgPath) {
+  const g = freshGeom();
+  if (g && g.spritePath) {
+    const ok = (d) => d && d.targetX != null && Array.isArray(d.cands) && d.cands.length > 0;
+    if (bgPath && rect) {
+      const bg = canvasDetToClip(chainDetect(bgPath, null, g), rect);
+      if (ok(bg)) {
+        bg.detector = 'chain';
+        bg.input = 'bg';
+        return bg;
+      }
+      log(`find_chain(bg) weak: z=${bg && bg.z} target=${bg && bg.targetX},${bg && bg.targetY}`);
+    }
+    const shot = chainDetect(path, rect, g);
+    if (ok(shot)) {
+      shot.detector = 'chain';
+      shot.input = 'shot';
+      return shot;
+    }
+    log(`find_chain(shot) weak: z=${shot && shot.z} target=${shot && shot.targetX},${shot && shot.targetY}`);
+    return null;
+  }
   try {
     const out = execFileSync('python3', [join(import.meta.dirname, 'find_hole.py'), path], { encoding: 'utf8', timeout: 30000 }).trim();
     if (!out || out === 'null') return null;
-    return JSON.parse(out);
+    const d = JSON.parse(out);
+    if (d) d.detector = 'morph';
+    return d;
   } catch (e) {
     log(`find_hole error: ${e.message.slice(0, 100)}`);
     return null;
   }
 }
 
-async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
-  const ts = () => new Date().toISOString().replace(/[:.]/g, '-');
-  const w = Math.round(clip.width);
-  const h = Math.round(clip.height);
-  log(`Puzzle box clip: ${JSON.stringify(clip)}`);
-
-  let holeDet = findHolePy(shotPath);
-  log(`find_hole: ${JSON.stringify(holeDet)}`);
-
-  // Re-screenshot + re-detect if piece/candidates missing (mid-render)
-  let pyHasTarget = holeDet && holeDet.targetX != null && holeDet.cands && holeDet.cands.length > 0;
-  if (!pyHasTarget && attempt < 3) {
-    log('Detection weak — waiting and re-screenshotting...');
-    await sleep(2000);
-    const shotPath2 = `${SHOT_DIR}/puzzle-redet-${ts()}.png`;
-    const shot2 = await page.screenshot({ path: shotPath2, clip }).catch(() => null);
-    if (shot2 && shot2.length >= 8000) {
-      holeDet = findHolePy(shotPath2);
-      log(`find_hole retry: ${JSON.stringify(holeDet)}`);
-      shot = shot2;
-      shotPath = shotPath2;
-      pyHasTarget = holeDet && holeDet.targetX != null && holeDet.cands && holeDet.cands.length > 0;
-    }
-  }
-
-  // Always run vision so we can cross-check morph ranking (first pick must be right).
-  let vision = null;
-  for (let v = 0; v < 3; v++) {
-    try {
-      vision = await analyzePuzzle(shot, w, h);
-      log(`Vision: ${JSON.stringify(vision)}`);
-      if (vision && vision.targetX != null && vision.targetY != null) break;
-    } catch (e) {
-      log(`Vision error: ${e.message.slice(0, 120)}`);
-      await sleep(2000);
-    }
-  }
-
+// Pure consensus + confidence gate.  Extracted so the read-only rehearsal tool
+// (verify_chain.mjs) can run the *identical* decision logic the bot uses —
+// what we rehearse is what we submit.
+//   chain-clear  dash-chain matched filter is sharp AND corroborated by an
+//                enclosed interior in the piece's shape; leads, vision only
+//                corroborates (it has been seen 13-145px off)
+//   agree        vision + CV point at the same spot (<=30px) -> submit
+//   py-clear     morph detector only (no sprite), CV winner clearly ahead
+//   bail         everything else; the vision self-check runs in the caller
+function consensusGate(holeDet, vision, w, h) {
   const pieceX = (holeDet && holeDet.pieceX != null) ? holeDet.pieceX
     : (vision && vision.pieceX != null) ? vision.pieceX : w / 2;
   const pieceY = (holeDet && holeDet.pieceY != null) ? holeDet.pieceY
@@ -933,17 +1231,171 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
   const grabY = (holeDet && holeDet.grabY != null) ? holeDet.grabY : pieceY;
   const grabAltX = (holeDet && holeDet.grabAltX != null) ? holeDet.grabAltX : grabX;
   const grabAltY = (holeDet && holeDet.grabAltY != null) ? holeDet.grabAltY : grabY;
-  const offX = grabX - pieceX;
-  const offY = grabY - pieceY;
 
   const pyBest = (holeDet && holeDet.cands && holeDet.cands.length) ? holeDet.cands[0] : null;
+  const pyCands = (holeDet && holeDet.cands) ? holeDet.cands : [];
   const visionOnBoard = vision && vision.targetX != null && vision.targetY != null
     && Math.hypot(vision.targetX - pieceX, vision.targetY - pieceY) >= 15;
   const agreeDist = (pyBest && visionOnBoard)
     ? Math.hypot(pyBest.x - vision.targetX, pyBest.y - vision.targetY)
     : null;
   const pyPd = holeDet && holeDet.ptdist != null ? holeDet.ptdist : 1;
-  log(`Consensus: pyBest=${pyBest ? `(${pyBest.x},${pyBest.y}) pd=${pyBest.ptdist}` : 'none'} vision=${visionOnBoard ? `(${Math.round(vision.targetX)},${Math.round(vision.targetY)})` : 'none'} dist=${agreeDist != null ? agreeDist.toFixed(0) : 'n/a'}`);
+  const pyMargin = (pyCands.length > 1 && pyCands[0].score > 0)
+    ? pyCands[1].score / pyCands[0].score : null;
+  log(`Consensus: pyBest=${pyBest ? `(${pyBest.x},${pyBest.y}) pd=${pyBest.ptdist}` : 'none'} vision=${visionOnBoard ? `(${Math.round(vision.targetX)},${Math.round(vision.targetY)})` : 'none'} dist=${agreeDist != null ? agreeDist.toFixed(0) : 'n/a'} margin=${pyMargin != null ? pyMargin.toFixed(2) : 'n/a'}`);
+
+  // ---- Confidence gate -------------------------------------------------
+  // A wrong Verify is a brand-new puzzle AND counts toward the 3-strike ban,
+  // so we only ever submit when the read is unambiguous. Anything else is
+  // abandoned with a reload (no attempt recorded) instead of guessed at.
+  const PY_PD_MAX = 0.10;     // observed ~0.078-0.090 on real puzzles
+  const PY_MARGIN_MIN = 1.2;  // best score vs runner-up
+  const chainMode = !!holeDet && holeDet.detector === 'chain';
+  // Chain thresholds calibrated on ALL 16 captured samples (5 truth bgs +
+  // 3 verify bgs + 8 widget shots, table in /tmp/onlyfaucet-shots/gate-table.json):
+  //   correct reads  z 5.16-7.98 / margin 1.33-2.15 / pd 0.059-0.079
+  //   wrong reads    z 3.40-4.74  / margin 1.00-1.65 / pd 0.083-0.099
+  // Every wrong read fails z >= 5 OR margin >= 1.25 (best wrong: T3-w z 3.7
+  // m 1.04; T4-w/T5-w z 4.7/4.74 but those turned out correct anyway), and
+  // every correct read clears both -> 10/10 pass, 0/6 wrong pass.
+  //   z >= 5 <=> ptdist <= 0.087, so the pd check is implied.
+  // The earlier third clause (support >= 2 && iou0 >= 0.35 for z < 7) was
+  // dropped: the enclosed-interior signal is flaky (V3-bg correct read had
+  // support 1 / iou0 0.226 -> needless bail) while cover/coverGap do not
+  // separate either (wrong widget reads score HIGHER cover 0.77-0.86 than
+  // correct bg reads 0.69-0.77).  support/iou0/cover stay in the log as
+  // diagnostics only.
+  const CHAIN_Z_MIN = 5.0;
+  const CHAIN_MARGIN_MIN = 1.25;
+  const chainClear = chainMode && holeDet.z != null && holeDet.z >= CHAIN_Z_MIN
+    && pyMargin != null && pyMargin >= CHAIN_MARGIN_MIN;
+  const pyClear = !chainMode && !!pyBest && pyPd <= PY_PD_MAX
+    && pyMargin != null && pyMargin >= PY_MARGIN_MIN;
+
+  let gate = 'bail';
+  let primary = null;
+  if (chainClear) {
+    // The chain read leads: on the captured samples it sits on the dash chain
+    // (silhouette-outline coverage 0.91-0.98, i.e. 6-8 sigma over random
+    // placements) while vision was observed 13px and even 145px off — so a
+    // clear chain is used as-is and never averaged with vision.
+    gate = 'chain-clear';
+    primary = { x: pyBest.x, y: pyBest.y, src: `chain${holeDet.z}m${pyMargin.toFixed(1)}` };
+  } else if (pyBest && visionOnBoard && agreeDist <= 30
+    && (!chainMode || (holeDet.z != null && holeDet.z >= 4 && pyMargin != null && pyMargin >= 1.15))) {
+    gate = 'agree';
+    primary = { x: (vision.targetX + pyBest.x) / 2, y: (vision.targetY + pyBest.y) / 2, src: `agree${agreeDist.toFixed(0)}` };
+  } else if (pyBest && visionOnBoard) {
+    gate = 'conflict'; // both saw a target, they disagree: one is a decoy
+  } else if (pyClear) {
+    gate = 'py-clear';
+    primary = { x: pyBest.x, y: pyBest.y, src: `py${pyBest.score}` };
+  }
+
+  const hd = holeDet || {};
+  log(`Gate: ${gate} det=${hd.detector || 'none'}/${hd.input || '-'} z=${hd.z ?? 'n/a'} pd=${pyPd.toFixed(3)} margin=${pyMargin != null ? pyMargin.toFixed(2) : 'n/a'} sup=${hd.support ?? 'n/a'} iou=${hd.iou0 ?? 'n/a'} agree=${agreeDist != null ? agreeDist.toFixed(0) : 'n/a'}`);
+  return {
+    pieceX, pieceY, grabX, grabY, grabAltX, grabAltY,
+    pyBest, pyCands, visionOnBoard, agreeDist, pyPd, pyMargin,
+    chainClear, pyClear, gate, primary,
+  };
+}
+
+async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
+  const ts = () => new Date().toISOString().replace(/[:.]/g, '-');
+  const w = Math.round(clip.width);
+  const h = Math.round(clip.height);
+  log(`Puzzle box clip: ${JSON.stringify(clip)} widgetAge=${widgetAgeMs()}ms`);
+  if (pastBailWindow()) return bailOutOfPuzzle(page, 'widget-clock-early');
+  // Re-entering after a Verify already fired this claim cycle: never submit a
+  // second attempt, just clear the widget and report the cycle as failed.
+  if (submitGuard.used) {
+    await bailOutOfPuzzle(page, 'reentered-after-verify');
+    return false;
+  }
+  // Time left before the widget force-fails; used to skip expensive retries
+  // that would push us past the bail window.
+  const msLeft = () => Math.max(0, BAIL_MS - widgetAgeMs());
+
+  // Kick off CV detection and vision concurrently (vision is the slow one) so
+  // the widget's 50s clock isn't burned waiting serially for both.
+  let tr = null;
+  try { tr = await getCanvasTransform(page); } catch (e) { tr = null; }
+  const rect = canvasRectFor(clip, tr);
+  const geomNow = freshGeom();
+  const bgPath = await freshBgPath(page, geomNow ? geomNow.at : null);
+  log(`canvas rect in shot: ${rect || 'unknown (full-image mapping)'} bg=${bgPath || 'none'}`);
+  let pyPending = Promise.resolve().then(() => findHolePy(shotPath, rect, bgPath));
+
+  // Always run vision so we can cross-check morph ranking (first pick must be
+  // right). One retry max: the widget clock matters more than a third try.
+  let vision = null;
+  for (let v = 0; v < 2 && !pastBailWindow() && (v === 0 || msLeft() > 12000); v++) {
+    try {
+      vision = await analyzePuzzle(shot, w, h);
+      log(`Vision: ${JSON.stringify(vision)}`);
+      if (vision && vision.targetX != null && vision.targetY != null) break;
+    } catch (e) {
+      log(`Vision error: ${e.message.slice(0, 120)}`);
+      await sleep(1200);
+    }
+  }
+
+  let holeDet = await pyPending;
+  log(`find_hole: ${JSON.stringify(holeDet)}`);
+
+  // Re-screenshot + re-detect if piece/candidates missing (mid-render)
+  let pyHasTarget = holeDet && holeDet.targetX != null && holeDet.cands && holeDet.cands.length > 0;
+  const visionHasTarget = vision && vision.targetX != null && vision.targetY != null;
+  if ((!pyHasTarget || !visionHasTarget) && attempt < 3 && msLeft() > 18000) {
+    log('Detection weak — waiting and re-screenshotting...');
+    await sleep(1500);
+    const shotPath2 = `${SHOT_DIR}/puzzle-redet-${ts()}.png`;
+    const shot2 = await page.screenshot({ path: shotPath2, clip }).catch(() => null);
+    if (shot2 && shot2.length >= 8000) {
+      const py2 = Promise.resolve().then(() => findHolePy(shotPath2, rect, bgPath));
+      // vision is throttled; only re-run it if the first pass found nothing
+      if (!visionHasTarget && msLeft() > 14000) {
+        try {
+          const v2 = await analyzePuzzle(shot2, w, h);
+          if (v2 && v2.targetX != null && v2.targetY != null) { vision = v2; log(`Vision retry: ${JSON.stringify(v2)}`); }
+        } catch (e) {
+          log(`Vision retry error: ${e.message.slice(0, 120)}`);
+        }
+      }
+      holeDet = await py2;
+      log(`find_hole retry: ${JSON.stringify(holeDet)}`);
+      shot = shot2;
+      shotPath = shotPath2;
+      pyHasTarget = holeDet && holeDet.targetX != null && holeDet.cands && holeDet.cands.length > 0;
+    }
+  }
+
+  const cons = consensusGate(holeDet, vision, w, h);
+  const { pieceX, pieceY, grabX, grabY, grabAltX, grabAltY, pyBest, pyCands,
+    visionOnBoard } = cons;
+  let { gate, primary } = cons;
+
+  // Last resort: CV unreadable but vision saw a target — make vision repeat
+  // itself before trusting it (a single hallucinated pass must not submit).
+  if (gate === 'bail' && visionOnBoard && msLeft() > 15000) {
+    gate = 'vision-only';
+    try {
+      const v2 = await analyzePuzzle(shot, w, h);
+      if (v2 && v2.targetX != null && v2.targetY != null) {
+        const d2 = Math.hypot(v2.targetX - vision.targetX, v2.targetY - vision.targetY);
+        log(`Vision self-check: repeat=${d2.toFixed(0)}px`);
+        if (d2 <= 25) {
+          gate = 'vision-agree';
+          primary = { x: (vision.targetX + v2.targetX) / 2, y: (vision.targetY + v2.targetY) / 2, src: `vagree${d2.toFixed(0)}` };
+        }
+      }
+    } catch (e) {
+      log(`Vision self-check error: ${e.message.slice(0, 100)}`);
+    }
+    log(`Gate: ${gate} (after vision self-check)`);
+  }
+  if (pastBailWindow()) return bailOutOfPuzzle(page, 'past-bail-window');
 
   const candidates = [];
   const pushCand = (x, y, src) => {
@@ -953,25 +1405,15 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
     return true;
   };
 
-  // Agreement (within 30px) => high-confidence single pick first.
-  // Disagree => vision first (exact-shape perception); morph pd alone cannot separate decoys.
-  if (visionOnBoard && pyBest) {
-    if (agreeDist <= 30) {
-      pushCand((vision.targetX + pyBest.x) / 2, (vision.targetY + pyBest.y) / 2, `agree${agreeDist.toFixed(0)}`);
-    } else {
-      pushCand(vision.targetX, vision.targetY, 'vision');
-    }
-  } else if (visionOnBoard) {
-    pushCand(vision.targetX, vision.targetY, 'vision');
+  if (!primary) {
+    // Ambiguous read: reload rather than spend an attempt on a coin flip.
+    return bailOutOfPuzzle(page, `low-confidence:${gate}`);
   }
-  if (holeDet && holeDet.cands && holeDet.cands.length) {
-    for (const c of holeDet.cands) pushCand(c.x, c.y, `py${c.score}`);
+  if (!pushCand(primary.x, primary.y, primary.src)) {
+    return bailOutOfPuzzle(page, `degenerate-target:${gate}`);
   }
-  if (candidates.length === 0) {
-    log('No target candidates');
-    if (attempt < 3) return handlePuzzle(page, attempt + 1);
-    return false;
-  }
+  // CV alternatives only matter as same-puzzle drop-miss fallbacks.
+  for (const c of pyCands) pushCand(c.x, c.y, `py${c.score}`);
 
   // First pick must be correct (verify-reject = brand-new puzzle).
   // 4 attempts only matter for drop-miss recovery on the SAME puzzle.
@@ -987,15 +1429,13 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
   const maxEmptyFails = 6;
   let curPieceX = pieceX, curPieceY = pieceY;
   let curGrab = grabOpts[0];
-  let curOffX = curGrab.x - curPieceX;
-  let curOffY = curGrab.y - curPieceY;
 
   async function redetectPiece(afterFail) {
     log(`Re-detecting piece after ${afterFail}...`);
     const rp = `${SHOT_DIR}/puzzle-redet-${ts()}.png`;
     const rs = await page.screenshot({ path: rp, clip }).catch(() => null);
     if (!rs || rs.length < 8000) return false;
-    const d = findHolePy(rp);
+    const d = findHolePy(rp, rect, bgPath);
     if (!d || d.pieceX == null) return false;
     curPieceX = d.pieceX;
     curPieceY = d.pieceY;
@@ -1013,114 +1453,129 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
     return true;
   }
 
+  // --- drag helpers -----------------------------------------------------
+  // The whole drag path works in canvas coords (450x280, the same space
+  // captcha_answer reports); a freshly-read host box only places the mouse.
+  const fallbackTransform = () => ({
+    hostX: clip.x, hostY: clip.y, hostW: clip.width, hostH: clip.height,
+    insetL: 0, insetT: 0, insetR: 0, insetB: 0,
+    canvasX: clip.x, canvasY: clip.y, canvasW: clip.width, canvasH: clip.height,
+  });
+
+  async function readAnswer() {
+    const st = await getPageState(page);
+    const m = (st.captchaAnswer || '').match(/^(-?\d+)\s*,\s*(-?\d+)$/);
+    if (!m) return null;
+    return { x: +m[1], y: +m[2], raw: st.captchaAnswer };
+  }
+
+  async function resetPuzzle() {
+    await page.evaluate(() => {
+      const b = document.querySelector('[id^="rb_btn_"]');
+      if (b) b.click();
+    }).catch(() => {});
+    await sleep(700);
+  }
+
+  // Empty/desynced answer: reset the widget and pick a different grab point,
+  // re-detecting the piece once the built-in options are exhausted.
+  async function recoverGrab(reason) {
+    await resetPuzzle();
+    if (grabIdx < grabOpts.length - 1) grabIdx++;
+    else if (await redetectPiece(reason)) grabIdx = 0;
+    curGrab = grabOpts[Math.min(grabIdx, grabOpts.length - 1)];
+    log(`Recover[${reason}]: grab -> ${curGrab.tag}(${curGrab.x},${curGrab.y})`);
+  }
+
+  const DROP_OK = 6;     // canvas px — clean drop, Verify away
+  const DROP_FAR = 15;   // sloppier than this: nudge done twice already, re-detect
+
   for (let ci = 0; ci < maxTry; ci++) {
     const cand = candidates[ci];
+    if (pastBailWindow()) return bailOutOfPuzzle(page, 'past-bail-window-drag');
 
-    // Grab ON the blue stroke; compensate so piece CENTER lands on hole center
-    const gx = clip.x + curGrab.x;
-    const gy = clip.y + curGrab.y;
-    const tx0 = clip.x + cand.x + curOffX;
-    const ty0 = clip.y + cand.y + curOffY;
-
-    // Re-measure box right before drag (ads shift layout)
-    const fresh = await getPuzzleBox(page);
-    let dx = 0, dy = 0;
-    if (fresh && fresh.w && Math.abs(fresh.w - clip.width) < 30) {
-      dx = fresh.x - clip.x;
-      dy = fresh.y - clip.y;
+    // Fresh host box: only used to place the mouse (ads shift layout).
+    const tr = (await getCanvasTransform(page)) || fallbackTransform();
+    // Detection coords are relative to the captured box, so convert with the
+    // capture-time origin — a page shift must not skew the target.
+    const relT = { ...tr, hostX: clip.x, hostY: clip.y };
+    const candC = clipToCanvas(relT, clip, cand.x, cand.y);
+    const pieceC = clipToCanvas(relT, clip, curPieceX, curPieceY);
+    let grabC = clipToCanvas(relT, clip, curGrab.x, curGrab.y);
+    // The server's own piece center (X-Captcha-Piece) is exact: prefer it when
+    // it agrees with the CV detection.
+    const geomNow = freshGeom();
+    if (geomNow && Math.hypot(geomNow.x - pieceC.x, geomNow.y - pieceC.y) <= 30) {
+      grabC = { x: geomNow.x, y: geomNow.y };
+      log(`Grab from captcha_image geometry (${geomNow.x},${geomNow.y})`);
     }
-    const fx = gx + dx, fy = gy + dy;
-    const tx = tx0 + dx, ty = ty0 + dy;
-    log(`Drag [${cand.src}/${curGrab.tag}] grab(${Math.round(fx)},${Math.round(fy)}) -> drop(${Math.round(tx)},${Math.round(ty)}) off(${Math.round(curOffX)},${Math.round(curOffY)})`);
+    log(`Drag [${cand.src}/${curGrab.tag}] grab(${grabC.x.toFixed(0)},${grabC.y.toFixed(0)}) -> target(${candC.x.toFixed(0)},${candC.y.toFixed(0)}) [canvas]`);
 
-    await page.mouse.move(fx, fy, { steps: 6 });
-    await sleep(100 + Math.random() * 150);
-    await page.mouse.down();
-    await sleep(60 + Math.random() * 100);
-
-    const steps = 16 + Math.floor(Math.random() * 8);
-    for (let i = 1; i <= steps; i++) {
-      const t = i / steps;
-      const ease = t * t * (3 - 2 * t);
-      const mx = fx + (tx - fx) * ease + (Math.random() - 0.5) * 2;
-      const my = fy + (ty - fy) * ease + (Math.random() - 0.5) * 2;
-      await page.mouse.move(mx, my);
-      await sleep(25 + Math.random() * 35);
-    }
-    // Small settle wiggle on target to register drop
-    await page.mouse.move(tx + (Math.random() - 0.5) * 4, ty + (Math.random() - 0.5) * 4, { steps: 3 });
-    await sleep(80);
-    await page.mouse.up();
-    await sleep(700);
+    await dragCanvas(page, tr, grabC, candC);
     log('Drag completed');
 
-    const afterDrag = await getPageState(page);
-    log(`captcha_answer after drag: "${afterDrag.captchaAnswer}"`);
-    if (!afterDrag.captchaAnswer) {
+    let ans = await readAnswer();
+    log(`captcha_answer after drag: "${ans ? ans.raw : ''}"`);
+    let ansLost = false;
+    if (ans) {
+      // Closed loop: captcha_answer IS the drop position in canvas coords, so
+      // nudge the piece from where it actually landed onto the target instead
+      // of guessing grab offsets.
+      for (let k = 0; k < 2; k++) {
+        const err = Math.hypot(ans.x - candC.x, ans.y - candC.y);
+        log(`Drop check: answer(${ans.x},${ans.y}) target(${candC.x.toFixed(0)},${candC.y.toFixed(0)}) err=${err.toFixed(1)}px`);
+        if (err <= DROP_OK) break;
+        log(`Correcting drop (${k + 1}/2)`);
+        await dragCanvas(page, tr, { x: ans.x, y: ans.y }, candC);
+        const a2 = await readAnswer();
+        if (!a2) { ansLost = true; break; }
+        ans = a2;
+      }
+    }
+
+    if (!ans || ansLost) {
       emptyFails++;
-      log(`Answer not recorded (${emptyFails}/${maxEmptyFails}) — reset, alternate grab`);
-      await page.evaluate(() => {
-        const b = document.querySelector('[id^="rb_btn_"]');
-        if (b) b.click();
-      }).catch(() => {});
-      await sleep(700);
+      log(`Answer not recorded (${emptyFails}/${maxEmptyFails})`);
       if (emptyFails >= maxEmptyFails) {
         log('Too many empty answers — abandon candidate');
         continue;
       }
-      // Same hole candidate, alternate grab (stale piece pos causes empty answers)
-      if (grabIdx < grabOpts.length - 1) {
-        grabIdx++;
-        curGrab = grabOpts[grabIdx];
-        curOffX = curGrab.x - curPieceX;
-        curOffY = curGrab.y - curPieceY;
-        if (!retried.has(ci)) {
-          retried.add(ci);
-          ci--;
-        }
-        continue;
-      }
-      const ok = await redetectPiece('empty answer');
-      grabIdx = 0;
-      if (ok && !retried.has(ci)) {
+      await recoverGrab('empty answer');
+      if (!retried.has(ci)) {
         retried.add(ci);
-        curGrab = grabOpts[0];
-        curOffX = curGrab.x - curPieceX;
-        curOffY = curGrab.y - curPieceY;
         ci--;
       }
       continue;
     }
 
-    // Verify drop landed near intended target (captcha_answer is canvas-internal ~450x280)
-    const ansM = afterDrag.captchaAnswer.match(/^(\d+)\s*,\s*(\d+)$/);
-    if (ansM) {
-      const axCss = (+ansM[1]) * (w / 450);
-      const ayCss = (+ansM[2]) * (h / 280);
-      const dropErr = Math.hypot(axCss - cand.x, ayCss - cand.y);
-      log(`Drop check: answer CSS(${axCss.toFixed(0)},${ayCss.toFixed(0)}) vs target(${cand.x},${cand.y}) err=${dropErr.toFixed(1)}px`);
-      if (dropErr > 55) {
-        log('Drop missed target — reset, re-detect, retry candidate');
-        await page.evaluate(() => {
-          const b = document.querySelector('[id^="rb_btn_"]');
-          if (b) b.click();
-        }).catch(() => {});
-        await sleep(700);
-        await redetectPiece('drop miss');
-        grabIdx = 0;
-        curGrab = grabOpts[0];
-        curOffX = curGrab.x - curPieceX;
-        curOffY = curGrab.y - curPieceY;
-        if (!retried.has(ci)) {
-          retried.add(ci);
-          ci--; // retry same index with fresh piece/grab
-        }
-        continue;
+    const dropErr = Math.hypot(ans.x - candC.x, ans.y - candC.y);
+    if (dropErr > DROP_FAR) {
+      log(`Drop still ${dropErr.toFixed(0)}px off — reset, re-detect, retry candidate`);
+      await resetPuzzle();
+      await redetectPiece('drop miss');
+      grabIdx = 0;
+      curGrab = grabOpts[0];
+      if (!retried.has(ci)) {
+        retried.add(ci);
+        ci--; // retry same index with fresh piece/grab
       }
+      continue;
+    }
+    log(`Drop accepted: err=${dropErr.toFixed(1)}px`);
+
+    // Never Verify inside the force-fail window: a reload here is free, a
+    // submit that gets rejected mid-countdown is not.
+    if (pastBailWindow()) return bailOutOfPuzzle(page, 'past-bail-window-verify');
+
+    // One Verify per claim cycle — a second one would be a second real attempt.
+    if (submitGuard.used) {
+      await bailOutOfPuzzle(page, 'second-verify-blocked');
+      return false; // count it: otherwise an unclear outcome loops forever
     }
 
     // Click Verify Selection — may navigate
     const st = await getPageState(page);
+    submitGuard.used = true;
     const navPromise = page.waitForNavigation({ timeout: 15000, waitUntil: 'domcontentloaded' }).catch(() => null);
     if (st.verifyRect) {
       await page.mouse.click(st.verifyRect.x, st.verifyRect.y);
@@ -1144,8 +1599,10 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
       if (after.cooldown) { log('Cooldown after puzzle — claim likely succeeded'); return true; }
       if (after.captchaError) {
         await dismissSweetAlert(page);
-        log('Captcha rejected');
-        break;
+        // A real attempt was rejected and the site is already serving a fresh
+        // puzzle with a live countdown. Back out (so it cannot force-fail and
+        // burn a second attempt) and report the failure to the ladder.
+        return bailOutOfPuzzle(page, 'captcha-rejected', false);
       }
       if (after.verification && !after.success && i >= 3) {
         await dismissSweetAlert(page);
@@ -1197,7 +1654,187 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
   return false;
 }
 
+// ---------------------------------------------------------------------------
+// Capture mode: gather real puzzle samples (screenshot + detector/vision
+// output) WITHOUT ever dragging or clicking Verify — zero ban risk.
+// ---------------------------------------------------------------------------
+
+function clampClip(box, vp) {
+  const clip = {
+    x: Math.max(0, box.x),
+    y: Math.max(0, box.y),
+    width: Math.min(box.w, vp.width),
+    height: Math.min(box.h, vp.height),
+  };
+  if (clip.y + clip.height > vp.height) clip.height = Math.max(50, vp.height - clip.y);
+  if (clip.x + clip.width > vp.width) clip.width = Math.max(50, vp.width - clip.x);
+  return clip;
+}
+
+async function capturePuzzles(page, count = 3, maxMinutes = 12) {
+  const ts = () => new Date().toISOString().replace(/[:.]/g, '-');
+  const out = [];
+  const rec = (o) => {
+    out.push({ t: new Date().toISOString(), ...o });
+    log(`CAPTURE ${JSON.stringify(o).slice(0, 500)}`);
+  };
+  const done = (status, extra = {}) => {
+    const p = `${SHOT_DIR}/capture-${ts()}.json`;
+    try { writeFileSync(p, JSON.stringify(out, null, 2)); } catch {}
+    const samples = out.filter(e => e.ev === 'sample');
+    log(`Capture trace written: ${p} (${out.length} events, ${samples.length} samples)`);
+    return { status, samples, ...extra };
+  };
+
+  const deadline = Date.now() + maxMinutes * 60000;
+  let st = await getPageState(page);
+  let cbOpens = 0;
+  let sampleIdx = 0;
+  let lastClaimAt = 0;
+  let waits = 0;
+  // The widget force-fails (-1,-1, form submit) 50s after it appears: every
+  // loop we must bail out (reload) before that or we burn a CAPTCHA attempt.
+  // (FORCE_FAIL_MS / BAIL_MS are module-level.)
+  let widgetShownAt = 0;
+
+  while (sampleIdx < count && Date.now() < deadline) {
+    st = await getPageState(page);
+    const widgetOpen = !!(st.puzzle || st.hRect);
+    if (widgetOpen && !widgetShownAt) widgetShownAt = Date.now();
+
+    if (widgetShownAt && Date.now() - widgetShownAt > BAIL_MS) {
+      rec({ ev: 'deadline-bail', openMs: Date.now() - widgetShownAt, forceFailAt: FORCE_FAIL_MS });
+      widgetShownAt = 0;
+      cbOpens = 0;
+      await page.goto(FAUCET_URL, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+      await sleep(3000);
+      await ensureCleared(page);
+      continue;
+    }
+
+    if (st.temporarilyBlocked) {
+      rec({ ev: 'blocked', blockSec: st.blockSec });
+      return done('blocked', { blockSec: st.blockSec ?? 3600 });
+    }
+    if (st.success && !st.verification && !st.puzzle) {
+      rec({ ev: 'success-banner', text: (st.text || '').replace(/\n/g, ' | ').slice(0, 120) });
+      await dismissSweetAlert(page);
+      await sleep(2000);
+      continue;
+    }
+    if (st.cooldown) {
+      if (waits++ % 3 === 0) rec({ ev: 'cooldown', waitSec: st.waitSec });
+      await sleep(Math.min(10000, Math.max(3000, (st.waitSec || 10) * 250)));
+      continue;
+    }
+
+    // Capture the widget if it is open
+    if (st.puzzle || st.hRect) {
+      const vp = page.viewportSize() || { width: 1280, height: 800 };
+      const box = await getPuzzleBox(page);
+      if (box) {
+        const clip = clampClip(box, vp);
+        const shot = await page.screenshot({ clip }).catch(() => null);
+        if (shot && shot.length > 8000) {
+          const shotPath = `${SHOT_DIR}/capture-${ts()}-${sampleIdx}.png`;
+          try { writeFileSync(shotPath, shot); } catch {}
+          const clipW = Math.round(clip.width);
+          const clipH = Math.round(clip.height);
+          const hole = findHolePy(shotPath, canvasRectFor(clip, await getCanvasTransform(page).catch(() => null)));
+          let vision = null;
+          for (let v = 0; v < 2 && !vision; v++) {
+            try { vision = await analyzePuzzle(shot, clipW, clipH); }
+            catch (e) { rec({ ev: 'vision-error', e: String(e.message).slice(0, 150) }); await sleep(1500); }
+          }
+          rec({
+            ev: 'sample', i: sampleIdx, path: shotPath, bytes: shot.length, clip,
+            answer: st.captchaAnswer || '', hole, vision,
+          });
+          sampleIdx++;
+          if (sampleIdx >= count) break;
+
+          // Reset the answer and close the widget so the next sample is fresh
+          const reset = await page.evaluate(() => {
+            const b = document.querySelector('[id^="rb_btn_"]');
+            if (b) { b.click(); return true; }
+            return false;
+          });
+          rec({ ev: 'reset', reset });
+          cbOpens = 0;
+          await sleep(2000);
+          continue;
+        }
+        rec({ ev: 'blank-shot', bytes: shot ? shot.length : 0 });
+      }
+    }
+
+    // Open the widget via the verification checkbox (opening is not an attempt)
+    if (st.verification && st.cbRect && cbOpens < 3) {
+      await page.evaluate(() => document.querySelector('[id^="cb_"]')?.scrollIntoView({ block: 'center' })).catch(() => {});
+      await sleep(400);
+      const cb = await getPageState(page);
+      if (cb.cbRect) {
+        await page.mouse.move(cb.cbRect.x, cb.cbRect.y, { steps: 4 });
+        await sleep(200);
+        await page.mouse.click(cb.cbRect.x, cb.cbRect.y);
+        cbOpens++;
+        widgetShownAt = Date.now(); // fresh widget → fresh 50s force-fail countdown
+        rec({ ev: 'cb-open', n: cbOpens });
+        await sleep(3500);
+        continue;
+      }
+    }
+
+    // No puzzle offered: submit the claim form (free claims cost no attempt)
+    if (st.claimBtn && !st.verification && !st.puzzle && Date.now() - lastClaimAt > 15000) {
+      const submitted = await page.evaluate(() => {
+        const form = document.querySelector('form[action*="faucet/verify"]');
+        if (form) { form.submit(); return 'form'; }
+        const btn = [...document.querySelectorAll('button')].find(b => /claim now/i.test(b.innerText || ''));
+        if (btn) { btn.click(); return 'click'; }
+        return false;
+      });
+      lastClaimAt = Date.now();
+      rec({ ev: 'claim-submitted', submitted });
+      await sleep(7000);
+      const after = await getPageState(page);
+      rec({
+        ev: 'after-claim', verification: after.verification, puzzle: after.puzzle,
+        captchaError: after.captchaError, cooldown: after.cooldown, waitSec: after.waitSec,
+        blocked: after.temporarilyBlocked, blockSec: after.blockSec,
+        text: (after.text || '').replace(/\n/g, ' | ').slice(0, 200),
+      });
+      if (after.temporarilyBlocked) return done('blocked', { blockSec: after.blockSec ?? 3600 });
+      if (after.captchaError) { await dismissSweetAlert(page); rec({ ev: 'captcha-error-dismissed' }); }
+      if (after.verification && after.cbRect === null && cbOpens >= 3) {
+        rec({ ev: 'stuck-no-widget', text: (after.text || '').replace(/\n/g, ' | ').slice(0, 200) });
+        break;
+      }
+      continue;
+    }
+
+    rec({ ev: 'idle', verification: st.verification, puzzle: st.puzzle, claimBtn: st.claimBtn, cb: !!st.cbRect });
+    await sleep(3000);
+  }
+
+  st = await getPageState(page);
+  rec({
+    ev: 'final', success: st.success, cooldown: st.cooldown, blocked: st.temporarilyBlocked,
+    blockSec: st.blockSec, answer: st.captchaAnswer || '',
+    text: (st.text || '').replace(/\n/g, ' | ').slice(0, 200),
+  });
+  // Never leave a widget open: it would force-fail on its own after 50s.
+  if (widgetShownAt && Date.now() - widgetShownAt < FORCE_FAIL_MS) {
+    rec({ ev: 'final-bail', openMs: Date.now() - widgetShownAt });
+    await page.goto(FAUCET_URL, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+    await sleep(2000);
+    await ensureCleared(page);
+  }
+  return done(st.temporarilyBlocked ? 'blocked' : 'captured');
+}
+
 async function claimFaucet(page, email) {
+  submitGuard.used = false; // fresh claim cycle => allowed one Verify
   log('Checking faucet status...');
   await ensureCleared(page);
   let st = await getPageState(page);
@@ -1225,8 +1862,11 @@ async function claimFaucet(page, email) {
   }
 
   if (st.puzzle || st.verification) {
+    // A widget already on screen means its countdown is already running.
+    if (st.puzzle) markWidgetShown();
     log('Verification/puzzle present — solving...');
     const ok = await handlePuzzle(page);
+    if (ok === 'aborted') return 'aborted'; // bailed pre-submit: no attempt burned
     st = await getPageState(page);
     if (st.temporarilyBlocked) {
       return { status: 'blocked', blockSec: st.blockSec ?? 3600 };
@@ -1287,6 +1927,7 @@ async function claimFaucet(page, email) {
     }
     if (st.puzzle || st.verification) {
       const ok = await handlePuzzle(page);
+      if (ok === 'aborted') return 'aborted'; // bailed pre-submit: no attempt burned
       st = await getPageState(page);
       if (st.temporarilyBlocked) {
         return { status: 'blocked', blockSec: st.blockSec ?? 3600 };
@@ -1411,6 +2052,9 @@ async function runLoop(email) {
   // 3 failed CAPTCHA attempts = site ban; never auto-attempt a 3rd.
   let captchaFails = 0;
   const MAX_CAPTCHA_FAILS = 2;
+  // Safe bail-outs (deadline / low-confidence read) are not failures: no
+  // attempt was submitted, so they never touch the failure ladder.
+  let aborts = 0;
 
   while (true) {
     try {
@@ -1465,9 +2109,18 @@ async function runLoop(email) {
         continue;
       }
 
+      if (result === 'aborted') {
+        aborts++;
+        log(`Puzzle abandoned safely (${aborts}) — nothing submitted, retrying without penalty`);
+        if (aborts >= 3) { aborts = 0; await sleep(60000); }
+        else await sleep(5000);
+        continue;
+      }
+
       if (result === 'success') {
         fails = 0;
         captchaFails = 0;
+        aborts = 0;
         // Wait cooldown then claim again on same page (no refresh unless needed)
         const ready = await waitForCooldown(page, 60);
         if (ready && ready.status === 'blocked') {
@@ -1519,23 +2172,72 @@ async function runLoop(email) {
   }
 }
 
-// CLI
-const args = process.argv.slice(2);
-if (args[0] === 'add' && args[1]) {
-  addAccount(args[1]);
-} else if (args[0] === 'list') {
-  loadAccounts().forEach(a => console.log(`${a.email} - Claims: ${a.claims} - Last: ${a.lastClaim || 'never'}`));
-} else if (args[0] === 'once') {
+// ---------------------------------------------------------------------------
+// CLI (guarded: this module is also imported by capture/diagnostic tools)
+// ---------------------------------------------------------------------------
+
+export {
+  log, sleep, launchBrowser, gotoRetry, waitForCloudflare, ensureCleared, hasTurnstile,
+  solveTurnstile, isLoggedIn, login, dismissSweetAlert, getPageState, getPuzzleBox,
+  handlePuzzle, capturePuzzles, findHolePy, findPiecePy, analyzePuzzle, claimFaucet,
+  waitForCooldown, waitOutBlock, waitManualSolve, loadAccounts,
+  getCanvasTransform, canvasRectFor, freshGeom, freshBgPath, clampClip, consensusGate,
+  canvasToPage, dragCanvas,
+  BASE_URL, FAUCET_URL, SHOT_DIR,
+};
+
+async function runCapture(count, maxMinutes = 12) {
   const accounts = loadAccounts();
-  if (!accounts.length) { console.error('No accounts'); process.exit(1); }
-  runOnce(accounts[0].email).then(r => { console.log(`done: ${r}`); process.exit(0); })
-    .catch(e => { console.error(e); process.exit(1); });
-} else {
-  acquireLock();
-  const accounts = loadAccounts();
-  if (!accounts.length) {
-    log('No accounts found. Run: node bot.mjs add <email>');
-    process.exit(0);
+  const email = process.env.LOGIN_EMAIL || process.env.EMAIL || accounts[0]?.email;
+  const ctx = await launchBrowser();
+  try {
+    const page = ctx.pages()[0] || (await ctx.newPage());
+    if (!(await gotoRetry(page, BASE_URL))) throw new Error('home nav failed');
+    await sleep(3000);
+    await ensureCleared(page);
+    if (!(await isLoggedIn(page))) {
+      const ok = await login(page, email);
+      if (!ok) throw new Error('login failed');
+    } else {
+      log('Already logged in');
+    }
+    if (!(await gotoRetry(page, FAUCET_URL))) throw new Error('faucet nav failed');
+    await sleep(4000);
+    await ensureCleared(page);
+    const res = await capturePuzzles(page, count, maxMinutes);
+    log(`Capture done: status=${res.status} samples=${(res.samples || []).length}`);
+    return res;
+  } finally {
+    await ctx.close().catch(() => {});
   }
-  runLoop(accounts[0].email).catch(e => { console.error('FATAL:', e.message); process.exit(1); });
+}
+
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) {
+  const args = process.argv.slice(2);
+  if (args[0] === 'add' && args[1]) {
+    addAccount(args[1]);
+  } else if (args[0] === 'list') {
+    loadAccounts().forEach(a => console.log(`${a.email} - Claims: ${a.claims} - Last: ${a.lastClaim || 'never'}`));
+  } else if (args[0] === 'capture') {
+    // Screenshot + detect only — never drags, never submits an attempt.
+    const n = Number(args[1] || 3);
+    acquireLock();
+    runCapture(n)
+      .then(r => { process.exit(r.status === 'blocked' ? 2 : 0); })
+      .catch(e => { console.error(e); process.exit(1); });
+  } else if (args[0] === 'once') {
+    const accounts = loadAccounts();
+    if (!accounts.length) { console.error('No accounts'); process.exit(1); }
+    runOnce(accounts[0].email).then(r => { console.log(`done: ${r}`); process.exit(0); })
+      .catch(e => { console.error(e); process.exit(1); });
+  } else {
+    acquireLock();
+    const accounts = loadAccounts();
+    if (!accounts.length) {
+      log('No accounts found. Run: node bot.mjs add <email>');
+      process.exit(0);
+    }
+    runLoop(accounts[0].email).catch(e => { console.error('FATAL:', e.message); process.exit(1); });
+  }
 }
