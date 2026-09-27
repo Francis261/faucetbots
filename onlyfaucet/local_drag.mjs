@@ -154,7 +154,9 @@ try {
   log(`press target: ${JSON.stringify(hit)}`);
 
   // --- the REAL production drag -------------------------------------------
+  const t0 = Date.now();
   await dragCanvas(page, tr, PIECE, TARGET);
+  const leg1ms = Date.now() - t0;
 
   const readFields = () => page.evaluate(() => {
     const val = (p) => { const el = document.querySelector(p); return el ? el.value : null; };
@@ -168,25 +170,29 @@ try {
   const driftOf = (v) => { const p = parse(v); return p ? Math.round(Math.hypot(p[0] - TARGET.x, p[1] - TARGET.y) * 10) / 10 : null; };
 
   const leg1 = await readFields();
-  log(`leg1 (piece->target): ca_="${leg1.ca}" pt_="${leg1.pt}" drift=${driftOf(leg1.ca)}`);
+  log(`leg1 (piece->target): ca_="${leg1.ca}" pt_="${leg1.pt}" drift=${driftOf(leg1.ca)} dragMs=${leg1ms}`);
 
   // Leg 2+3: the recovery path the bot uses when a drop lands far off —
   // grab the piece WHERE IT LANDED and nudge it onto the target.  This also
   // exercises the second-drag grab check (pt_ already set from leg 1).
-  const legs = [{ leg: 1, answer: leg1.ca, driftPx: driftOf(leg1.ca), grabPassed: !!leg1.pt }];
+  const legs = [{ leg: 1, answer: leg1.ca, driftPx: driftOf(leg1.ca), grabPassed: !!leg1.pt, dragMs: leg1ms }];
   const cur = parse(leg1.ca);
   if (cur) {
     const BAD = { x: TARGET.x + 25, y: TARGET.y - 10 };
+    const t2 = Date.now();
     await dragCanvas(page, tr, { x: cur[0], y: cur[1] }, BAD);
+    const leg2ms = Date.now() - t2;
     const leg2 = await readFields();
-    log(`leg2 (deliberate bad drop): ca_="${leg2.ca}" drift=${driftOf(leg2.ca)}`);
-    legs.push({ leg: 2, answer: leg2.ca, driftPx: driftOf(leg2.ca) });
+    log(`leg2 (deliberate bad drop): ca_="${leg2.ca}" drift=${driftOf(leg2.ca)} dragMs=${leg2ms}`);
+    legs.push({ leg: 2, answer: leg2.ca, driftPx: driftOf(leg2.ca), dragMs: leg2ms });
     const cur2 = parse(leg2.ca);
     if (cur2) {
+      const t3 = Date.now();
       await dragCanvas(page, tr, { x: cur2[0], y: cur2[1] }, TARGET);
+      const leg3ms = Date.now() - t3;
       const leg3 = await readFields();
-      log(`leg3 (nudge back to target): ca_="${leg3.ca}" drift=${driftOf(leg3.ca)}`);
-      legs.push({ leg: 3, answer: leg3.ca, driftPx: driftOf(leg3.ca) });
+      log(`leg3 (nudge back to target): ca_="${leg3.ca}" drift=${driftOf(leg3.ca)} dragMs=${leg3ms}`);
+      legs.push({ leg: 3, answer: leg3.ca, driftPx: driftOf(leg3.ca), dragMs: leg3ms });
     }
   }
   const last = legs[legs.length - 1];

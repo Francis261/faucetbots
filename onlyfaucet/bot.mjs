@@ -352,10 +352,10 @@ async function dragCanvas(page, tr, fromC, toC) {
       return !(el && el.value);
     }).catch(() => true);
 
-    await page.mouse.move(f.x, f.y, { steps: 6 });
-    await sleep(100 + Math.random() * 150);
+    await page.mouse.move(f.x, f.y, { steps: 4 });
+    await sleep(50 + Math.random() * 70);
     await page.mouse.down();
-    await sleep(60 + Math.random() * 100);
+    await sleep(35 + Math.random() * 45);
 
     // The widget writes pt_ only when pointerdown passed its grab test
     // (within pieceR*1.15 of the piece) — an empty-to-empty pt_ means the
@@ -371,20 +371,27 @@ async function dragCanvas(page, tr, fromC, toC) {
       continue;
     }
 
-    const steps = 16 + Math.floor(Math.random() * 8);
+    // 10-14 eased steps with light jitter: ~1.2-2.0s end to end.  The widget
+    // force-fails at 50s and detection already costs 8-20s, so a slow drag
+    // (the old 16-23 steps x 25-60ms slept 4-6s) was blowing the clock on
+    // retry/nudge rounds.  A human flick takes well under a second anyway —
+    // speed here is both safety and better camouflage.
+    const steps = 10 + Math.floor(Math.random() * 5);
     for (let i = 1; i <= steps; i++) {
       const u = i / steps;
       const ease = u * u * (3 - 2 * u);
       const mx = f.x + (to.x - f.x) * ease + (Math.random() - 0.5) * 2;
       const my = f.y + (to.y - f.y) * ease + (Math.random() - 0.5) * 2;
       await page.mouse.move(mx, my);
-      await sleep(25 + Math.random() * 35);
+      await sleep(14 + Math.random() * 18);
     }
     // Small settle wiggle on target to register drop
-    await page.mouse.move(to.x + (Math.random() - 0.5) * 4, to.y + (Math.random() - 0.5) * 4, { steps: 3 });
-    await sleep(80);
+    await page.mouse.move(to.x + (Math.random() - 0.5) * 4, to.y + (Math.random() - 0.5) * 4, { steps: 2 });
+    await sleep(50);
     await page.mouse.up();
-    await sleep(700);
+    // ca_/captcha_answer is written synchronously in the widget's endDrag —
+    // no need to sit on a long tail before reading it back.
+    await sleep(250);
     return true;
   }
   log('drag: press never engaged the widget');
@@ -1317,37 +1324,50 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
   // that would push us past the bail window.
   const msLeft = () => Math.max(0, BAIL_MS - widgetAgeMs());
 
-  // Kick off CV detection and vision concurrently (vision is the slow one) so
-  // the widget's 50s clock isn't burned waiting serially for both.
   let tr = null;
   try { tr = await getCanvasTransform(page); } catch (e) { tr = null; }
   const rect = canvasRectFor(clip, tr);
   const geomNow = freshGeom();
   const bgPath = await freshBgPath(page, geomNow ? geomNow.at : null);
   log(`canvas rect in shot: ${rect || 'unknown (full-image mapping)'} bg=${bgPath || 'none'}`);
-  let pyPending = Promise.resolve().then(() => findHolePy(shotPath, rect, bgPath));
 
-  // Always run vision so we can cross-check morph ranking (first pick must be
-  // right). One retry max: the widget clock matters more than a third try.
+  // CV first: it costs 2-4s vs vision's 13-16s, and it alone decides whether
+  // vision is needed at all (see below).
+  let holeDet = findHolePy(shotPath, rect, bgPath);
+  log(`find_hole: ${JSON.stringify(holeDet)}`);
+  let pyHasTarget = holeDet && holeDet.targetX != null && holeDet.cands && holeDet.cands.length > 0;
+
+  // Vision-on-demand: the chain-clear branch of consensusGate never consults
+  // vision — the gate was calibrated on all 16 samples that way — and every
+  // vision call burns 13-16s of the widget's 50s clock, which is what used to
+  // leave the drag racing forceFail.  So a decisive chain read skips vision
+  // entirely.  Everything else (incl. morph-mode py-clear, where the
+  // agree/conflict branches still interleave with vision) pays for the
+  // cross-check exactly as before.
   let vision = null;
-  for (let v = 0; v < 2 && !pastBailWindow() && (v === 0 || msLeft() > 12000); v++) {
-    try {
-      vision = await analyzePuzzle(shot, w, h);
-      log(`Vision: ${JSON.stringify(vision)}`);
-      if (vision && vision.targetX != null && vision.targetY != null) break;
-    } catch (e) {
-      log(`Vision error: ${e.message.slice(0, 120)}`);
-      await sleep(1200);
+  let cons = consensusGate(holeDet, null, w, h);
+  const needVision = !cons.chainClear;
+  if (needVision) {
+    // Vision cross-check before trusting a ranking. One retry max: the widget
+    // clock matters more than a third try.
+    for (let v = 0; v < 2 && !pastBailWindow() && (v === 0 || msLeft() > 12000); v++) {
+      try {
+        vision = await analyzePuzzle(shot, w, h);
+        log(`Vision: ${JSON.stringify(vision)}`);
+        if (vision && vision.targetX != null && vision.targetY != null) break;
+      } catch (e) {
+        log(`Vision error: ${e.message.slice(0, 120)}`);
+        await sleep(1200);
+      }
     }
+    cons = consensusGate(holeDet, vision, w, h);
+  } else {
+    log(`CV read decisive (${cons.gate}) — vision skipped, drag starts ~13s earlier`);
   }
 
-  let holeDet = await pyPending;
-  log(`find_hole: ${JSON.stringify(holeDet)}`);
-
   // Re-screenshot + re-detect if piece/candidates missing (mid-render)
-  let pyHasTarget = holeDet && holeDet.targetX != null && holeDet.cands && holeDet.cands.length > 0;
   const visionHasTarget = vision && vision.targetX != null && vision.targetY != null;
-  if ((!pyHasTarget || !visionHasTarget) && attempt < 3 && msLeft() > 18000) {
+  if ((!pyHasTarget || (needVision && !visionHasTarget)) && attempt < 3 && msLeft() > 18000) {
     log('Detection weak — waiting and re-screenshotting...');
     await sleep(1500);
     const shotPath2 = `${SHOT_DIR}/puzzle-redet-${ts()}.png`;
@@ -1355,7 +1375,9 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
     if (shot2 && shot2.length >= 8000) {
       const py2 = Promise.resolve().then(() => findHolePy(shotPath2, rect, bgPath));
       // vision is throttled; only re-run it if the first pass found nothing
-      if (!visionHasTarget && msLeft() > 14000) {
+      // AND the gate actually wanted a vision cross-check (a decisive CV read
+      // must never pay the 13-16s vision cost).
+      if (needVision && !visionHasTarget && msLeft() > 14000) {
         try {
           const v2 = await analyzePuzzle(shot2, w, h);
           if (v2 && v2.targetX != null && v2.targetY != null) { vision = v2; log(`Vision retry: ${JSON.stringify(v2)}`); }
@@ -1368,10 +1390,10 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
       shot = shot2;
       shotPath = shotPath2;
       pyHasTarget = holeDet && holeDet.targetX != null && holeDet.cands && holeDet.cands.length > 0;
+      cons = consensusGate(holeDet, vision, w, h);
     }
   }
 
-  const cons = consensusGate(holeDet, vision, w, h);
   const { pieceX, pieceY, grabX, grabY, grabAltX, grabAltY, pyBest, pyCands,
     visionOnBoard } = cons;
   let { gate, primary } = cons;
@@ -1463,10 +1485,14 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
   });
 
   async function readAnswer() {
-    const st = await getPageState(page);
-    const m = (st.captchaAnswer || '').match(/^(-?\d+)\s*,\s*(-?\d+)$/);
+    // Direct field read: getPageState walks the whole DOM + innerText, which
+    // is wasted latency between drag and drop-check (called 1-3x per candidate).
+    const v = await page.evaluate(() =>
+      document.querySelector('[name="captcha_answer"]')?.value || ''
+    ).catch(() => '');
+    const m = v.match(/^(-?\d+)\s*,\s*(-?\d+)$/);
     if (!m) return null;
-    return { x: +m[1], y: +m[2], raw: st.captchaAnswer };
+    return { x: +m[1], y: +m[2], raw: v };
   }
 
   async function resetPuzzle() {
@@ -1522,6 +1548,9 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
       // nudge the piece from where it actually landed onto the target instead
       // of guessing grab offsets.
       for (let k = 0; k < 2; k++) {
+        // A nudge is a full extra drag — never start one inside the bail
+        // window, or forceFail (50s) lands mid-sequence.
+        if (pastBailWindow()) return bailOutOfPuzzle(page, 'past-bail-window-nudge');
         const err = Math.hypot(ans.x - candC.x, ans.y - candC.y);
         log(`Drop check: answer(${ans.x},${ans.y}) target(${candC.x.toFixed(0)},${candC.y.toFixed(0)}) err=${err.toFixed(1)}px`);
         if (err <= DROP_OK) break;
