@@ -38,10 +38,11 @@ const SAMPLES = [
 ];
 
 let rightPass = 0, rightN = 0, wrongN = 0, wrongPass = 0;
+let missing = 0;
 const bad = [];
 for (const [name, img, spr, geom, rect, correct] of SAMPLES) {
   const ip = join(SHOTS, img), sp = join(SHOTS, spr);
-  if (!existsSync(ip) || !existsSync(sp)) { console.log(`${name}: missing sample`); continue; }
+  if (!existsSync(ip) || !existsSync(sp)) { console.log(`${name}: missing sample`); missing++; continue; }
   const argv = ['python3', join(import.meta.dirname, 'find_chain.py'), ip,
     '--sprite', sp, '--geom', geom];
   if (rect) argv.push('--rect', rect);
@@ -65,4 +66,8 @@ for (const [name, img, spr, geom, rect, correct] of SAMPLES) {
 }
 console.log(`\ncorrect pass ${rightPass}/${rightN}   wrong rejected ${wrongN - wrongPass}/${wrongN}`
   + (bad.length ? `   FAILURES: ${bad.join(', ')}` : '   ALL GOOD'));
-process.exit(bad.length ? 1 : 0);
+if (missing) {
+  // A wiped SHOT_DIR must never read as a green run (0/0 "ALL GOOD").
+  console.log(`SAMPLES MISSING: ${missing}/${SAMPLES.length} — regression INCOMPLETE (recapture fixtures, e.g. dump_widget.mjs)`);
+}
+process.exit(bad.length || missing ? 1 : 0);

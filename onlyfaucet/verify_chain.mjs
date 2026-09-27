@@ -13,7 +13,7 @@ import {
   sleep, log, BASE_URL, FAUCET_URL, SHOT_DIR, loadAccounts,
   getPuzzleBox, clampClip, getCanvasTransform, canvasRectFor,
   freshGeom, freshBgPath, findHolePy, analyzePuzzle, consensusGate, canvasToPage,
-  dragCanvas,
+  dragCanvas, ensureClickable,
 } from './bot.mjs';
 
 const email = process.env.LOGIN_EMAIL || process.env.EMAIL || loadAccounts()[0]?.email;
@@ -46,7 +46,7 @@ try {
       await page.evaluate(() => document.querySelector('[id^="cb_"]')?.scrollIntoView({ block: 'center' })).catch(() => {});
       await sleep(400);
       const cb = await getPageState(page);
-      if (cb.cbRect) { log('clicking cb_'); await page.mouse.click(cb.cbRect.x, cb.cbRect.y); await sleep(3000); continue; }
+      if (cb.cbRect) { log('clicking cb_'); const esc = await ensureClickable(page, cb.cbRect.x, cb.cbRect.y); if (esc.startsWith('neutralized')) log(`cb click: ${esc}`); await page.mouse.click(cb.cbRect.x, cb.cbRect.y); await sleep(3000); continue; }
     }
     if (st.claimBtn && !st.verification && !st.puzzle && !st.cooldown && freeRuns >= 2) {
       const submitted = await page.evaluate(() => {

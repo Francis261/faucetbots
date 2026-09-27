@@ -315,6 +315,36 @@ function canvasToPage(t, cx, cy) {
   return { x: t.canvasX + (cx / CANVAS_W) * t.canvasW, y: t.canvasY + (cy / CANVAS_H) * t.canvasH };
 }
 
+// Ad networks (ccnsad/bmcdn6-style wrappers: data-cc-id, data-format) deliver
+// an invisible full-viewport position:fixed div with z-index:2147483647 that
+// swallows every pointer event — elementFromPoint reports it as a bare "DIV"
+// sitting ABOVE the widget, so drags/Verify/cb clicks silently land on it.
+// When such a wrapper covers (x,y) and the real target is deeper in the stack,
+// disable its pointer-events (site UI is never touched: the wrapper must be
+// fixed + z >= 1e6 + cover >=85% of the viewport). Returns a status string.
+async function ensureClickable(page, x, y) {
+  return page.evaluate(([px, py]) => {
+    const stack = document.elementsFromPoint(px, py) || [];
+    if (!stack.length) return 'empty-stack';
+    const vw = innerWidth, vh = innerHeight;
+    const ov = stack.find(el => {
+      const cs = getComputedStyle(el);
+      if (cs.position !== 'fixed') return false;
+      const z = parseInt(cs.zIndex, 10);
+      if (!Number.isFinite(z) || z < 1000000) return false;
+      const r = el.getBoundingClientRect();
+      return r.width >= vw * 0.85 && r.height >= vh * 0.85
+        && r.left <= px && r.top <= py && r.right >= px && r.bottom >= py;
+    });
+    const top3 = stack.slice(0, 3).map(el =>
+      `${el.tagName}#${el.id || '-'}.${(typeof el.className === 'string' ? el.className : '').trim().split(/\s+/)[0] || '-'}`).join('|');
+    if (!ov) return `clear top=${top3}`;
+    ov.style.setProperty('pointer-events', 'none', 'important');
+    const still = document.elementFromPoint(px, py);
+    return `neutralized ${ov.tagName}.${ov.className}(cc=${ov.getAttribute('data-cc-id') || '-'}) -> top=${still ? `${still.tagName}#${still.id || '-'}` : 'null'}`;
+  }, [x, y]).catch(e => `err:${String(e.message).slice(0, 80)}`);
+}
+
 // Human-ish drag of the puzzle piece: grab at fromC, ease to toC, small settle
 // wiggle, release.  Kept at module level (page passed in) so the offline local
 // rehearsal harness (local_drag.mjs) can exercise the EXACT production code.
@@ -343,7 +373,10 @@ async function dragCanvas(page, tr, fromC, toC) {
       return (id.startsWith('h_') || el.tagName === 'CANVAS') ? 'ok' : (id || el.tagName);
     }, [f.x, f.y]).catch(() => 'err');
     if (hit !== 'ok') {
-      log(`drag: press point blocked by "${hit}" (attempt ${attempt + 1})`);
+      // Invisible ad wrapper (data-cc-id / z-max / full-viewport fixed) is the
+      // known cause — neutralize it and retry; otherwise log the stack.
+      const esc = await ensureClickable(page, f.x, f.y);
+      log(`drag: press point blocked by "${hit}" at (${f.x.toFixed(0)},${f.y.toFixed(0)}) (attempt ${attempt + 1}) ensure=${esc}`);
       await sleep(400);
       continue;
     }
@@ -1067,6 +1100,8 @@ async function handlePuzzle(page, attempt = 0) {
       await sleep(400);
       const cb = await getPageState(page);
       if (cb.cbRect) {
+        const esc = await ensureClickable(page, cb.cbRect.x, cb.cbRect.y);
+        if (esc.startsWith('neutralized')) log(`cb click: ${esc}`);
         await page.mouse.click(cb.cbRect.x, cb.cbRect.y);
         cbClicks++;
         clearWidgetClock(); // a fresh captcha_image => fresh 50s countdown
@@ -1469,8 +1504,9 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
     grabOpts.push(g0, g1, { x: curPieceX, y: curPieceY, tag: 'rectr' });
     grabIdx = 0;
     curGrab = grabOpts[0];
-    curOffX = curGrab.x - curPieceX;
-    curOffY = curGrab.y - curPieceY;
+    // (curOffX/curOffY from an older grab-offset scheme were removed: they
+    // were assigned but never declared nor read — in ESM strict mode the
+    // assignment threw ReferenceError the first time re-detect ran.)
     log(`Piece re-detected at (${curPieceX},${curPieceY}) grab=${curGrab.tag}(${curGrab.x},${curGrab.y})`);
     return true;
   }
@@ -1607,6 +1643,8 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
     submitGuard.used = true;
     const navPromise = page.waitForNavigation({ timeout: 15000, waitUntil: 'domcontentloaded' }).catch(() => null);
     if (st.verifyRect) {
+      const esc = await ensureClickable(page, st.verifyRect.x, st.verifyRect.y);
+      if (esc !== 'ok' && !esc.startsWith('clear')) log(`verify click: ${esc}`);
       await page.mouse.click(st.verifyRect.x, st.verifyRect.y);
       log('Clicked Verify Selection');
     } else {
@@ -1803,6 +1841,8 @@ async function capturePuzzles(page, count = 3, maxMinutes = 12) {
       await sleep(400);
       const cb = await getPageState(page);
       if (cb.cbRect) {
+        const esc = await ensureClickable(page, cb.cbRect.x, cb.cbRect.y);
+        if (esc.startsWith('neutralized')) log(`cb open: ${esc}`);
         await page.mouse.move(cb.cbRect.x, cb.cbRect.y, { steps: 4 });
         await sleep(200);
         await page.mouse.click(cb.cbRect.x, cb.cbRect.y);
@@ -2218,6 +2258,7 @@ export {
   handlePuzzle, capturePuzzles, findHolePy, findPiecePy, analyzePuzzle, claimFaucet,
   waitForCooldown, waitOutBlock, waitManualSolve, loadAccounts,
   getCanvasTransform, canvasRectFor, freshGeom, freshBgPath, clampClip, consensusGate,
+  ensureClickable,
   canvasToPage, dragCanvas,
   BASE_URL, FAUCET_URL, SHOT_DIR,
 };

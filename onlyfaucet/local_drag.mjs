@@ -12,7 +12,7 @@
 //   __ptr = document-level pointerdown/up trace (did the press reach us?)
 //
 // Usage: DISPLAY=:0 node local_drag.mjs
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { chromium } from 'playwright';
 import { log, sleep, getCanvasTransform, canvasToPage, dragCanvas, SHOT_DIR } from './bot.mjs';
 
@@ -21,6 +21,17 @@ const SPRITE = `${SHOT_DIR}/sprite-1790437422807.png`; // its piece sprite (116x
 const PAGE = `${SHOT_DIR}/page-dump.html`;          // full live page dump
 const PIECE = { x: 59, y: 80 };                     // X-Captcha-Piece from that challenge
 const TARGET = { x: 81, y: 211 };                   // verify6 chain verdict (chain-clear)
+
+// Fixtures live in SHOT_DIR (/tmp — wiped by reboots). Fail with an actionable
+// message instead of a bare ENOENT stack when they're gone.
+for (const f of [BG, SPRITE, PAGE]) {
+  if (!existsSync(f)) {
+    console.log(`local_drag: fixture missing: ${f}\n`
+      + 'Regenerate with dump_widget.mjs (opens a widget live — space it from other opens),\n'
+      + 'then update BG/SPRITE/PIECE/TARGET constants above to the new capture.');
+    process.exit(1);
+  }
+}
 
 const bgB64 = readFileSync(BG).toString('base64');
 const sprB64 = readFileSync(SPRITE).toString('base64');
