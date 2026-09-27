@@ -130,10 +130,15 @@ try {
   // Confirm button or by the 50s forceFail, neither of which we touch.  So we
   // can compare the widget's own answer with our intended target — the real
   // geometry check — and then reload.
-  if (process.env.DRAG === '1' && cons.primary) {
+  // DRAG=2 forces the rehearsal even on a non-clear gate (drops at the CV best
+  // candidate) — only to exercise the press/overlay/grab path; never submitted.
+  const dragFallback = (process.env.DRAG === '2' && holeDet && holeDet.cands && holeDet.cands[0])
+    ? { x: holeDet.cands[0].x, y: holeDet.cands[0].y } : null;
+  if ((process.env.DRAG === '1' && cons.primary) || dragFallback) {
     const tr2 = (await getCanvasTransform(page)) || tr;
-    const targetC = t, pieceC = pc;
-    if (tr2 && targetC.x != null && pieceC.x != null) {
+    const targetC = t.x != null ? t : dragFallback;
+    const pieceC = pc;
+    if (tr2 && targetC && targetC.x != null && pieceC.x != null) {
       const f = canvasToPage(tr2, pieceC.x, pieceC.y);
       const to = canvasToPage(tr2, targetC.x, targetC.y);
       log(`drag rehearsal: piece canvas(${pieceC.x},${pieceC.y}) -> target canvas(${targetC.x},${targetC.y})`);
