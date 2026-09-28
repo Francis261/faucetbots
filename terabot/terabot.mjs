@@ -3,15 +3,22 @@
 // Opens a 1024tera.com / TeraBox share link, extracts video metadata and
 // download links, and optionally downloads the full preview rendition.
 //
-//   node terabot.mjs [share-url] [--download] [--json] [--out DIR] [--cookies FILE]
+//   node terabot.mjs [share-url] [--download] [--download-original]
+//                    [--json] [--out DIR] [--cookies FILE]
 //
-//   --download     fetch every HLS segment, stitch the full transcode and
-//                  remux to .mp4 with ffmpeg (when available)
-//   --json         print the full metadata JSON to stdout
-//   --out DIR      output directory (default: <script dir>/output)
-//   --cookies FILE Playwright storageState with a logged-in TeraBox session;
-//                  enables the original-quality dlink (anonymous sessions get
-//                  errno 2 / "need verify_v2" from /share/download)
+//   --download          fetch every HLS segment, stitch the full 480p
+//                       transcode and remux to .mp4 with ffmpeg (fast,
+//                       works anonymously)
+//   --download-original download the original file via the dlink — needs
+//                       --cookies (logged-in session); the free-tier CDN
+//                       trickles ~10-50KB/s per connection, so the file is
+//                       pulled as parallel byte ranges (~10 min / 30MB)
+//   --json              print the full metadata JSON to stdout
+//   --out DIR           output directory (default: <script dir>/output)
+//   --cookies FILE      Playwright storageState with a logged-in TeraBox
+//                       session (create with `node login.mjs`); anonymous
+//                       sessions get errno 2 / "need verify_v2" from
+//                       /share/download
 //
 // How the preview download works (anonymous):
 //   /share/streaming serves HLS windows of ~3 segments (30s) at a RANDOM
@@ -19,15 +26,25 @@
 //   playlist, unions the byte ranges until [0, ts_size) is fully covered,
 //   then downloads each unique segment from the signed CDN URLs (cookie-free)
 //   and stitches them back into the complete transport stream.
+//
+// How the original download works (logged-in):
+//   The Download button calls POST /share/download with the frontend's
+//   scene=purchased_list shape (Wt wrapper) and receives a signed
+//   d.1024tera.com dlink that expires in ~10 min.  The CDN requires the
+//   session cookies and throttles free accounts (~10-50KB/s per
+//   connection), so the bot fetches parallel 2MB ranges through Playwright's
+//   cookie-sharing request context, refreshing the dlink near expiry, then
+//   reassembles and verifies size + md5 against the share metadata.
 
 import { chromium } from 'playwright';
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DEFAULT_URL =
+export const DEFAULT_URL =
   'https://www.1024tera.com/sharing/link?surl=reCn7CaS8tLmcdVMe3SYWg';
 const UA =
   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36';
@@ -37,12 +54,13 @@ const STREAM_TYPE = 'M3U8_FLV_264_480'; // non-Safari 480p rendition
 // ---------------------------------------------------------------- args
 function parseArgs(argv) {
   const opts = {
-    url: DEFAULT_URL, download: false, json: false,
+    url: DEFAULT_URL, download: false, downloadOriginal: false, json: false,
     out: path.join(__dirname, 'output'), cookies: null,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--download') opts.download = true;
+    else if (a === '--download-original') opts.downloadOriginal = true;
     else if (a === '--json') opts.json = true;
     else if (a === '--out') opts.out = path.resolve(argv[++i]);
     else if (a === '--cookies') opts.cookies = path.resolve(argv[++i]);
@@ -64,8 +82,18 @@ async function waitFor(fn, ms, step = 250) {
 }
 
 // ---------------------------------------------------------------- main
-async function main() {
-  const opts = parseArgs(process.argv.slice(2));
+// Run one full extraction (optionally with downloads).
+//
+//   opts  — parseArgs() shape: {url, download, downloadOriginal, json, out,
+//           cookies, quiet}
+//   hooks — optional { log(msg), onProgress(info) }; defaults write to
+//           stderr / no-op.  The REST API passes its own to feed job state.
+//
+// Returns { code, metadata, written, errors }; throws on fatal errors.
+export async function runTerabot(opts, hooks = {}) {
+  const log = hooks.log || console.error;
+  const onProgress = hooks.onProgress || (() => {});
+  const errors = [];
   mkdirSync(opts.out, { recursive: true });
 
   const browser = await chromium.launch({ headless: true });
@@ -96,6 +124,22 @@ async function main() {
       }
     });
     const parseJson = (res) => res.text().then((t) => JSON.parse(t));
+    const saw = { transfer: false, checkLogin: false };
+    page.on('request', (req) => {
+      const u = req.url();
+      if (u.includes('querysurltransfer')) saw.transfer = true;
+      if (u.includes('/api/check/login')) saw.checkLogin = true;
+      if (u.includes('/share/download?')) {
+        log(`[net] POST /share/download :: ${u.slice(0, 600)}`);
+        const pd = req.postData();
+        if (pd) log(`[net]   body: ${pd.slice(0, 300)}`);
+      }
+    });
+    page.on('response', (res) => {
+      if (res.url().includes('/share/download?')) {
+        res.text().then((t) => log(`[net]   resp: ${t.slice(0, 500)}`)).catch(() => {});
+      }
+    });
     page.on('response', (res) => {
       const u = res.url();
       try {
@@ -117,7 +161,7 @@ async function main() {
     });
 
     // ---- load ---------------------------------------------------------
-    console.error(`[terabot] opening ${opts.url}`);
+    log(`[terabot] opening ${opts.url}`);
     await page.goto(opts.url, { waitUntil: 'domcontentloaded', timeout: 45000 });
     const got = await waitFor(() => cap.shareRaw && cap.files.length > 0, 20000);
     if (!got) {
@@ -162,33 +206,41 @@ async function main() {
       jsToken: window.jsToken || '',
     }));
 
-    // exact frontend shape for /share/download (getDlink -> os wrapper)
+    // exact frontend shape for /share/download — the Wt wrapper used by the
+    // Download button (scene=purchased_list); the os wrapper (scene="") gets
+    // errno 14 even when logged in
     const tryOriginalDlink = (fid) =>
       page.evaluate(async ({ si, fid, env, dpLogid }) => {
         const q = new URLSearchParams({
           clientfrom: 'h5', psign: '0', pcftoken: env.pcftoken,
           clienttype: '0', channel: 'dubox',
+          scene: 'purchased_list',
+          shareid: String(si.shareid), sign: si.sign,
+          timestamp: String(si.timestamp), bdstoken: env.bdstoken,
           app_id: '250528', web: '1', jsToken: env.jsToken,
           'dp-logid': dpLogid || '',
-          scene: '', bdstoken: env.bdstoken,
-          shareid: String(si.shareid), type: 'dlink',
-          sign: si.sign, timestamp: String(si.timestamp), need_speed: '0',
         });
         try {
           const r = await fetch(`/share/download?${q}`, {
             method: 'POST',
             headers: { 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8' },
             body: new URLSearchParams({
-              product: 'share', uk: String(si.uk),
+              product: 'share', nozip: '0',
               fid_list: JSON.stringify([String(fid)]),
+              uk: String(si.uk),
               primaryid: String(si.shareid),
             }).toString(),
           });
           const j = await r.json();
-          const dlink = Array.isArray(j.dlink) ? j.dlink[0]
-            : (j.list && j.list[0] && j.list[0].dlink) || j.dlink || null;
-          return { errno: j.errno ?? 0, available: !!dlink, dlink, raw: dlink ? undefined : j };
-        } catch (e) { return { errno: -1, available: false, error: String(e).slice(0, 150) }; }
+          const dlink = (typeof j.dlink === 'string' && j.dlink) ||
+            (Array.isArray(j.dlink) && j.dlink[0]) || null;
+          return {
+            errno: j.errno ?? 0, available: !!dlink, dlink,
+            file_info: j.file_info, raw: dlink ? undefined : j,
+          };
+        } catch (e) {
+          return { errno: -1, available: false, error: String(e).slice(0, 150) };
+        }
       }, {
         si: { shareid: cap.shareRaw.shareid, uk: cap.shareRaw.uk, sign: cap.shareRaw.sign, timestamp: cap.shareRaw.timestamp },
         fid, env: pageEnv, dpLogid: cap.dpLogid,
@@ -285,13 +337,20 @@ async function main() {
 
     // ---- original dlink attempt ---------------------------------------
     const downloads = { original: null, previewHLS: [] };
-    const firstFid = (videoFiles[0] || cap.files[0]).fs_id;
-    console.error('[terabot] attempting original dlink…');
+    const firstFile = videoFiles[0] ? videoFiles[0].file : cap.files[0];
+    const firstFid = firstFile.fs_id;
+    // logged-in pages register the share to the account via
+    // /share/querysurltransfer right after load — wait for that handshake
+    // (plus /api/check/login) before asking for the dlink
+    await waitFor(() => saw.checkLogin && saw.transfer, 12000);
+    if (saw.transfer) await sleep(1500);
+    log('[terabot] attempting original dlink…');
     downloads.original = await tryOriginalDlink(firstFid);
     if (downloads.original.available) {
-      console.error(`[terabot] original dlink OK: ${downloads.original.dlink}`);
+      log(`[terabot] original dlink OK: ` +
+        `${downloads.original.dlink.slice(0, 160)}…`);
     } else {
-      console.error(
+      log(
         `[terabot] original dlink unavailable (errno ${downloads.original.errno})` +
         `${downloads.original.errno === 2 || downloads.original.errno === 400310
           ? ' — anonymous sessions need a logged-in cookie jar (--cookies)' : ''}`);
@@ -299,16 +358,20 @@ async function main() {
 
     // ---- HLS union-harvest per video ----------------------------------
     for (const { file, meta } of videoFiles) {
-      console.error(`[terabot] harvesting HLS windows for "${file.server_filename}"…`);
+      log(`[terabot] harvesting HLS windows for "${file.server_filename}"…`);
       const h = await harvestHls(file.fs_id);
       if (h.error && !h.segmentCount) {
-        console.error(`[terabot] harvest failed: ${h.error}`);
+        log(`[terabot] harvest failed: ${h.error}`);
       } else {
-        console.error(
+        log(
           `[terabot] harvest: ${h.segmentCount} segments, ` +
           `${h.covered}/${h.tsSize} bytes in ${h.iterations} fetches` +
           `${h.complete ? ' (complete)' : ' (INCOMPLETE)'}`);
       }
+      onProgress({
+        phase: 'harvest', fid: file.fs_id, segments: h.segmentCount,
+        bytes: h.covered, total: h.tsSize, complete: h.complete,
+      });
       downloads.previewHLS.push({
         fid: file.fs_id, filename: file.server_filename,
         duration: meta.duration, width: meta.width, height: meta.height,
@@ -320,16 +383,146 @@ async function main() {
 
     // ---- optional download --------------------------------------------
     const written = [];
-    if (opts.download) {
-      for (const h of downloads.previewHLS) {
+    let gotOriginal = false;
+
+    // (A) original file via dlink — --download-original.
+    // The free-tier CDN trickles ~10-50KB/s per connection, so pull the file
+    // as parallel byte ranges (each through Playwright's cookie-sharing
+    // request context) and refresh the ~10-min dlink when close to expiry.
+    const orig = downloads.original;
+    if (opts.downloadOriginal) {
+      if (!opts.cookies || !orig || !orig.available || !orig.dlink) {
+        log('[terabot] --download-original needs a logged-in session ' +
+          '("--cookies cookies.json") and a working dlink');
+        errors.push('download-original: no logged-in dlink available');
+      } else {
+        const expected = (orig.file_info && Number(orig.file_info.size)) ||
+          Number(firstFile.size);
+        const fname = firstFile.server_filename || `terabot-${firstFid}`;
+        const CHUNK = 2 * 1024 * 1024;
+        const POOL = 4;
+        const RETRIES = 3;
+        const nChunks = Math.ceil(expected / CHUNK);
+        log(`[terabot] downloading ORIGINAL as ${nChunks} ranged chunks ` +
+          `(free-tier CDN trickles ~50KB/s, expect a few minutes)…`);
+        let dlink = orig.dlink;
+        let fetched = 0;
+        const t0 = Date.now();
+        const parts = new Array(nChunks);
+        const freshDlink = async () => {
+          const exp = Number(new URL(dlink).searchParams.get('expires')) * 1000;
+          if (exp - Date.now() > 120000) return dlink;
+          const r = await tryOriginalDlink(firstFid);
+          if (r.available && r.dlink) {
+            dlink = r.dlink;
+            orig.dlink = dlink;
+            log('[terabot]   refreshed dlink (near 10-min expiry)');
+          } else {
+            log('[terabot]   dlink refresh failed — hoping the current one holds');
+          }
+          return dlink;
+        };
+        const fetchChunk = async (i) => {
+          const a = i * CHUNK;
+          const b = Math.min(a + CHUNK, expected) - 1;
+          let err;
+          for (let attempt = 1; attempt <= RETRIES; attempt++) {
+            try {
+              const url = await freshDlink();
+              const res = await ctx.request.get(url, {
+                headers: {
+                  'user-agent': UA,
+                  referer: 'https://www.1024tera.com/',
+                  range: `bytes=${a}-${b}`,
+                },
+                timeout: 240000,
+              });
+              if (res.status() !== 206 && res.status() !== 200)
+                throw new Error(`HTTP ${res.status()} (expected 206)`);
+              const buf = await res.body();
+              if (buf.length !== b - a + 1)
+                throw new Error(`got ${buf.length} bytes, expected ${b - a + 1}`);
+              parts[i] = buf;
+              fetched += buf.length;
+              const secs = (Date.now() - t0) / 1000;
+              log(`[terabot]   chunk ${i + 1}/${nChunks} ok ` +
+                `(${(fetched / 1048576).toFixed(1)}/${(expected / 1048576).toFixed(1)} MB, ` +
+                `${Math.round(fetched / secs / 1024)}KB/s)`);
+              onProgress({
+                phase: 'original', chunk: i + 1, chunks: nChunks,
+                bytes: fetched, total: expected,
+                kbps: Math.round(fetched / secs / 1024),
+              });
+              return;
+            } catch (e) {
+              err = e;
+              if (attempt < RETRIES) await sleep(1500 * attempt);
+            }
+          }
+          throw new Error(`chunk ${i}: ${err && err.message}`);
+        };
+        try {
+          let next = 0;
+          await Promise.all(Array.from(
+            { length: Math.min(POOL, nChunks) },
+            async () => {
+              while (true) {
+                const i = next++;
+                if (i >= nChunks) return;
+                await fetchChunk(i);
+              }
+            },
+          ));
+          const data = Buffer.concat(parts);
+          if (data.length !== expected)
+            throw new Error(`size mismatch: got ${data.length}, expected ${expected}`);
+          const md5 = createHash('md5').update(data).digest('hex');
+          // For videos the served bytes hash to mediameta's real_md5 (the
+          // CDN's content-md5 header matches it), while file.md5 is the
+          // file-record hash — accept either.
+          const wantMd5s = [
+            ...new Set([
+              firstFile.md5,
+              videoFiles[0] && videoFiles[0].meta.real_md5,
+            ].filter(Boolean)),
+          ];
+          if (wantMd5s.length && !wantMd5s.includes(md5))
+            throw new Error(
+              `md5 mismatch: got ${md5}, expected one of ${wantMd5s.join(', ')}`);
+          const origPath = path.join(
+            opts.out, fname.replace(/[^\w.\- ()]+/g, '_'));
+          writeFileSync(origPath, data);
+          written.push(origPath);
+          gotOriginal = true;
+          orig.downloaded = {
+            path: origPath, bytes: data.length, md5,
+            md5ok: true, md5Matched: wantMd5s.find((m) => m === md5),
+          };
+          log(`[terabot] wrote ${origPath} (${data.length} bytes, md5 ok)`);
+          const probe = spawnSync('ffprobe',
+            ['-v', 'error', '-show_entries',
+              'format=duration:stream=codec_name,width,height',
+              '-of', 'json', origPath],
+            { timeout: 30000, encoding: 'utf8' });
+          try { orig.downloaded.ffprobe = JSON.parse(probe.stdout); } catch { /* ignore */ }
+        } catch (e) {
+          log(`[terabot] original download failed: ${e.message}`);
+        }
+      }
+    }
+
+    // (B) preview rendition — --download (fast, works anonymously)
+    if (opts.download) for (const h of downloads.previewHLS) {
         if (!h.complete) {
-          console.error(`[terabot] skip download of ${h.filename}: coverage incomplete`);
+          log(`[terabot] skip download of ${h.filename}: coverage incomplete`);
           continue;
         }
-        console.error(`[terabot] downloading ${h.segmentCount} segments for "${h.filename}"…`);
+        log(`[terabot] downloading ${h.segmentCount} segments for "${h.filename}"…`);
         const buf = Buffer.alloc(h.tsSize);
         const flags = new Uint8Array(h.tsSize);
         let ok = true;
+        let segDone = 0;
+        let bytesDone = 0;
         for (const seg of h.segments) {
           const [a, b] = seg.range.split('-').map(Number);
           try {
@@ -340,8 +533,14 @@ async function main() {
               throw new Error(`got ${data.length} bytes, expected ${b - a + 1}`);
             data.copy(buf, a);
             flags.fill(1, a, b + 1);
+            segDone++;
+            bytesDone += data.length;
+            onProgress({
+              phase: 'preview', segment: segDone, segments: h.segmentCount,
+              bytes: bytesDone, total: h.tsSize,
+            });
           } catch (e) {
-            console.error(`[terabot] segment ${seg.range} failed: ${e.message}`);
+            log(`[terabot] segment ${seg.range} failed: ${e.message}`);
             ok = false;
             break;
           }
@@ -350,7 +549,7 @@ async function main() {
         let missing = 0;
         for (let i = 0; i < h.tsSize; i++) if (!flags[i]) missing++;
         if (missing) {
-          console.error(`[terabot] stitch incomplete: ${missing} bytes missing`);
+          log(`[terabot] stitch incomplete: ${missing} bytes missing`);
           continue;
         }
         // TS alignment check: 0x47 sync byte every 188 bytes
@@ -359,14 +558,14 @@ async function main() {
           if (buf[i] !== 0x47) bad++;
         }
         if (bad > checked * 0.01) {
-          console.error(`[terabot] TS sync check failed (${bad}/${checked} bad)`);
+          log(`[terabot] TS sync check failed (${bad}/${checked} bad)`);
           continue;
         }
         const base = h.filename.replace(/\.[^.]+$/, '').replace(/[^\w.\- ()]+/g, '_');
         const tsPath = path.join(opts.out, `${base}.preview480.ts`);
         writeFileSync(tsPath, buf);
         written.push(tsPath);
-        console.error(`[terabot] wrote ${tsPath} (${buf.length} bytes, TS sync ok)`);
+        log(`[terabot] wrote ${tsPath} (${buf.length} bytes, TS sync ok)`);
 
         const mp4Path = path.join(opts.out, `${base}.preview480.mp4`);
         const ff = spawnSync('ffmpeg',
@@ -374,9 +573,9 @@ async function main() {
            '-bsf:a', 'aac_adtstoasc', mp4Path],
           { timeout: 180000, encoding: 'utf8' });
         if (ff.error && ff.error.code === 'ENOENT') {
-          console.error('[terabot] ffmpeg not found — kept .ts only');
+          log('[terabot] ffmpeg not found — kept .ts only');
         } else if (ff.status !== 0) {
-          console.error(`[terabot] ffmpeg remux failed: ${(ff.stderr || '').slice(-300)}`);
+          log(`[terabot] ffmpeg remux failed: ${(ff.stderr || '').slice(-300)}`);
         } else {
           written.push(mp4Path);
           const probe = spawnSync('ffprobe',
@@ -387,10 +586,9 @@ async function main() {
           let info = null;
           try { info = JSON.parse(probe.stdout); } catch { /* ignore */ }
           h.remuxed = { path: mp4Path, ffprobe: info };
-          console.error(`[terabot] remuxed -> ${mp4Path}`);
+          log(`[terabot] remuxed -> ${mp4Path}`);
         }
       }
-    }
 
     // ---- assemble metadata --------------------------------------------
     const sr = cap.shareRaw;
@@ -447,8 +645,12 @@ async function main() {
       downloads,
       files_written: written,
       limitations: [
-        'original-quality dlink requires a logged-in TeraBox session ' +
-          '(anonymous /share/download returns errno 2 / verify_v2)',
+        'original-quality dlink requires a logged-in session ' +
+          '("--cookies"; anonymous /share/download returns errno 2 / ' +
+          'verify_v2)',
+        'free accounts: the original-file CDN throttles to ~10-50KB/s per ' +
+          'connection — use --download-original (parallel ranges) and ' +
+          'expect a few minutes for tens of MB',
         'the HLS playlist serves random 30s windows — use the segment list ' +
           '(or this bot\'s --download) for the full preview rendition',
       ],
@@ -456,10 +658,11 @@ async function main() {
 
     const jsonPath = path.join(opts.out, 'metadata.json');
     writeFileSync(jsonPath, JSON.stringify(metadata, null, 2));
-    console.error(`[terabot] metadata -> ${jsonPath}`);
+    log(`[terabot] metadata -> ${jsonPath}`);
 
-    if (opts.json) console.log(JSON.stringify(metadata, null, 2));
-    else {
+    if (opts.json) {
+      if (!opts.quiet) console.log(JSON.stringify(metadata, null, 2));
+    } else if (!opts.quiet) {
       const v = metadata.videos[0];
       const fmtDur = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
       console.log(`share      : ${metadata.share.sharer || '?'} — ` +
@@ -470,7 +673,12 @@ async function main() {
       if (v) console.log(`video      : ${v.duration}s, ${v.width}x${v.height}, ` +
         `md5 ${v.real_md5}`);
       const o = downloads.original;
-      console.log(`original   : ${o.available ? o.dlink : `not available (errno ${o.errno})`}`);
+      console.log(`original   : ${o.available
+        ? o.dlink.slice(0, 160) + (o.dlink.length > 160 ? '…' : '')
+        : `not available (errno ${o.errno})`}`);
+      if (gotOriginal && o.downloaded)
+        console.log(`original   : downloaded -> ${o.downloaded.path} ` +
+          `(${(o.downloaded.bytes / 1048576).toFixed(1)} MB, md5 ok)`);
       for (const h of downloads.previewHLS) {
         console.log(`preview    : ${h.segmentCount} segments covering ` +
           `${(h.covered / 1048576).toFixed(1)}/${(h.tsSize / 1048576).toFixed(1)} MB ` +
@@ -479,16 +687,23 @@ async function main() {
       for (const w of written) console.log(`written    : ${w}`);
     }
     const noVideo = downloads.previewHLS.length === 0;
-    const downloadFailed = opts.download && written.length === 0;
-    return (noVideo || downloadFailed) ? 1 : 0;
+    const downloadFailed =
+      (opts.download && !written.some((p) => p.includes('.preview480'))) ||
+      (opts.downloadOriginal && !gotOriginal);
+    const code = (noVideo || downloadFailed) ? 1 : 0;
+    return { code, metadata, written, errors };
   } finally {
     await browser.close().catch(() => {});
   }
 }
 
-main()
-  .then((code) => process.exit(code ?? 0))
-  .catch((e) => {
-    console.error(`[terabot] fatal: ${e.message}`);
-    process.exit(1);
-  });
+const isMain = !!process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  runTerabot(parseArgs(process.argv.slice(2)))
+    .then((r) => process.exit(r.code ?? 0))
+    .catch((e) => {
+      console.error(`[terabot] fatal: ${e.message}`);
+      process.exit(1);
+    });
+}

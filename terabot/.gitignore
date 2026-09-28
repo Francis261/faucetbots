@@ -1,2 +1,4 @@
 output/
 probe-out/
+cookies*.json
+.account.json
