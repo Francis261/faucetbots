@@ -83,14 +83,34 @@ localhost only unless `--host` says otherwise):
 | Method | Path | Body / Query | Returns |
 |---|---|---|---|
 | GET | `/health` | | `{ok, session, jobs}` |
-| POST | `/api/extract` | `{url?}` | `202 {id}` — metadata + links job |
+| POST | `/api/info` | `{url?}` | **one synchronous call** — `200` with `download_url`, `stream_url`, `stream_segments`, `video` and full `metadata` (waits ~15-25 s in the queue) |
+| POST | `/api/extract` | `{url?}` | `202 {id}` — metadata + links job (result carries the same envelope) |
 | POST | `/api/download` | `{url?, mode: "preview"\|"original"}` | `202 {id}` |
 | GET | `/api/jobs` | | job summaries, newest first |
-| GET | `/api/jobs/:id` | | status, `progress`, `logs`, `result` |
+| GET | `/api/jobs/:id` | | status, `progress`, `logs`, `result` (envelope + `files`) |
 | DELETE | `/api/jobs/:id` | | cancel a queued job (`409` if running) |
-| GET | `/api/metadata` | `?url=` | synchronous metadata JSON (waits ~20-30 s) |
+| GET | `/api/metadata` | `?url=` | same envelope as `POST /api/info` (prefer the POST) |
 | GET | `/api/files` | | list output files with sizes + URLs |
 | GET | `/api/files/:name` | | download the file (traversal-guarded) |
+
+The shared **envelope** (`/api/info`, `/api/metadata`, job `result`):
+
+```jsonc
+{
+  "url": "https://www.1024tera.com/sharing/link?surl=...",
+  "video": {"filename": "...", "duration": 141, "width": 1280, "height": 720,
+            "size": 30187549, "md5": "e665...", "fid": "..."},
+  "download_url": "https://d.1024tera.com/file/...?expires=...",  // original dlink, ~10 min TTL
+  "download_available": true,
+  "download_expires_at": "2026-09-28T17:00:00.000Z",
+  "download_size": 30187549,
+  "stream_url": "https://www.1024tera.com/share/streaming?...&sign=...",  // HLS window playlist
+  "stream_bytes": 8758356,
+  "stream_complete": true,
+  "stream_segments": [{"range": "0-65535", "url": "https://v4.freeterabox.com/..."}],
+  "metadata": { /* full terabot metadata */ }
+}
+```
 
 Jobs run through a queue (default concurrency 1 — each launches a headless
 Chromium); `progress` carries the latest phase (`harvest` / `dlink` /
@@ -99,11 +119,13 @@ capped ring of the bot's own output.
 
 ```bash
 curl -s localhost:8788/health
-curl -s -X POST localhost:8788/api/extract -d '{}'        # -> {id}
+# one call: metadata + download_url + stream_url (url in the JSON payload)
+curl -s -X POST localhost:8788/api/info -H 'content-type: application/json' \
+     -d '{"url":"https://www.1024tera.com/sharing/link?surl=reCn7CaS8tLmcdVMe3SYWg"}'
+curl -s -X POST localhost:8788/api/extract -d '{}'        # -> {id}, async variant
 curl -s localhost:8788/api/jobs/<id>                      # poll result
 curl -s -X POST localhost:8788/api/download -d '{"mode":"preview"}'
 curl -s -X POST localhost:8788/api/download -d '{"mode":"original"}'   # needs cookies.json
-curl -s localhost:8788/api/metadata                       # sync shortcut
 curl -O localhost:8788/api/files/Post%20493%20video%202.preview480.mp4
 ```
 

@@ -7,6 +7,9 @@
 // Endpoints (JSON, CORS enabled):
 //   GET    /                    endpoint index
 //   GET    /health              liveness + session/job counters
+//   POST   /api/info            {url?} -> 200 (one synchronous call: metadata
+//                                  + download_url + stream_url/segments;
+//                                  waits ~15-25 s in the queue)
 //   POST   /api/extract         {url?} -> 202 {id}     metadata + links (job)
 //   POST   /api/download        {url?, mode} -> 202 {id}
 //                                  mode "preview"  — fast 480p transcode
@@ -126,7 +129,7 @@ async function runJob(job) {
     });
     job.exitCode = r.code;
     job.errors = r.errors || [];
-    job.result = { metadata: r.metadata, files: r.written };
+    job.result = { ...infoOf(r.metadata), files: r.written };
     const failed = r.code !== 0 && job.type === 'download';
     job.status = failed ? 'failed' : 'done';
     if (failed) job.error = `download failed (exit ${r.code}) — see logs`;
@@ -207,6 +210,52 @@ const jobFull = (j) => ({
   progress: j.progress, logs: j.logs, result: j.result,
 });
 
+// Flatten the three things callers ask for into one envelope around the
+// full metadata: download_url (original dlink), stream_url (HLS playlist
+// window) + stream_segments (direct CDN links, ~8h validity).
+function infoOf(metadata) {
+  const d = (metadata.downloads && metadata.downloads.original) || {};
+  const h = ((metadata.downloads && metadata.downloads.previewHLS) || [])[0] || null;
+  const v = (metadata.videos && metadata.videos[0]) || null;
+  const file = ((metadata.files || []).find((f) => v && f.fs_id === v.fid)) ||
+    (metadata.files || [])[0] || null;
+  let downloadExpiresAt = null;
+  if (d.dlink) {
+    try {
+      const ex = new URL(d.dlink).searchParams.get('expires');
+      if (ex) downloadExpiresAt = new Date(Number(ex) * 1000).toISOString();
+    } catch { /* ignore */ }
+  }
+  return {
+    url: metadata.source,
+    video: v ? {
+      fid: v.fid, filename: v.filename, duration: v.duration,
+      width: v.width, height: v.height,
+      size: file ? file.size : null,
+      md5: v.real_md5 || (file && file.md5) || null,
+    } : null,
+    download_url: d.available ? d.dlink : null,
+    download_available: !!d.available,
+    download_errno: d.errno ?? null,
+    download_expires_at: downloadExpiresAt,
+    download_size: (d.file_info && Number(d.file_info.size)) ||
+      (file ? file.size : null),
+    stream_url: h ? h.playlistUrl : null,
+    stream_type: h ? h.type : null,
+    stream_bytes: h ? h.tsSize : null,
+    stream_complete: h ? h.complete : null,
+    stream_segments: h ? h.segments.map((s) => ({ range: s.range, url: s.url })) : [],
+    stream_note: h ? h.note : null,
+    metadata,
+  };
+}
+
+const badUrl = (u) => u != null && !/^https?:\/\//i.test(String(u));
+const bodyOf = async (req) => {
+  const raw = await readBody(req).catch(() => '');
+  try { return raw ? JSON.parse(raw) : {}; } catch { return null; }
+};
+
 async function handle(req, res) {
   const u = new URL(req.url, 'http://x');
   const p = u.pathname;
@@ -218,6 +267,7 @@ async function handle(req, res) {
     service: 'terabot-api',
     endpoints: {
       'GET /health': 'liveness + session/job counters',
+      'POST /api/info': '{url?} -> 200  ONE call: metadata + download_url + stream_url (waits ~15-25s)',
       'POST /api/extract': '{url?} -> 202 {id}  metadata + links job',
       'POST /api/download': '{url?, mode: "preview"|"original"} -> 202 {id}',
       'GET /api/jobs': 'job summaries (newest first)',
@@ -241,16 +291,16 @@ async function handle(req, res) {
 
   // ---- jobs
   if (p === '/api/extract' && req.method === 'POST') {
-    const body = await readBody(req).catch(() => ({}));
-    let b = {};
-    try { b = body ? JSON.parse(body) : {}; } catch { return sendJson(res, 400, { error: 'invalid JSON' }); }
+    const b = await bodyOf(req);
+    if (b === null) return sendJson(res, 400, { error: 'invalid JSON' });
+    if (badUrl(b.url)) return sendJson(res, 400, { error: 'url must be http(s)' });
     const job = enqueue(makeJob('extract', null, b.url));
     return sendJson(res, 202, { id: job.id, status: job.status });
   }
   if (p === '/api/download' && req.method === 'POST') {
-    const body = await readBody(req).catch(() => ({}));
-    let b = {};
-    try { b = body ? JSON.parse(body) : {}; } catch { return sendJson(res, 400, { error: 'invalid JSON' }); }
+    const b = await bodyOf(req);
+    if (b === null) return sendJson(res, 400, { error: 'invalid JSON' });
+    if (badUrl(b.url)) return sendJson(res, 400, { error: 'url must be http(s)' });
     const mode = b.mode === 'original' ? 'original' : 'preview';
     if (mode === 'original' && !sessionPresent()) {
       return sendJson(res, 400, {
@@ -259,6 +309,22 @@ async function handle(req, res) {
     }
     const job = enqueue(makeJob('download', mode, b.url));
     return sendJson(res, 202, { id: job.id, status: job.status, mode });
+  }
+
+  // ---- single-call info: metadata + download_url + stream_url in one JSON
+  if (p === '/api/info' && req.method === 'POST') {
+    const b = await bodyOf(req);
+    if (b === null) return sendJson(res, 400, { error: 'invalid JSON' });
+    if (badUrl(b.url)) return sendJson(res, 400, { error: 'url must be http(s)' });
+    const job = enqueue(makeJob('extract', null, b.url));
+    const settled = await job.settled;
+    if (settled.status === 'cancelled') return sendJson(res, 409, { error: 'cancelled' });
+    if (!settled.result) {
+      return sendJson(res, 502, {
+        error: settled.error || 'extract failed', logs: settled.logs.slice(-30),
+      });
+    }
+    return sendJson(res, 200, { job_id: job.id, ...settled.result });
   }
   if (p === '/api/jobs' && req.method === 'GET') {
     const list = [...jobs.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -279,13 +345,14 @@ async function handle(req, res) {
     }
   }
 
-  // ---- synchronous metadata shortcut
+  // ---- synchronous metadata shortcut (same envelope as POST /api/info;
+  //      prefer POST /api/info with the url in the payload)
   if (p === '/api/metadata' && req.method === 'GET') {
     const job = enqueue(makeJob('extract', null, u.searchParams.get('url')));
     const settled = await job.settled;
     if (settled.status === 'cancelled') return sendJson(res, 409, { error: 'cancelled' });
     if (!settled.result) return sendJson(res, 502, { error: settled.error || 'extract failed', logs: settled.logs.slice(-30) });
-    return sendJson(res, 200, settled.result.metadata);
+    return sendJson(res, 200, { job_id: job.id, ...settled.result });
   }
 
   // ---- files
