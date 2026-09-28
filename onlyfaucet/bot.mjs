@@ -1851,7 +1851,12 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
           const u = res.url();
           const isAsset = /\.(png|jpe?g|gif|css|js|woff2?|svg|webp)(\?|$)/i.test(u);
           if (isAsset) return;
-          const interesting = req.method() === 'POST' || /verify|captcha|x-?captcha/i.test(u);
+          // Same-origin activity only (plus any captcha/verify URL): third-party
+          // ad/analytics/cdn-cgi POSTs bury the two lines that matter.
+          const sameOrigin = u.startsWith(`${BASE_URL}/`);
+          const interesting = sameOrigin
+            ? (req.method() === 'POST' && !/\/cdn-cgi\//.test(u))
+            : /verify|captcha|x-?captcha/i.test(u);
           if (!interesting) return;
           const pd = (req.postData() || '').slice(0, 500);
           const body = await res.text().catch(() => '');
@@ -2666,6 +2671,7 @@ if (isMain) {
   } else if (args[0] === 'once') {
     const accounts = loadAccounts();
     if (!accounts.length) { console.error('No accounts'); process.exit(1); }
+    acquireLock(); // one browser profile at a time — a concurrent loop/once pair corrupts it
     runOnce(accounts[0].email).then(r => { console.log(`done: ${r}`); process.exit(0); })
       .catch(e => { console.error(e); process.exit(1); });
   } else {
