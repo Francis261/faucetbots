@@ -4,7 +4,7 @@ import { writeFileSync } from 'node:fs';
 import {
   launchBrowser, gotoRetry, ensureCleared, isLoggedIn, login, getPageState,
   getPuzzleBox, dismissSweetAlert, sleep, log, BASE_URL, FAUCET_URL, SHOT_DIR,
-  loadAccounts,
+  loadAccounts, roundSpacingLeft, noteRoundStart,
 } from './bot.mjs';
 
 const OUT = process.env.INSPECT_OUT || `${SHOT_DIR}/inspect`;
@@ -30,6 +30,14 @@ try {
   let st = await getPageState(page);
   log(`state verif=${st.verification} puzzle=${st.puzzle} claimBtn=${st.claimBtn} blocked=${st.temporarilyBlocked} cooldown=${st.cooldown}`);
 
+  // Round spacing: widget opens are real round events (>=3 in 7min => 1h
+  // block). Wait out any pending window before the open loop.
+  const preSpacing = roundSpacingLeft();
+  if (preSpacing > 0) {
+    log(`round spacing: waiting ${Math.round(preSpacing / 1000)}s before opening widget`);
+    await sleep(preSpacing + 3000);
+  }
+
   // Open the widget whenever the verification checkbox is offered
   for (let i = 0; i < 6; i++) {
     st = await getPageState(page);
@@ -42,6 +50,7 @@ try {
         log(`clicking cb_ at (${Math.round(cb.cbRect.x)},${Math.round(cb.cbRect.y)})`);
         await page.mouse.move(cb.cbRect.x, cb.cbRect.y, { steps: 4 });
         await sleep(250);
+        noteRoundStart();
         await page.mouse.click(cb.cbRect.x, cb.cbRect.y);
         await sleep(4000);
         continue;
@@ -68,8 +77,13 @@ try {
       st = await getPageState(page);
       log(`after claim: verif=${st.verification} puzzle=${st.puzzle} cooldown=${st.cooldown} captchaErr=${st.captchaError}`);
       if (st.cbRect) {
-        await page.mouse.click(st.cbRect.x, st.cbRect.y);
-        await sleep(4000);
+        if (roundSpacingLeft() > 0) {
+          log(`round spacing: skipping cb open (${Math.round(roundSpacingLeft() / 1000)}s left)`);
+        } else {
+          noteRoundStart();
+          await page.mouse.click(st.cbRect.x, st.cbRect.y);
+          await sleep(4000);
+        }
       }
       continue;
     }

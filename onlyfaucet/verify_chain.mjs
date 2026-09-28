@@ -11,7 +11,8 @@ import { writeFileSync } from 'node:fs';
 import {
   launchBrowser, gotoRetry, ensureCleared, isLoggedIn, login, getPageState,
   sleep, log, BASE_URL, FAUCET_URL, SHOT_DIR, loadAccounts,
-  getPuzzleBox, clampClip, getCanvasTransform, canvasRectFor,
+  getPuzzleBox, clampClip, getCanvasTransform, canvasRectFor, captureWidgetFrame,
+  noteRoundStart, roundSpacingLeft,
   freshGeom, freshBgPath, findHolePy, analyzePuzzle, consensusGate, canvasToPage,
   dragCanvas, ensureClickable,
 } from './bot.mjs';
@@ -43,10 +44,17 @@ try {
     freeRuns++;
     if (st.puzzle) { opened = true; break; }
     if (st.verification && st.cbRect) {
+      const spacingLeft = roundSpacingLeft();
+      if (spacingLeft > 0) {
+        // Rehearsal opens count server-side like real ones — respect spacing.
+        log(`round spacing: waiting ${Math.round(spacingLeft / 1000)}s before opening widget`);
+        await sleep(Math.min(spacingLeft + 3000, 30000));
+        continue;
+      }
       await page.evaluate(() => document.querySelector('[id^="cb_"]')?.scrollIntoView({ block: 'center' })).catch(() => {});
       await sleep(400);
       const cb = await getPageState(page);
-      if (cb.cbRect) { log('clicking cb_'); const esc = await ensureClickable(page, cb.cbRect.x, cb.cbRect.y); if (esc.startsWith('neutralized')) log(`cb click: ${esc}`); await page.mouse.click(cb.cbRect.x, cb.cbRect.y); await sleep(3000); continue; }
+      if (cb.cbRect) { log('clicking cb_'); const esc = await ensureClickable(page, cb.cbRect.x, cb.cbRect.y); if (esc.startsWith('neutralized')) log(`cb click: ${esc}`); noteRoundStart(); await page.mouse.click(cb.cbRect.x, cb.cbRect.y); await sleep(3000); continue; }
     }
     if (st.claimBtn && !st.verification && !st.puzzle && !st.cooldown && freeRuns >= 2) {
       const submitted = await page.evaluate(() => {
@@ -66,12 +74,15 @@ try {
   if (!opened) throw new Error('widget never opened');
 
   // --- exactly the detection path handlePuzzleContent uses ----------------
-  const box = await getPuzzleBox(page);
-  if (!box) throw new Error('no puzzle box');
-  const clip = clampClip(box, page.viewportSize() || { width: 1280, height: 800 });
-  await sleep(500);
-  const shotPath = `${SHOT_DIR}/verify-${ts()}.png`;
-  const shot = await page.screenshot({ path: shotPath, clip });
+  // Drift-verified capture (same helper as production): ads move the widget
+  // 100-250px within a few hundred ms — a stale clip here would rehearse
+  // detection against pixels that are not the canvas.
+  const cap = await captureWidgetFrame(page, 'verify');
+  if (!cap) throw new Error('no puzzle box');
+  if (cap.drift > 5) log(`WARN: frame captured with drift ${cap.drift.toFixed(1)}px — layout was moving`);
+  const clip = cap.clip;
+  const shotPath = cap.path;
+  const shot = cap.shot;
   const w = Math.round(clip.width), h = Math.round(clip.height);
 
   const tr = await getCanvasTransform(page).catch(() => null);

@@ -25,10 +25,35 @@ const FORCE_FAIL_MS = 50000;
 const BAIL_MS = 43000;          // 7s of headroom for reload + Cloudflare
 const widgetClock = { shownAt: 0 };
 
-function markWidgetShown() { if (!widgetClock.shownAt) widgetClock.shownAt = Date.now(); }
+function markWidgetShown() { if (!widgetClock.shownAt) { widgetClock.shownAt = Date.now(); noteRoundStart(); } }
 function widgetAgeMs() { return widgetClock.shownAt ? Date.now() - widgetClock.shownAt : 0; }
 function pastBailWindow() { return widgetClock.shownAt > 0 && widgetAgeMs() > BAIL_MS; }
 function clearWidgetClock() { widgetClock.shownAt = 0; }
+
+// ---- Round spacing (open-rate protection) --------------------------------
+// The site issues a 1h block, lazily on the next page load, once >=3 "round
+// events" land within ~7 minutes, where an event is EITHER a checkbox start
+// OR a mid-widget bail reload (observed: 2 abandoned rounds = 4 events in
+// 104s => 1h block; separately, 3 plain opens in ~7min => 1h block).  The
+// state is PERSISTED because fresh `once` processes must respect it too —
+// two manual runs 86s apart are exactly how the last block happened — and
+// because the server keeps its own count across restarts.
+const ROUND_SPACING_FILE = join(import.meta.dirname, '.round-state.json');
+const ROUND_SPACING_MS = 7 * 60 * 1000;
+const roundState = (() => {
+  try {
+    const s = JSON.parse(readFileSync(ROUND_SPACING_FILE, 'utf8'));
+    if (s && Number.isFinite(s.lastStart)) return s;
+  } catch {}
+  return { lastStart: 0 };
+})();
+function noteRoundStart() {
+  roundState.lastStart = Date.now();
+  try { writeFileSync(ROUND_SPACING_FILE, JSON.stringify(roundState)); } catch {}
+}
+function roundSpacingLeft() {
+  return Math.max(0, roundState.lastStart + ROUND_SPACING_MS - Date.now());
+}
 
 // Abandon the current puzzle WITHOUT submitting: reloading before the 50s
 // mark means no attempt is recorded (forceFail only fires while the page lives).
@@ -1028,29 +1053,9 @@ async function getPageState(page) {
   }
 }
 
-async function getPuzzleBox(page) {
-  // Scroll into center first so clip stays inside viewport (ads shift layout)
-  await page.evaluate(() => {
-    if (!document || !document.body) return;
-    const h = document.querySelector('[id^="h_"]');
-    if (h) { h.scrollIntoView({ block: 'center', behavior: 'instant' }); return; }
-    try {
-      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-      while (walker.nextNode()) {
-        const n = walker.currentNode;
-        if ((n.textContent || '').includes('Drag the shape')) {
-          let el = n.parentElement;
-          for (let i = 0; i < 10 && el; i++) {
-            const r = el.getBoundingClientRect();
-            if (r.width > 250 && r.height > 180) { el.scrollIntoView({ block: 'center', behavior: 'instant' }); return; }
-            el = el.parentElement;
-          }
-        }
-      }
-    } catch (e) { /* mid-navigation */ }
-  }).catch(() => {});
-  await sleep(400);
-
+// Raw rect read: no scroll, no settle.  Used for the drift check right after
+// a capture — scrolling again there could itself change what we measure.
+async function measureBox(page) {
   return page.evaluate(() => {
     if (!document || !document.body) return null;
     const h = document.querySelector('[id^="h_"]');
@@ -1074,6 +1079,68 @@ async function getPuzzleBox(page) {
     } catch (e) { /* mid-navigation */ }
     return null;
   }).catch(() => null);
+}
+
+async function getPuzzleBox(page) {
+  // Scroll into center first so clip stays inside viewport (ads shift layout)
+  await page.evaluate(() => {
+    if (!document || !document.body) return;
+    const h = document.querySelector('[id^="h_"]');
+    if (h) { h.scrollIntoView({ block: 'center', behavior: 'instant' }); return; }
+    try {
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      while (walker.nextNode()) {
+        const n = walker.currentNode;
+        if ((n.textContent || '').includes('Drag the shape')) {
+          let el = n.parentElement;
+          for (let i = 0; i < 10 && el; i++) {
+            const r = el.getBoundingClientRect();
+            if (r.width > 250 && r.height > 180) { el.scrollIntoView({ block: 'center', behavior: 'instant' }); return; }
+            el = el.parentElement;
+          }
+        }
+      }
+    } catch (e) { /* mid-navigation */ }
+  }).catch(() => {});
+  await sleep(400);
+
+  return measureBox(page);
+}
+
+// Ads inject AND collapse around the widget, shifting it 100-250px within a
+// few hundred ms — live-observed: one capture held an ad+heading where the
+// canvas should be, its re-detect nine seconds later held canvas+footer (the
+// ad had collapsed).  Both are stale-clip reads: find_hole then "scores"
+// garbage and the gate can only refuse.  Measure -> shoot -> re-measure:
+// capture only when the rect did not move during the shot, so clip, rect
+// (canvas mapping) and the pixels all describe the same frame.
+async function captureWidgetFrame(page, tag, tries = 2) {
+  const vp = page.viewportSize() || { width: 1280, height: 800 };
+  const stamp = () => new Date().toISOString().replace(/[:.]/g, '-');
+  let last = null;
+  for (let i = 0; i < tries; i++) {
+    // First try trusts the caller's recent scroll (keeps the common path
+    // fast); a retry re-centers and settles properly via getPuzzleBox.
+    let box = await measureBox(page);
+    if (!box || box.y < 0 || box.x < 0 || box.y + box.h > vp.height || box.x + box.w > vp.width) {
+      box = await getPuzzleBox(page);
+    }
+    if (!box) break;
+    const clip = clampClip(box, vp);
+    const path = `${SHOT_DIR}/${tag}-${stamp()}.png`;
+    const shot = await page.screenshot({ path, clip }).catch(() => null);
+    if (!shot) break;
+    const after = await measureBox(page);
+    const drift = after
+      ? Math.hypot(after.x - box.x, after.y - box.y)
+        + Math.abs((after.w ?? box.w) - box.w) + Math.abs((after.h ?? box.h) - box.h)
+      : 999;
+    log(`capture ${tag}: ${shot.length}B drift=${drift.toFixed(1)}px${i ? ` (retry ${i})` : ''}`);
+    last = { shot, path, clip, drift };
+    if (drift <= 5 && shot.length >= 8000) return last;
+    await sleep(700); // let the ad storm settle before re-measuring
+  }
+  return last;
 }
 
 async function handlePuzzle(page, attempt = 0) {
@@ -1113,12 +1180,26 @@ async function handlePuzzle(page, attempt = 0) {
     }
     // Cap checkbox re-clicks: spinning cb_ when widget never reopens wastes a claim
     if (st.cbRect && st.verification && cbClicks < 2) {
+      // Gate only the FIRST click of this round: after our own click
+      // spacingLeft() is nonzero by construction (noteRoundStart) and must
+      // not abort the very round it just measured.
+      if (cbClicks === 0) {
+        const spacingLeft = roundSpacingLeft();
+        if (spacingLeft > 0) {
+          // Opening now would push the 7-minute event window over the block
+          // threshold.  The widget is NOT open yet, so leaving the page
+          // untouched costs zero events — let the caller back off instead.
+          log(`Round spacing: previous round started ${Math.round(spacingLeft / 1000)}s ago — NOT opening the widget`);
+          return 'aborted';
+        }
+      }
       await page.evaluate(() => document.querySelector('[id^="cb_"]')?.scrollIntoView({ block: 'center' })).catch(() => {});
       await sleep(400);
       const cb = await getPageState(page);
       if (cb.cbRect) {
         const esc = await ensureClickable(page, cb.cbRect.x, cb.cbRect.y);
         if (esc.startsWith('neutralized')) log(`cb click: ${esc}`);
+        noteRoundStart(); // the captcha_image REQUEST is the round's first event
         await page.mouse.click(cb.cbRect.x, cb.cbRect.y);
         cbClicks++;
         clearWidgetClock(); // a fresh captcha_image => fresh 50s countdown
@@ -1147,35 +1228,21 @@ async function handlePuzzle(page, attempt = 0) {
     if (st.success || st.cooldown) return true;
     return false;
   }
-  // Clamp clip to viewport
-  const vp = page.viewportSize() || { width: 1280, height: 800 };
-  const clip = {
-    x: Math.max(0, box.x),
-    y: Math.max(0, box.y),
-    width: Math.min(box.w, vp.width),
-    height: Math.min(box.h, vp.height),
-  };
-  if (clip.y + clip.height > vp.height) clip.height = Math.max(50, vp.height - clip.y);
-  if (clip.x + clip.width > vp.width) clip.width = Math.max(50, vp.width - clip.x);
-
-  // The probe above already proved the canvas rendered; 250ms is just layout
-  // settle after scrollIntoView (was 800ms — visible as "delay before it
-  // clicks the widget").
-  await sleep(250);
-  const shotPath = `${SHOT_DIR}/puzzle-${ts()}.png`;
-  const shot = await page.screenshot({ path: shotPath, clip });
-  log(`Screenshot ${shot.length} bytes clip=${JSON.stringify(clip)}`);
-  if (shot.length < 8000) {
-    log('Screenshot looks blank — waiting and retrying once');
+  // Fresh measure + drift-verified capture: the wait loop's box may already
+  // be stale by now (ads move the widget between probe and shot — a stale
+  // clip captures ad/heading pixels instead of the canvas).
+  const cap = await captureWidgetFrame(page, 'puzzle');
+  if (!cap || cap.shot.length < 8000) {
+    log(`Screenshot looks blank (${cap ? cap.shot.length : 0} bytes) — waiting and retrying once`);
     await sleep(2500);
-    const shot2 = await page.screenshot({ path: `${SHOT_DIR}/puzzle-retry-${ts()}.png`, clip });
-    if (shot2.length >= 8000) {
-      return handlePuzzleContent(page, shot2, shot2.length >= 8000 ? `${SHOT_DIR}/puzzle-retry-${ts()}.png` : shotPath, clip, attempt);
+    const cap2 = await captureWidgetFrame(page, 'puzzle-retry');
+    if (cap2 && cap2.shot.length >= 8000) {
+      return handlePuzzleContent(page, cap2.shot, cap2.path, cap2.clip, attempt);
     }
-    log(`Still blank (${shot2.length} bytes)`);
+    log(`Still blank (${cap2 ? cap2.shot.length : 0} bytes)`);
     return false;
   }
-  return handlePuzzleContent(page, shot, shotPath, clip, attempt);
+  return handlePuzzleContent(page, cap.shot, cap.path, cap.clip, attempt);
 }
 
 function findPiecePy(path) {
@@ -1374,8 +1441,8 @@ function consensusGate(holeDet, vision, w, h) {
 
 async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
   const ts = () => new Date().toISOString().replace(/[:.]/g, '-');
-  const w = Math.round(clip.width);
-  const h = Math.round(clip.height);
+  let w = Math.round(clip.width);
+  let h = Math.round(clip.height);
   log(`Puzzle box clip: ${JSON.stringify(clip)} widgetAge=${widgetAgeMs()}ms`);
   if (pastBailWindow()) return bailOutOfPuzzle(page, 'widget-clock-early');
   // Re-entering after a Verify already fired this claim cycle: never submit a
@@ -1390,10 +1457,26 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
 
   let tr = null;
   try { tr = await getCanvasTransform(page); } catch (e) { tr = null; }
-  const rect = canvasRectFor(clip, tr);
+  let rect = canvasRectFor(clip, tr);
   const geomNow = freshGeom();
   const bgPath = await freshBgPath(page, geomNow ? geomNow.at : null);
   log(`canvas rect in shot: ${rect || 'unknown (full-image mapping)'} bg=${bgPath || 'none'}`);
+
+  // Re-capture with a fresh measure whenever the layout may have moved since
+  // this frame was taken.  Keeps clip/w/h/rect in lockstep with what the new
+  // frame actually contains — a stale rect maps find_hole candidates into the
+  // wrong canvas coordinates (and would skew clipToCanvas at drag time).
+  const refreshFrame = async (tag) => {
+    const cap = await captureWidgetFrame(page, tag);
+    if (!cap) return null;
+    clip = cap.clip;
+    w = Math.round(clip.width);
+    h = Math.round(clip.height);
+    try { tr = await getCanvasTransform(page); } catch (e) { tr = null; }
+    rect = canvasRectFor(clip, tr);
+    log(`frame refreshed (${tag}): clip=${JSON.stringify(clip)} rect=${rect}`);
+    return cap;
+  };
 
   // CV first: it costs 2-4s vs vision's 13-16s, and it alone decides whether
   // vision is needed at all (see below).
@@ -1434,9 +1517,10 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
   if ((!pyHasTarget || (needVision && !visionHasTarget)) && attempt < 3 && msLeft() > 18000) {
     log('Detection weak — waiting and re-screenshotting...');
     await sleep(1500);
-    const shotPath2 = `${SHOT_DIR}/puzzle-redet-${ts()}.png`;
-    const shot2 = await page.screenshot({ path: shotPath2, clip }).catch(() => null);
-    if (shot2 && shot2.length >= 8000) {
+    const cap2 = await refreshFrame('puzzle-redet');
+    if (cap2 && cap2.shot.length >= 8000) {
+      const shotPath2 = cap2.path;
+      const shot2 = cap2.shot;
       const py2 = Promise.resolve().then(() => findHolePy(shotPath2, rect, bgPath));
       // vision is throttled; only re-run it if the first pass found nothing
       // AND the gate actually wanted a vision cross-check (a decisive CV read
@@ -1518,10 +1602,9 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
 
   async function redetectPiece(afterFail) {
     log(`Re-detecting piece after ${afterFail}...`);
-    const rp = `${SHOT_DIR}/puzzle-redet-${ts()}.png`;
-    const rs = await page.screenshot({ path: rp, clip }).catch(() => null);
-    if (!rs || rs.length < 8000) return false;
-    const d = findHolePy(rp, rect, bgPath);
+    const capR = await refreshFrame('puzzle-redet');
+    if (!capR || capR.shot.length < 8000) return false;
+    const d = findHolePy(capR.path, rect, bgPath);
     if (!d || d.pieceX == null) return false;
     curPieceX = d.pieceX;
     curPieceY = d.pieceY;
@@ -1761,12 +1844,16 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
         // "malfunctioning" double-widget sequence).  Bail cleanly instead;
         // claimFaucet resets the stuck session before the next round.
         if (submitGuard.used) return bailOutOfPuzzle(page, 'verify-unconfirmed', false);
+        if (roundSpacingLeft() > 0) {
+          log(`Round spacing: ${Math.round(roundSpacingLeft() / 1000)}s left — not re-opening widget`);
+          return bailOutOfPuzzle(page, 'round-spacing', 'aborted');
+        }
         const clicked = await page.evaluate(() => {
           const c = document.querySelector('[id^="cb_"]');
           if (c) { c.click(); return true; }
           return false;
         }).catch(() => false);
-        if (clicked) await sleep(2500);
+        if (clicked) { noteRoundStart(); await sleep(2500); }
         break;
       }
     }
@@ -1856,17 +1943,17 @@ async function capturePuzzles(page, count = 3, maxMinutes = 12) {
 
     // Capture the widget if it is open
     if (st.puzzle || st.hRect) {
-      const vp = page.viewportSize() || { width: 1280, height: 800 };
-      const box = await getPuzzleBox(page);
-      if (box) {
-        const clip = clampClip(box, vp);
-        const shot = await page.screenshot({ clip }).catch(() => null);
-        if (shot && shot.length > 8000) {
-          const shotPath = `${SHOT_DIR}/capture-${ts()}-${sampleIdx}.png`;
-          try { writeFileSync(shotPath, shot); } catch {}
-          const clipW = Math.round(clip.width);
-          const clipH = Math.round(clip.height);
-          const hole = findHolePy(shotPath, canvasRectFor(clip, await getCanvasTransform(page).catch(() => null)));
+      // Drift-verified capture: a calibration sample taken from a stale clip
+      // (ad shifted the widget between measure and shot) is a poisoned label
+      // — gate calibration must only ever see frames that held the canvas.
+      const cap = await captureWidgetFrame(page, `capture-${ts()}-${sampleIdx}`);
+      if (cap && cap.shot.length > 8000) {
+        const shot = cap.shot;
+        const shotPath = cap.path;
+        const clip = cap.clip;
+        const clipW = Math.round(clip.width);
+        const clipH = Math.round(clip.height);
+        const hole = findHolePy(shotPath, canvasRectFor(clip, await getCanvasTransform(page).catch(() => null)));
           let vision = null;
           for (let v = 0; v < 2 && !vision; v++) {
             try { vision = await analyzePuzzle(shot, clipW, clipH); }
@@ -1890,12 +1977,19 @@ async function capturePuzzles(page, count = 3, maxMinutes = 12) {
           await sleep(2000);
           continue;
         }
-        rec({ ev: 'blank-shot', bytes: shot ? shot.length : 0 });
-      }
+      rec({ ev: 'blank-shot', bytes: cap ? cap.shot.length : 0 });
     }
 
     // Open the widget via the verification checkbox (opening is not an attempt)
     if (st.verification && st.cbRect && cbOpens < 3) {
+      const spacingLeft = roundSpacingLeft();
+      if (spacingLeft > 0) {
+        // Rehearsal opens count server-side exactly like real ones — wait
+        // out the 7-minute spacing instead of tripping the 1h block.
+        rec({ ev: 'spacing-wait', ms: spacingLeft });
+        await sleep(Math.min(spacingLeft + 5000, 30000));
+        continue;
+      }
       await page.evaluate(() => document.querySelector('[id^="cb_"]')?.scrollIntoView({ block: 'center' })).catch(() => {});
       await sleep(400);
       const cb = await getPageState(page);
@@ -1904,6 +1998,7 @@ async function capturePuzzles(page, count = 3, maxMinutes = 12) {
         if (esc.startsWith('neutralized')) log(`cb open: ${esc}`);
         await page.mouse.move(cb.cbRect.x, cb.cbRect.y, { steps: 4 });
         await sleep(200);
+        noteRoundStart(); // the captcha_image REQUEST is the round's first event
         await page.mouse.click(cb.cbRect.x, cb.cbRect.y);
         cbOpens++;
         widgetShownAt = Date.now(); // fresh widget → fresh 50s force-fail countdown
@@ -2231,7 +2326,7 @@ async function runOnce(email) {
     await ensureCleared(page);
 
     const result = await claimFaucet(page, email);
-    log(`Result: ${result}`);
+    log(`Result: ${typeof result === 'object' && result !== null ? JSON.stringify(result) : result}`);
     return result;
   } finally {
     await ctx.close().catch(() => {});
@@ -2308,11 +2403,14 @@ async function runLoop(email) {
         aborts++;
         log(`Puzzle abandoned safely (${aborts}) — nothing submitted, retrying without penalty`);
         // Every aborted cycle re-claims, and the claim re-opens a widget.
-        // Bursts of widget OPENs are what trip the site's temp block (observed:
-        // 3 opens in ~7 min => 1h block, issued lazily on the next faucet page
-        // load; a single open+abandon never blocked).  Aborting itself is free
-        // — but space the re-opens hard.
-        const backoff = [30000, 120000, 600000];
+        // The block counts ROUND EVENTS — checkbox starts AND mid-widget bail
+        // reloads — at >=3 within ~7min (observed: 3 opens in ~7min => 1h
+        // block; and 2 abandoned rounds = 4 events in 104s => 1h block,
+        // issued lazily on the next faucet page load).  So one abandoned
+        // round per 7min, ever: the first backoff is a full spacing window
+        // (roundSpacingLeft() in the cb-click path enforces the same floor
+        // even for manual runs).  Aborting itself is free.
+        const backoff = [420000, 600000, 900000];
         const wait = backoff[Math.min(aborts - 1, backoff.length - 1)];
         log(`Open-rate protection: waiting ${Math.round(wait / 1000)}s before re-claim`);
         await sleep(wait);
@@ -2384,7 +2482,7 @@ export {
   handlePuzzle, capturePuzzles, findHolePy, findPiecePy, analyzePuzzle, claimFaucet,
   waitForCooldown, waitOutBlock, waitManualSolve, loadAccounts,
   getCanvasTransform, canvasRectFor, freshGeom, freshBgPath, clampClip, consensusGate,
-  ensureClickable,
+  ensureClickable, captureWidgetFrame, noteRoundStart, roundSpacingLeft,
   canvasToPage, dragCanvas,
   BASE_URL, FAUCET_URL, SHOT_DIR,
 };
