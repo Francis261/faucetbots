@@ -924,6 +924,22 @@ async function login(page, email) {
 }
 
 async function dismissSweetAlert(page) {
+  // Capture the site's own message before dismissing — after a rejected
+  // Verify this is the only place the rejection reason (wrong answer vs bot
+  // telemetry vs rate limit) is ever visible.
+  const modalText = await page.evaluate(() => {
+    const els = [...document.querySelectorAll(
+      '.swal2-popup,.sweet-alert,[role="alert"],.swal2-container,.modal.show')];
+    for (const el of els) {
+      const r = el.getBoundingClientRect();
+      if (r.width > 50 && r.height > 30) {
+        const t = (el.innerText || '').replace(/\s+/g, ' ').trim();
+        if (t) return t.slice(0, 200);
+      }
+    }
+    return '';
+  }).catch(() => '');
+  if (modalText) log(`modal: ${modalText}`);
   const clicked = await page.evaluate(() => {
     let ok = false;
     const selectors = [
@@ -1307,10 +1323,19 @@ function consensusGate(holeDet, vision, w, h) {
   // separate either (wrong widget reads score HIGHER cover 0.77-0.86 than
   // correct bg reads 0.69-0.77).  support/iou0/cover stay in the log as
   // diagnostics only.
+  // cover (tolerant outline coverage) now ALSO gates: it does not separate
+  // right from wrong — 0.69-0.77 correct vs 0.77-0.86 wrong — but it separates
+  // a real measurement from a degenerate one.  Every healthy read on either
+  // widget theme scores >= 0.69; a broken dash mask collapses it to ~0.02
+  // while z goes crazy (z=33.97 m=10.1 once cleared this gate and dragged to
+  // a noise peak the site rejected).  0.5 sits far below every real read and
+  // far above every broken one.
   const CHAIN_Z_MIN = 5.0;
   const CHAIN_MARGIN_MIN = 1.25;
+  const CHAIN_COVER_MIN = 0.5;
   const chainClear = chainMode && holeDet.z != null && holeDet.z >= CHAIN_Z_MIN
-    && pyMargin != null && pyMargin >= CHAIN_MARGIN_MIN;
+    && pyMargin != null && pyMargin >= CHAIN_MARGIN_MIN
+    && holeDet.cover != null && holeDet.cover >= CHAIN_COVER_MIN;
   const pyClear = !chainMode && !!pyBest && pyPd <= PY_PD_MAX
     && pyMargin != null && pyMargin >= PY_MARGIN_MIN;
 

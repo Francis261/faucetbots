@@ -59,7 +59,14 @@ sx, sy = RW / CW, RH / CH          # canvas -> image px (inside the canvas box)
 # ---------------------------------------------------------------- dash mask
 g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 med = cv2.medianBlur(g, 15 if min(IW, IH) > 200 else 9)
-dash = ((g.astype(np.int16) - med.astype(np.int16)) > 12).astype(np.float32)
+# The median of a 15x15 window is always the FIELD colour (dashes never fill
+# it), so dashes sit on whichever side of the median is farther out: brighter
+# on the old navy theme (light dashes), darker on the current beige theme
+# (dark dashes).  Taking only the bright sign silently produced an EMPTY mask
+# on the beige widget (density ~0.0000): z-scores then measured noise (z=34
+# at cover 0.02) and the gate dragged to a garbage peak, which the site
+# rejected.  abs() covers both themes and is a no-op on navy-era captures.
+dash = (np.abs(g.astype(np.int16) - med.astype(np.int16)) > 12).astype(np.float32)
 
 # --------------------------------------------------- the piece (blue stroke)
 b, gg, r = img[:, :, 0].astype(np.int16), img[:, :, 1].astype(np.int16), img[:, :, 2].astype(np.int16)
