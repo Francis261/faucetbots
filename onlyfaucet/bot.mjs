@@ -266,6 +266,12 @@ async function launchBrowser() {
     args: ['--no-sandbox', '--disable-blink-features=AutomationControlled', '--disable-dev-shm-usage', '--disable-gpu'],
     viewport: { width: 1280, height: 800 },
   });
+  // Playwright's default30s action timeout once turned a single missing
+  // #walletInput/button into a 30s stall per step (login took minutes of pure
+  // waiting).  Everything in this bot re-polls in its own loops — fast
+  // failing actions are strictly better.
+  ctx.setDefaultTimeout(8000);
+  ctx.setDefaultNavigationTimeout(25000);
   await ctx.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => undefined }));
   // Record the widget's pristine background PNG.  The widget builds it with
   // URL.createObjectURL; capturing those exact bytes lets the chain detector
@@ -467,7 +473,15 @@ async function gotoRetry(page, url, tries = 5) {
   for (let i = 0; i < tries; i++) {
     try {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-      await waitForCloudflare(page, 90);
+      const cleared = await waitForCloudflare(page, 90);
+      if (!cleared) {
+        // Returning true here would make every caller navigate onward from a
+        // LIVE challenge — each navigation spawns a fresh challenge instance
+        // and verification never gets a stable window.  waitForCloudflare
+        // already retried internally (clicks + up to 3 reloads); give up.
+        log(`goto: challenge not cleared after ${url.slice(0, 60)}`);
+        return false;
+      }
       return true;
     } catch (e) {
       log(`goto attempt ${i + 1}: ${e.message.slice(0, 60)}`);
@@ -517,10 +531,19 @@ async function getChallengeState(page) {
     }
   }
 
-  // Strict CF challenge detection — main challenge heading only (match rosecrypto)
+  // Strict CF challenge detection — main challenge heading only (match rosecrypto).
+  // The SPINNER phase ("Verifying you are human. This may take a few seconds.")
+  // REPLACES that heading while our click is being verified — reading it as
+  // "cleared" is what let login() navigate mid-verify, which restarts the
+  // challenge from scratch (fresh Ray ID) and is why verification never once
+  // got an uninterrupted window to finish.
+  const bodyVerifying =
+    bodyText.includes('Verifying you are human') ||
+    bodyText.includes('This may take a few seconds');
   const onChallenge =
     bodyText.includes('Performing security verification') ||
-    bodyText.includes('Just a moment...');
+    bodyText.includes('Just a moment...') ||
+    bodyVerifying;
   if (!onChallenge) return { onChallenge: false, verifying: false, verifyHuman: false, frameOpaque: false };
 
   // Extra guard: site captcha UI also present → treat as site
@@ -533,7 +556,8 @@ async function getChallengeState(page) {
     return { onChallenge: false, verifying: false, verifyHuman: false, frameOpaque: false };
   }
 
-  return await describeFrameState(page, true);
+  const d = await describeFrameState(page, true);
+  return { ...d, verifying: d.verifying || bodyVerifying };
 }
 
 async function describeFrameState(page, onChallenge) {
@@ -555,6 +579,21 @@ async function describeFrameState(page, onChallenge) {
   }
   if (!onChallenge) return { onChallenge: false, verifying: false, verifyHuman: false, frameOpaque: false };
   return { onChallenge: true, verifying, verifyHuman, hasChallengeFrame, frameOpaque };
+}
+
+// Trusted-but-human pointer press.  Turnstile's interactive checkbox engaged
+// only intermittently on raw page.mouse.click (0ms down/up): 5 dead-on clicks
+// landed and only one ever started a verify spinner.  Hover dwell + press
+// hold + small jitter matches real pointer timing closely enough for the
+// widget to accept the interaction.
+async function humanClick(page, x, y) {
+  const jx = x + (Math.random() * 4 - 2);
+  const jy = y + (Math.random() * 4 - 2);
+  await page.mouse.move(jx, jy, { steps: 8 + Math.floor(Math.random() * 6) });
+  await sleep(120 + Math.random() * 180);
+  await page.mouse.down();
+  await sleep(60 + Math.random() * 70);
+  await page.mouse.up();
 }
 
 async function clickChallengeBody(page) {
@@ -581,9 +620,7 @@ async function clickChallengeBody(page) {
       const pageX = box.x + local.x;
       const pageY = box.y + local.y;
       log(`Clicking CF via frameElement at (${Math.round(pageX)}, ${Math.round(pageY)}) box=${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}x${Math.round(box.height)} url=${url.slice(0, 80)}`);
-      await page.mouse.move(pageX, pageY, { steps: 8 });
-      await sleep(300);
-      await page.mouse.click(pageX, pageY);
+      await humanClick(page, pageX, pageY);
       return true;
     } catch {}
   }
@@ -621,15 +658,11 @@ async function clickChallengeBody(page) {
     const pageX = iframePos.x + 25;
     const pageY = iframePos.y + iframePos.h / 2;
     log(`Clicking CF iframe area at (${Math.round(pageX)}, ${Math.round(pageY)})`);
-    await page.mouse.move(pageX, pageY, { steps: 5 });
-    await sleep(200);
-    await page.mouse.click(pageX, pageY);
+    await humanClick(page, pageX, pageY);
     return true;
   }
   log('Clicking CF checkbox fallback at (215, 336)');
-  await page.mouse.move(215, 336, { steps: 5 });
-  await sleep(200);
-  await page.mouse.click(215, 336);
+  await humanClick(page, 215, 336);
   return false;
 }
 
@@ -666,7 +699,9 @@ async function waitForCloudflare(page, maxSec = 90) {
     if (inVerifyWait) {
       if (!verifyingSince) verifyingSince = Date.now();
       // Stay patient — interrupting verify restarts the challenge
-      if (Date.now() - verifyingSince > 45000 && reloadCount < 3) {
+      if (Date.now() - verifyingSince > 90000 && reloadCount < 3) {
+        // 90s, not 45s: a slow interactive verify (observed a 60s+ spinner)
+        // gets RESTARTED by a reload — only recover a genuinely wedged one.
         log('CF verifying stuck, reloading...');
         try { await page.reload({ waitUntil: 'domcontentloaded', timeout: 20000 }); } catch {}
         await sleep(5000);
@@ -749,7 +784,7 @@ async function waitForCloudflare(page, maxSec = 90) {
           return false;
         }
         log('On challenge, clicking widget fallback...');
-        await page.mouse.click(215, 336);
+        await humanClick(page, 215, 336);
         lastClickAt = now;
         assumeVerifyUntil = Date.now() + 30000;
         await sleep(6000);
@@ -833,7 +868,14 @@ async function hasTurnstile(page) {
 }
 
 async function ensureCleared(page) {
-  const ok = await waitForCloudflare(page, 90);
+  let ok = await waitForCloudflare(page, 90);
+  if (!ok) {
+    // One patient retry: pressing onward from a live challenge (navigating,
+    // filling, clicking) restarts it — the loop that consumed 4 minutes in
+    // once23.  Callers must treat a false return as "stop, do not navigate".
+    log('ensureCleared: challenge not cleared, retrying once');
+    ok = await waitForCloudflare(page, 60);
+  }
   if (!ok) {
     log('ensureCleared: waitForCloudflare failed');
     try { await page.screenshot({ path: `${SHOT_DIR}/cleared-fail-${Date.now()}.png`, fullPage: true }); } catch {}
@@ -858,6 +900,7 @@ async function ensureCleared(page) {
     ).catch(() => '');
     if (token.length < 10) await solveTurnstile(page);
   }
+  return ok;
 }
 
 async function isLoggedIn(page) {
@@ -869,7 +912,10 @@ async function isLoggedIn(page) {
 
 async function login(page, email) {
   log('Clicking Login / Register...');
-  await ensureCleared(page);
+  if (!(await ensureCleared(page))) {
+    log('login: CF challenge will not clear — aborting (navigating would restart it)');
+    return false;
+  }
   // If we're not on a page with the login entry point, go home first
   const hasLoginEntry = await page.evaluate(() =>
     (document.body?.innerText || '').includes('Login / Register')
@@ -878,37 +924,63 @@ async function login(page, email) {
     log('Login entry not found, reloading home...');
     await gotoRetry(page, BASE_URL);
     await sleep(2000);
-    await ensureCleared(page);
+    if (!(await ensureCleared(page))) {
+      log('login: challenge after home reload — aborting');
+      return false;
+    }
   }
   await page.click('text=Login / Register').catch(() => {});
   await sleep(2000);
-  // Login may navigate to /auth/login (possibly with CF handoff token)
-  if (page.url().includes('/auth/login')) {
-    log(`On login URL: ${page.url().slice(0, 120)}`);
-    await ensureCleared(page);
-    // Strip challenge handoff token if still present
-    if (page.url().includes('__cf_chl_rt_tk')) {
-      try { await page.goto(`${BASE_URL}/auth/login`, { waitUntil: 'domcontentloaded', timeout: 20000 }); } catch {}
-      await ensureCleared(page);
-    }
-  } else {
-    await ensureCleared(page);
+  if (!(await ensureCleared(page))) {
+    log('login: challenge after Login click — aborting');
+    return false;
   }
-  // Wait for wallet input to appear
-  let hasWallet = false;
+
+  // Reconcile to a clean, cleared login page.  A CF interstitial handoff can
+  // land on ANY url (recover1: cleared back onto / with no form) and can
+  // carry a ?__cf_chl_rt_tk token that never renders the form — so never
+  // start the wallet wait from wherever the challenge dance left us.
+  const loginUrl = `${BASE_URL}/auth/login`;
+  let hasWallet = await page.evaluate(() => !!document.querySelector('#walletInput')).catch(() => false);
+  if (!hasWallet && (!page.url().startsWith(loginUrl) || page.url().includes('__cf_chl_rt_tk'))) {
+    log(`login: going to /auth/login from ${page.url().slice(0, 80)}`);
+    try { await page.goto(loginUrl, { waitUntil: 'domcontentloaded', timeout: 20000 }); } catch {}
+    if (!(await ensureCleared(page))) {
+      log('login: challenge at login page — aborting');
+      return false;
+    }
+  }
+
+  // Wait for the wallet input on /auth/login; if the form never renders
+  // there, fall back to the home-page Login / Register entry (modal mount).
   for (let i = 0; i < 10; i++) {
     hasWallet = await page.evaluate(() => !!document.querySelector('#walletInput')).catch(() => false);
     if (hasWallet) break;
     log(`Waiting for #walletInput (${i})... url=${page.url().slice(0, 100)}`);
     await sleep(1500);
-    if (i === 4) {
-      try { await page.goto(`${BASE_URL}/auth/login`, { waitUntil: 'domcontentloaded', timeout: 20000 }); } catch {}
-      await ensureCleared(page);
+  }
+  if (!hasWallet) {
+    log('No form on /auth/login — trying home Login / Register entry');
+    if (!(await gotoRetry(page, BASE_URL))) {
+      log('login: home nav failed during form fallback');
+      return false;
+    }
+    await sleep(2000);
+    if (!(await ensureCleared(page))) {
+      log('login: challenge at home during form fallback — aborting');
+      return false;
+    }
+    await page.click('text=Login / Register').catch(() => {});
+    await sleep(3000);
+    for (let i = 0; i < 6 && !hasWallet; i++) {
+      hasWallet = await page.evaluate(() => !!document.querySelector('#walletInput')).catch(() => false);
+      if (!hasWallet) { log(`home form wait (${i})... url=${page.url().slice(0, 100)}`); await sleep(1500); }
     }
   }
   if (!hasWallet) {
     log('walletInput never appeared');
     try { await page.screenshot({ path: `${SHOT_DIR}/login-nowallet-${Date.now()}.png`, fullPage: true }); } catch {}
+    return false;
   }
   await page.fill('#walletInput', email).catch(() => {});
   await sleep(1000);
@@ -920,13 +992,19 @@ async function login(page, email) {
   }
   await page.click('button:has-text("Continue"), button[type="submit"]').catch(() => {});
   await sleep(5000);
-  await ensureCleared(page);
+  if (!(await ensureCleared(page))) {
+    log('login: challenge after submit — aborting before retry');
+    return false;
+  }
   if (await isLoggedIn(page)) {
     log('Login successful!');
     return true;
   }
   // Retry once with a fresh challenge clear
-  await ensureCleared(page);
+  if (!(await ensureCleared(page))) {
+    log('login: challenge before retry — aborting');
+    return false;
+  }
   await page.fill('#walletInput', email).catch(() => {});
   await sleep(500);
   await page.click('button:has-text("Continue"), button[type="submit"]').catch(() => {});
@@ -2081,29 +2159,57 @@ async function waitForFaucetReady(page, timeout = 10000) {
 // instead of failing every round that follows one bad Verify.
 async function recoverSession(page, email) {
   log('Session recovery: logout -> login (reset stuck verification state)');
-  const clicked = await page.evaluate(() => {
-    const a = [...document.querySelectorAll('a')].find(el =>
-      /logout/i.test((el.innerText || '').trim()) || /logout/i.test(el.getAttribute('href') || ''));
-    if (a) { a.click(); return true; }
+  const t0 = Date.now();
+  const deadline = t0 + 360000;
+
+  // Phase 1 — logout, VERIFIED on a real content page.  The logout nav gets
+  // CF-challenged; once23's "logout ok" was read off a challenge page
+  // (isLoggedIn=false there means nothing), the server session survived and
+  // recover2 then found the profile still logged in — i.e. the stuck
+  // verification never actually reset.  Require: challenge cleared + origin
+  // URL + real body + negative isLoggedIn, else try the direct endpoints.
+  const logoutPaths = ['/auth/logout', '/logout'];
+  let loggedOut = false;
+  for (let attempt = 0; attempt <= logoutPaths.length && !loggedOut; attempt++) {
+    if (attempt === 0) {
+      const clicked = await page.evaluate(() => {
+        const a = [...document.querySelectorAll('a')].find(el =>
+          /logout/i.test((el.innerText || '').trim()) || /logout/i.test(el.getAttribute('href') || ''));
+        if (a) { a.click(); return true; }
+        return false;
+      }).catch(() => false);
+      if (!clicked) { log('logout: no logout link — using direct endpoint'); continue; }
+    } else {
+      log(`logout: direct endpoint ${logoutPaths[attempt - 1]}`);
+      try { await page.goto(`${BASE_URL}${logoutPaths[attempt - 1]}`, { waitUntil: 'domcontentloaded', timeout: 20000 }); } catch {}
+    }
+    await sleep(2500);
+    const cleared = await ensureCleared(page);
+    const cs = await getChallengeState(page).catch(() => ({ onChallenge: true }));
+    const bodyLen = await page.evaluate(() => (document.body?.innerText || '').trim().length).catch(() => 0);
+    const realPage = !cs.onChallenge && page.url().startsWith(BASE_URL) && bodyLen > 60;
+    loggedOut = realPage && !(await isLoggedIn(page));
+    log(`logout attempt ${attempt}: cleared=${cleared} realPage=${realPage} loggedOut=${loggedOut} url=${page.url().slice(0, 70)}`);
+    if (!cleared) { log('logout: challenge stuck — aborting recovery'); return false; }
+    if (Date.now() > deadline) { log('logout: recovery deadline hit'); return false; }
+  }
+  log(`logout ${loggedOut ? 'ok' : 'DID NOT TAKE'} [${Math.round((Date.now() - t0) / 1000)}s]`);
+  if (!loggedOut) {
+    log('Session recovery: cannot reset stuck verification without a real logout');
     return false;
-  }).catch(() => false);
-  if (!clicked) {
-    try { await page.goto(`${BASE_URL}/auth/logout`, { waitUntil: 'domcontentloaded', timeout: 20000 }); } catch {}
   }
-  await sleep(2500);
-  await ensureCleared(page);
-  if (await isLoggedIn(page)) {
-    try { await page.goto(`${BASE_URL}/logout`, { waitUntil: 'domcontentloaded', timeout: 20000 }); } catch {}
-    await sleep(2000);
-    await ensureCleared(page);
-  }
-  const loggedOut = !(await isLoggedIn(page));
-  log(`logout ${loggedOut ? 'ok' : 'did not take'} — logging in again`);
+
   const ok = await login(page, email);
-  await gotoRetry(page, FAUCET_URL);
-  await sleep(3000);
-  await ensureCleared(page);
-  log(`Session recovery ${ok ? 'done' : 'LOGIN FAILED'}`);
+  if (ok) {
+    await gotoRetry(page, FAUCET_URL);
+    await sleep(3000);
+    await ensureCleared(page);
+  } else {
+    // Login already aborted on an uncleared challenge; navigating to the
+    // faucet now would just spawn another challenge instance for nothing.
+    log('Session recovery: LOGIN FAILED — skipping faucet nav');
+  }
+  log(`Session recovery ${ok ? 'done' : 'LOGIN FAILED'} in ${Math.round((Date.now() - t0) / 1000)}s`);
   return ok;
 }
 
@@ -2316,7 +2422,7 @@ async function runOnce(email) {
     await sleep(3000);
     await ensureCleared(page);
     if (!(await isLoggedIn(page))) {
-      await login(page, email);
+      if (!(await login(page, email))) throw new Error('login failed');
     } else {
       log('Already logged in');
     }
@@ -2355,7 +2461,7 @@ async function runLoop(email) {
         if (!(await gotoRetry(page, BASE_URL))) throw new Error('home nav failed');
         await sleep(3000);
         await ensureCleared(page);
-        if (!(await isLoggedIn(page))) await login(page, email);
+        if (!(await isLoggedIn(page)) && !(await login(page, email))) throw new Error('login failed');
         if (!(await gotoRetry(page, FAUCET_URL))) throw new Error('faucet nav failed');
         await sleep(4000);
         await ensureCleared(page);
@@ -2480,6 +2586,7 @@ export {
   log, sleep, launchBrowser, gotoRetry, waitForCloudflare, ensureCleared, hasTurnstile,
   solveTurnstile, isLoggedIn, login, dismissSweetAlert, getPageState, getPuzzleBox,
   handlePuzzle, capturePuzzles, findHolePy, findPiecePy, analyzePuzzle, claimFaucet,
+  recoverSession,
   waitForCooldown, waitOutBlock, waitManualSolve, loadAccounts,
   getCanvasTransform, canvasRectFor, freshGeom, freshBgPath, clampClip, consensusGate,
   ensureClickable, captureWidgetFrame, noteRoundStart, roundSpacingLeft,
