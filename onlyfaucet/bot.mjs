@@ -1012,6 +1012,7 @@ async function getPageState(page) {
         verification: text.includes('Verification Required'),
         puzzle: text.includes('Drag the shape'),
         captchaError: text.includes('Please complete the captcha'),
+        verificationFailed: /verification failed/i.test(text),
         cooldown: waitSec !== null && !temporarilyBlocked,
         waitSec,
         temporarilyBlocked,
@@ -1023,7 +1024,7 @@ async function getPageState(page) {
       };
     });
   } catch (e) {
-    return { text: '', success: false, verification: false, puzzle: false, captchaError: false, cooldown: false, waitSec: null, temporarilyBlocked: false, blockSec: null, claimBtn: false, captchaAnswer: '', hRect: null, cbRect: null, verifyRect: null, hasForm: false, navError: true };
+    return { text: '', success: false, verification: false, puzzle: false, captchaError: false, verificationFailed: false, cooldown: false, waitSec: null, temporarilyBlocked: false, blockSec: null, claimBtn: false, captchaAnswer: '', hRect: null, cbRect: null, verifyRect: null, hasForm: false, navError: true };
   }
 }
 
@@ -1157,7 +1158,10 @@ async function handlePuzzle(page, attempt = 0) {
   if (clip.y + clip.height > vp.height) clip.height = Math.max(50, vp.height - clip.y);
   if (clip.x + clip.width > vp.width) clip.width = Math.max(50, vp.width - clip.x);
 
-  await sleep(800);
+  // The probe above already proved the canvas rendered; 250ms is just layout
+  // settle after scrollIntoView (was 800ms — visible as "delay before it
+  // clicks the widget").
+  await sleep(250);
   const shotPath = `${SHOT_DIR}/puzzle-${ts()}.png`;
   const shot = await page.screenshot({ path: shotPath, clip });
   log(`Screenshot ${shot.length} bytes clip=${JSON.stringify(clip)}`);
@@ -1663,6 +1667,12 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
       return false; // count it: otherwise an unclear outcome loops forever
     }
 
+    // The widget commits the drop asynchronously (endDrag -> answer field ->
+    // server pickup).  Clicking Verify in the same instant races that commit
+    // and the platform answers "verification failed" even for a perfect
+    // drop (user-observed).  Give it a beat before reading state/submitting.
+    await sleep(700);
+
     // Click Verify Selection — may navigate
     const st = await getPageState(page);
     submitGuard.used = true;
@@ -1689,6 +1699,17 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
       if (after.navError) { await sleep(1500); continue; }
       if (after.success) { log('Puzzle solved — claim successful!'); return true; }
       if (after.cooldown) { log('Cooldown after puzzle — claim likely succeeded'); return true; }
+      if (after.verificationFailed) {
+        // The platform's own rejection: "Verification failed, please try
+        // again".  It leaves the ACCOUNT in a stuck state — every later solve
+        // is rejected the same way until logout/login (user-observed).  Save
+        // the evidence, back out before forceFail, and let claimFaucet's
+        // session recovery replay the proven reset before the next round.
+        await dismissSweetAlert(page);
+        await page.screenshot({ path: `${SHOT_DIR}/verify-failed-${ts()}.png`, fullPage: true }).catch(() => {});
+        log('Site said: verification failed — account state now needs a reset');
+        return bailOutOfPuzzle(page, 'verification-failed', false);
+      }
       if (after.captchaError) {
         await dismissSweetAlert(page);
         // A real attempt was rejected and the site is already serving a fresh
@@ -1698,6 +1719,10 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
       }
       if (after.verification && !after.success && i >= 3) {
         await dismissSweetAlert(page);
+        // Silent reject: no error text in the DOM, but the verify went
+        // nowhere.  Screenshot it — if the widget holds the message in its
+        // closed shadow root, this is the only way to see it.
+        await page.screenshot({ path: `${SHOT_DIR}/verify-stuck-${ts()}.png`, fullPage: true }).catch(() => {});
         log('Still verification after verify — reject');
         break;
       }
@@ -1718,15 +1743,24 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
         break;
       }
       if (cur.puzzle) {
+        // A fresh puzzle after an already-fired Verify is a rejection serving
+        // the next round — re-entering would drag a widget that can never be
+        // submitted (submitGuard), burning its countdown for nothing.
+        if (submitGuard.used) return bailOutOfPuzzle(page, 'fresh-puzzle-after-verify', false);
         await page.evaluate(() => {
           const b = document.querySelector('[id^="rb_btn_"]');
           if (b) b.click();
         }).catch(() => {});
         await sleep(800);
-        // Re-screenshot after reset for fresh coordinates
         break; // re-enter handlePuzzle for fresh vision/py on new puzzle
       }
       if (cur.verification) {
+        // Verify already fired this claim cycle: clicking cb here opens a
+        // SECOND widget while the first round is still unresolved — the
+        // re-entry then bails AFTER the new countdown started (the
+        // "malfunctioning" double-widget sequence).  Bail cleanly instead;
+        // claimFaucet resets the stuck session before the next round.
+        if (submitGuard.used) return bailOutOfPuzzle(page, 'verify-unconfirmed', false);
         const clicked = await page.evaluate(() => {
           const c = document.querySelector('[id^="cb_"]');
           if (c) { c.click(); return true; }
@@ -1927,11 +1961,62 @@ async function capturePuzzles(page, count = 3, maxMinutes = 12) {
   return done(st.temporarilyBlocked ? 'blocked' : 'captured');
 }
 
-async function claimFaucet(page, email) {
+// Bounded wait until the faucet page shows ANY actionable state.  goto()
+// resolves at domcontentloaded and Cloudflare clearing proves only that the
+// shell rendered — the claim widget/ads hydrate later, and deciding (or
+// clicking) on a half-rendered page is exactly the "too fast, page not loaded"
+// behaviour observed from the outside.  Returns the first ready state, or the
+// final one on timeout.
+async function waitForFaucetReady(page, timeout = 10000) {
+  const end = Date.now() + timeout;
+  let st = await getPageState(page);
+  while (Date.now() < end) {
+    if (st.navError || st.claimBtn || st.hasForm || st.verification || st.puzzle
+      || st.success || st.cooldown || st.temporarilyBlocked) return st;
+    await sleep(700);
+    st = await getPageState(page);
+  }
+  return st;
+}
+
+// Stuck verification state: after a rejected/unconfirmed Verify the platform
+// answers EVERY subsequent solve with "Verification failed, please try again"
+// — even a correct manual drag from a fresh browser — until the account logs
+// out and back in (user-observed reset).  Replay that proven workaround
+// instead of failing every round that follows one bad Verify.
+async function recoverSession(page, email) {
+  log('Session recovery: logout -> login (reset stuck verification state)');
+  const clicked = await page.evaluate(() => {
+    const a = [...document.querySelectorAll('a')].find(el =>
+      /logout/i.test((el.innerText || '').trim()) || /logout/i.test(el.getAttribute('href') || ''));
+    if (a) { a.click(); return true; }
+    return false;
+  }).catch(() => false);
+  if (!clicked) {
+    try { await page.goto(`${BASE_URL}/auth/logout`, { waitUntil: 'domcontentloaded', timeout: 20000 }); } catch {}
+  }
+  await sleep(2500);
+  await ensureCleared(page);
+  if (await isLoggedIn(page)) {
+    try { await page.goto(`${BASE_URL}/logout`, { waitUntil: 'domcontentloaded', timeout: 20000 }); } catch {}
+    await sleep(2000);
+    await ensureCleared(page);
+  }
+  const loggedOut = !(await isLoggedIn(page));
+  log(`logout ${loggedOut ? 'ok' : 'did not take'} — logging in again`);
+  const ok = await login(page, email);
+  await gotoRetry(page, FAUCET_URL);
+  await sleep(3000);
+  await ensureCleared(page);
+  log(`Session recovery ${ok ? 'done' : 'LOGIN FAILED'}`);
+  return ok;
+}
+
+async function claimFaucet(page, email, retried = false) {
   submitGuard.used = false; // fresh claim cycle => allowed one Verify
   log('Checking faucet status...');
   await ensureCleared(page);
-  let st = await getPageState(page);
+  let st = await waitForFaucetReady(page, 10000);
   log(`state: success=${st.success} verif=${st.verification} puzzle=${st.puzzle} cooldown=${st.cooldown} wait=${st.waitSec}s claimBtn=${st.claimBtn} blocked=${st.temporarilyBlocked} blockSec=${st.blockSec}`);
 
   if (st.temporarilyBlocked) {
@@ -1972,6 +2057,7 @@ async function claimFaucet(page, email) {
       return 'success';
     }
     log('Puzzle solve did not confirm success');
+    await recoverSession(page, email); // replay the logout/login reset BEFORE the next round
     return 'puzzle-failed';
   }
 
@@ -1996,9 +2082,11 @@ async function claimFaucet(page, email) {
       return false;
     });
     log(`Submitted: ${submitted}`);
-    await sleep(8000);
+    // Blind 8s sleep used to read the page mid-navigation when the server was
+    // slow — wait for a real state marker instead (min 4s for the redirect).
+    await sleep(4000);
 
-    st = await getPageState(page);
+    st = await waitForFaucetReady(page, 9000);
     log(`after submit: success=${st.success} verif=${st.verification} puzzle=${st.puzzle} cooldown=${st.cooldown} wait=${st.waitSec} captchaErr=${st.captchaError}`);
     await page.screenshot({ path: `${SHOT_DIR}/after-submit-${Date.now()}.png`, fullPage: true }).catch(() => {});
 
@@ -2032,6 +2120,7 @@ async function claimFaucet(page, email) {
         log(`Claim via puzzle after submit. Claims=${n}`);
         return 'success';
       }
+      await recoverSession(page, email); // replay the logout/login reset BEFORE the next round
       return 'puzzle-failed';
     }
     if (st.cooldown) {
@@ -2044,6 +2133,18 @@ async function claimFaucet(page, email) {
   }
 
   log('No claim available');
+  // Distinguish "genuinely nothing to claim" from "session died / page never
+  // hydrated": a logged-out page otherwise sits at 'none' forever.  One
+  // bounded re-login retry, then give up honestly.
+  if (!retried && !(await isLoggedIn(page))) {
+    log('No claim UI and not logged in — re-login and retry once');
+    if (await login(page, email)) {
+      await gotoRetry(page, FAUCET_URL);
+      await sleep(3000);
+      await ensureCleared(page);
+      return claimFaucet(page, email, true);
+    }
+  }
   return 'none';
 }
 
