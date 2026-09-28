@@ -77,8 +77,9 @@ Budget ~10 min per 30 MB file.
 
 ## REST API
 
-`node server.mjs` starts an HTTP server (default `127.0.0.1:8788`, no auth —
-localhost only unless `--host` says otherwise):
+**Full reference: [`API.md`](API.md).**  `node server.mjs` starts an HTTP
+server (default `127.0.0.1:8788`, no auth — localhost only unless `--host`
+says otherwise):
 
 | Method | Path | Body / Query | Returns |
 |---|---|---|---|
@@ -132,7 +133,7 @@ curl -O localhost:8788/api/files/Post%20493%20video%202.preview480.mp4
 ## Files
 
 - `terabot.mjs` — the bot (CLI + exported `runTerabot(opts, hooks)` for the API)
-- `server.mjs` — the REST API server
+- `server.mjs` — the REST API server ([`API.md`](API.md) — full endpoint reference)
 - `login.mjs` — one-shot login that persists `cookies.json`
 - `probe*.mjs` — reconnaissance scripts (page/network/API experiments)
 - `output/` — runtime output (gitignored)
