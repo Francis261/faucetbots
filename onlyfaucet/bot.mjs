@@ -1817,6 +1817,9 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
       continue;
     }
     log(`Drop accepted: err=${dropErr.toFixed(1)}px`);
+    // Visual ground truth: the piece's resting place vs the hole, BEFORE the
+    // click (verify-failed shots are all post-reload resets).
+    try { await page.screenshot({ path: `${SHOT_DIR}/pre-verify-${Date.now()}.png` }); } catch {}
 
     // Never Verify inside the force-fail window: a reload here is free, a
     // submit that gets rejected mid-countdown is not.
@@ -1837,6 +1840,32 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
     // Click Verify Selection — may navigate
     const st = await getPageState(page);
     submitGuard.used = true;
+    // Capture the verify submit's raw request/response: the server's exact
+    // verdict (wrong answer vs stale/invalid token vs bot flag) is otherwise
+    // unrecoverable — the modal only says "Verification failed".
+    if (!page.__ofVerifyHook) {
+      page.__ofVerifyHook = true;
+      page.on('response', async (res) => {
+        try {
+          const req = res.request();
+          const u = res.url();
+          const isAsset = /\.(png|jpe?g|gif|css|js|woff2?|svg|webp)(\?|$)/i.test(u);
+          if (isAsset) return;
+          const interesting = req.method() === 'POST' || /verify|captcha|x-?captcha/i.test(u);
+          if (!interesting) return;
+          const pd = (req.postData() || '').slice(0, 500);
+          const body = await res.text().catch(() => '');
+          log(`NET ${res.status()} ${req.method()} ${u.slice(0, 130)}`);
+          if (pd) log(`NET-REQ ${pd}`);
+          if (body && !body.startsWith('<!DOCTYPE') && !body.startsWith('<html')) log(`NET-RES ${body.slice(0, 600)}`);
+          else if (body) {
+            // HTML result page — pull out any error/verdict text
+            const m = body.match(/verification failed|try again|wrong|invalid|error[^<]{0,120}/i);
+            if (m) log(`NET-RES-HTML ${m[0].slice(0, 300)}`);
+          }
+        } catch {}
+      });
+    }
     const navPromise = page.waitForNavigation({ timeout: 15000, waitUntil: 'domcontentloaded' }).catch(() => null);
     if (st.verifyRect) {
       const esc = await ensureClickable(page, st.verifyRect.x, st.verifyRect.y);
