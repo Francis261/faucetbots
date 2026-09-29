@@ -114,7 +114,8 @@ no auth — localhost only unless `--host` says otherwise):
 | Method | Path | Body / Query | Returns |
 |---|---|---|---|
 | GET | `/health` | | `{ok, session, jobs}` |
-| POST | `/api/info` | `{url?}` | **one synchronous call** — `200` with `download_url`, `stream_url`, `stream_segments`, `video` and full `metadata` (waits ~15-25 s in the queue) |
+| POST | `/api/info` | `{url?}` | **one synchronous call** — `200` with `download_url`, `stream_url`, `stream_segments`, `video` and full `metadata` (waits ~3-8 s in the queue) |
+| POST | `/api/urls` | `{url?}` | **only** `{download_url, stream_url}` — same extraction, no metadata payload (also `GET /api/urls?url=`) |
 | POST | `/api/extract` | `{url?}` | `202 {id}` — metadata + links job (result carries the same envelope) |
 | POST | `/api/download` | `{url?, mode: "preview"\|"original"}` | `202 {id}` |
 | GET | `/api/jobs` | | job summaries, newest first |

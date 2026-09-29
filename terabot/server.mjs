@@ -11,6 +11,10 @@
 //   POST   /api/info            {url?} -> 200 (one synchronous call: metadata
 //                                  + download_url + stream_url/segments;
 //                                  typically ~3-8 s via the fast path)
+//   POST   /api/urls            {url?} -> 200 {download_url, stream_url}
+//                                 (same extraction, but ONLY the two links —
+//                                  no metadata payload; GET /api/urls?url=
+//                                  works too)
 //   POST   /api/extract         {url?} -> 202 {id}     metadata + links (job)
 //   POST   /api/download        {url?, mode} -> 202 {id}
 //                                  mode "preview"  — fast 480p transcode
@@ -273,6 +277,7 @@ async function handle(req, res) {
     endpoints: {
       'GET /health': 'liveness + session/job counters',
       'POST /api/info': '{url?} -> 200  ONE call: metadata + download_url + stream_url (typically ~3-8s)',
+      'POST /api/urls': '{url?} -> 200  ONLY {download_url, stream_url} (also GET /api/urls?url=)',
       'POST /api/extract': '{url?} -> 202 {id}  metadata + links job',
       'POST /api/download': '{url?, mode: "preview"|"original"} -> 202 {id}',
       'GET /api/jobs': 'job summaries (newest first)',
@@ -330,6 +335,31 @@ async function handle(req, res) {
       });
     }
     return sendJson(res, 200, { job_id: job.id, ...settled.result });
+  }
+  // ---- lean: only the two URLs, nothing else (same queue/fast path)
+  if (p === '/api/urls' && (req.method === 'POST' || req.method === 'GET')) {
+    let url = null;
+    if (req.method === 'POST') {
+      const b = await bodyOf(req);
+      if (b === null) return sendJson(res, 400, { error: 'invalid JSON' });
+      if (badUrl(b.url)) return sendJson(res, 400, { error: 'url must be http(s)' });
+      url = b.url;
+    } else {
+      url = u.searchParams.get('url');
+      if (badUrl(url)) return sendJson(res, 400, { error: 'url must be http(s)' });
+    }
+    const job = enqueue(makeJob('extract', null, url));
+    const settled = await job.settled;
+    if (settled.status === 'cancelled') return sendJson(res, 409, { error: 'cancelled' });
+    if (!settled.result) {
+      return sendJson(res, 502, {
+        error: settled.error || 'extract failed', logs: settled.logs.slice(-30),
+      });
+    }
+    return sendJson(res, 200, {
+      download_url: settled.result.download_url,   // original dlink, null if
+      stream_url: settled.result.stream_url,       // unavailable (anon/errno)
+    });
   }
   if (p === '/api/jobs' && req.method === 'GET') {
     const list = [...jobs.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));

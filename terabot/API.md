@@ -135,6 +135,28 @@ curl -s -X POST http://127.0.0.1:8788/api/info \
   -d '{"url":"https://www.1024tera.com/sharing/link?surl=..."}'
 ```
 
+### `POST /api/urls` — only the two links
+
+Same body (and same queue/fast-path extraction as `/api/info`), but the
+response is **just** the two URLs — no metadata payload:
+
+```json
+{
+  "download_url": "https://d.1024tera.com/file/...?sign=...",
+  "stream_url": "https://data.1024tera.com/file/...m3u8..."
+}
+```
+
+`download_url` is `null` when the original dlink is unavailable (anonymous
+session → `errno 2`, share not accepted → `14`, `need verify_v2` → `400310`);
+`stream_url` is the main HLS playlist window.  `GET /api/urls?url=…` works
+too.  Extraction failures answer `502` exactly like `/api/info`.
+
+```bash
+curl -s http://127.0.0.1:8788/api/urls
+# {"download_url": "https://...", "stream_url": "https://..."}
+```
+
 ### `POST /api/extract` — async variant
 
 Same body. Returns `202 {"id": "<job id>", "status": "queued"}` immediately;
@@ -225,7 +247,8 @@ the output directory → `400`. Also supports `HEAD`.
 - **Queue:** jobs run FIFO with `--concurrency` slots (default **1**).
   Extraction uses the browser-free fast path — Chromium is launched only by
   the automatic fallback or `mode: "original"` jobs (~300-400 MB RAM).
-- **`POST /api/info` and `GET /api/metadata` obey the same queue** — they wait
+- **`POST /api/info`, `POST /api/urls` and `GET /api/metadata` obey the same
+  queue** — they wait
   for their slot before starting, so their latency = queue wait + ~3-8 s.
 - **History:** last 100 jobs kept (oldest finished jobs drop out); logs capped
   at 300 lines per job.
@@ -246,7 +269,7 @@ All errors are JSON: `{"error": "message"}` (job failures add `logs`).
 | `400` | invalid JSON body · `url` not `http(s)` · `mode: original` without `cookies.json` · path traversal |
 | `404` | unknown job id · unknown file · unknown route |
 | `409` | `DELETE` on a running job · sync call cancelled |
-| `502` | sync call (`/api/info`, `/api/metadata`) job failed — body has `error` + tail of `logs` |
+| `502` | sync call (`/api/info`, `/api/urls`, `/api/metadata`) job failed — body has `error` + tail of `logs` |
 | `500` | unexpected server error |
 
 A `202`'d job that later fails shows `status: "failed"` + `error` on
@@ -262,6 +285,9 @@ BASE=http://127.0.0.1:8788
 # 1) one-call info
 curl -s -X POST $BASE/api/info -H 'content-type: application/json' \
      -d '{"url":"https://www.1024tera.com/sharing/link?surl=..."}'
+
+# 1b) JUST the two URLs — {"download_url":"...","stream_url":"..."}
+curl -s -X POST $BASE/api/urls -H 'content-type: application/json' -d '{}'
 
 # 2) submit + poll until done (preview download)
 ID=$(curl -s -X POST $BASE/api/download -d '{"mode":"preview"}' \
