@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 // server.mjs — REST API for terabot
 //
-//   node server.mjs [--port 8788] [--host 127.0.0.1] [--out DIR]
-//                   [--cookies FILE] [--concurrency N]
+//   node terabot.mjs serve [--port 8788] [--host 127.0.0.1] [--out DIR]
+//                          [--cookies FILE] [--concurrency N]
+//   (running `node server.mjs …` directly works too)
 //
 // Endpoints (JSON, CORS enabled):
 //   GET    /                    endpoint index
 //   GET    /health              liveness + session/job counters
 //   POST   /api/info            {url?} -> 200 (one synchronous call: metadata
 //                                  + download_url + stream_url/segments;
-//                                  waits ~15-25 s in the queue)
+//                                  typically ~3-8 s via the fast path)
 //   POST   /api/extract         {url?} -> 202 {id}     metadata + links (job)
 //   POST   /api/download        {url?, mode} -> 202 {id}
 //                                  mode "preview"  — fast 480p transcode
@@ -20,13 +21,16 @@
 //   GET    /api/jobs/:id        full job: status, progress, logs, result
 //   DELETE /api/jobs/:id        cancel a queued job (409 if running)
 //   GET    /api/metadata?url=   synchronous shortcut -> metadata JSON
-//                                 (waits for its queue slot; ~20-30 s)
+//                                 (waits for its queue slot)
 //   GET    /api/files           list files in the output directory
 //   GET    /api/files/:name     download a file
 //
-// Jobs run through a queue (default concurrency 1 — each job launches a
-// headless Chromium).  The server binds localhost only unless --host says
-// otherwise; there is no auth, so do not expose it publicly.
+// Jobs run through a queue (default concurrency 1).  Extraction is
+// browser-free on the fast path (a Playwright fallback is used only if it
+// fails, or for --download-original).  On boot the server auto-runs the
+// login flow when .account.json exists but cookies.json does not.
+// The server binds localhost only unless --host says otherwise; there is no
+// auth, so do not expose it publicly.
 
 import { createServer } from 'node:http';
 import { createReadStream, existsSync, readdirSync, statSync } from 'node:fs';
@@ -57,9 +61,10 @@ function parseArgs(argv) {
   }
   return opts;
 }
-const opts = parseArgs(process.argv.slice(2));
-const cookiesPath = opts.cookies || path.join(__dirname, 'cookies.json');
-const sessionPresent = () => existsSync(cookiesPath);
+let opts = null;
+let cookiesPath = null;
+const sessionPresent = () =>
+  existsSync(cookiesPath || path.join(__dirname, 'cookies.json'));
 
 // ---------------------------------------------------------------- jobs
 const jobs = new Map();      // id -> job
@@ -267,13 +272,13 @@ async function handle(req, res) {
     service: 'terabot-api',
     endpoints: {
       'GET /health': 'liveness + session/job counters',
-      'POST /api/info': '{url?} -> 200  ONE call: metadata + download_url + stream_url (waits ~15-25s)',
+      'POST /api/info': '{url?} -> 200  ONE call: metadata + download_url + stream_url (typically ~3-8s)',
       'POST /api/extract': '{url?} -> 202 {id}  metadata + links job',
       'POST /api/download': '{url?, mode: "preview"|"original"} -> 202 {id}',
       'GET /api/jobs': 'job summaries (newest first)',
       'GET /api/jobs/:id': 'full job incl. logs, progress, result',
       'DELETE /api/jobs/:id': 'cancel a queued job',
-      'GET /api/metadata?url=': 'synchronous metadata shortcut (waits ~20-30s)',
+      'GET /api/metadata?url=': 'synchronous metadata shortcut',
       'GET /api/files': 'list output files',
       'GET /api/files/:name': 'download a file',
     },
@@ -398,21 +403,51 @@ async function handle(req, res) {
   return sendJson(res, 404, { error: 'not found' });
 }
 
-const server = createServer((req, res) => {
-  handle(req, res).catch((e) => {
-    try { sendJson(res, 500, { error: String(e && e.message || e) }); } catch { /* gone */ }
-  });
-});
-
-server.listen(opts.port, opts.host, () => {
-  console.error(`[api] terabot REST API on http://${opts.host}:${opts.port}`);
-  console.error(`[api] out=${opts.out} session=${sessionPresent() ? cookiesPath : 'anonymous'} concurrency=${opts.concurrency}`);
-});
-
-for (const sig of ['SIGINT', 'SIGTERM']) {
-  process.on(sig, () => {
-    console.error(`[api] ${sig} — shutting down (in-flight jobs are aborted; chromium may take a moment)`);
-    server.close(() => process.exit(0));
-    setTimeout(() => process.exit(0), 1500).unref();
-  });
+// ---------------------------------------------------------------- boot
+// Auto-login: a fresh checkout has .account.json (gitignored) but no
+// cookies.json — `node terabot.mjs` then logs in on its own so every
+// endpoint immediately serves logged-in dlinks.
+async function maybeAutoLogin() {
+  const account = path.join(__dirname, '.account.json');
+  if (sessionPresent() || !existsSync(account)) return;
+  console.error('[api] no cookies.json — logging in (.account.json present)…');
+  try {
+    const { runLogin } = await import('./login.mjs');
+    const ok = await runLogin({ headful: false });
+    console.error(ok
+      ? '[api] login OK — logged-in dlinks enabled'
+      : '[api] login FAILED — running anonymous (extract still works)');
+  } catch (e) {
+    console.error(`[api] auto-login error: ${e.message} — running anonymous`);
+  }
 }
+
+export function startServer(argv = []) {
+  opts = parseArgs(argv);
+  cookiesPath = opts.cookies || path.join(__dirname, 'cookies.json');
+
+  const server = createServer((req, res) => {
+    handle(req, res).catch((e) => {
+      try { sendJson(res, 500, { error: String(e && e.message || e) }); } catch { /* gone */ }
+    });
+  });
+
+  server.listen(opts.port, opts.host, () => {
+    console.error(`[api] terabot REST API on http://${opts.host}:${opts.port}`);
+    console.error(`[api] out=${opts.out} session=${sessionPresent() ? cookiesPath : 'anonymous'} concurrency=${opts.concurrency}`);
+    maybeAutoLogin();
+  });
+
+  for (const sig of ['SIGINT', 'SIGTERM']) {
+    process.on(sig, () => {
+      console.error(`[api] ${sig} — shutting down (in-flight jobs are aborted; chromium may take a moment)`);
+      server.close(() => process.exit(0));
+      setTimeout(() => process.exit(0), 1500).unref();
+    });
+  }
+  return server;
+}
+
+const isMain = !!process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) startServer(process.argv.slice(2));

@@ -1,12 +1,15 @@
 // login.mjs — log in to1024tera.com with the saved account and persist the
-// session (Playwright storageState) for terabot.mjs --cookies.
+// session (Playwright storageState) for terabot --cookies.
 //
-//   node login.mjs            (headless)
-//   HEADFUL=1 node login.mjs  (real window on DISPLAY=:0 if a captcha appears)
+//   node terabot.mjs login          (headless)
+//   node terabot.mjs login --headful  or  HEADFUL=1 … (real window on
+//                                   DISPLAY=:0 if a captcha appears)
+//   `node terabot.mjs` (server) also runs this automatically on boot when
+//   .account.json exists but cookies.json does not.
 //
 // Credentials come from ./.account.json (gitignored): {email, password}
 import { chromium } from 'playwright';
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, chmodSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -15,12 +18,14 @@ const OUT_STATE = path.join(__dirname, 'cookies.json');
 const SHOTS = path.join(__dirname, 'probe-out');
 mkdirSync(SHOTS, { recursive: true });
 
-const { email, password } = JSON.parse(
-  readFileSync(path.join(__dirname, '.account.json'), 'utf8'),
-);
-const headful = !!process.env.HEADFUL;
+export async function runLogin(runOpts = {}) {
+  const { email, password } = JSON.parse(
+    readFileSync(path.join(__dirname, '.account.json'), 'utf8'),
+  );
+  const headful = !!(runOpts.headful || process.env.HEADFUL);
+  let done = false;              // declared outside `try` — returned below
 
-const browser = await chromium.launch({ headless: !headful });
+  const browser = await chromium.launch({ headless: !headful });
 try {
   const ctx = await browser.newContext({
     userAgent:
@@ -90,13 +95,20 @@ try {
     } catch { return false; }
   };
 
-  // submit: click the primary button, fall back to Enter
-  const submit = page.locator('button:visible').filter({ hasText: /log ?in|sign ?in|continue/i }).first();
-  if (await submit.count()) await submit.click({ timeout: 5000 }).catch(() => {});
-  else await page.keyboard.press('Enter');
+  // submit: the SPA has no <form>/<button> in the auth card — the submit
+  // control is the "Login" / "Sign in" text (the nav's "Log in" link must
+  // NOT be clicked; it matches looser patterns and just reloads the route).
+  // Enter as fallback.
+  const submit = page.locator('text=/^(Login|Sign in)$/i').first();
+  if (await submit.count()) {
+    await submit.click({ timeout: 5000 })
+      .catch(() => page.keyboard.press('Enter').catch(() => {}));
+  } else {
+    await page.keyboard.press('Enter').catch(() => {});
+  }
   console.error('[login] submitted, waiting…');
 
-  const ok = await (async () => {
+  done = await (async () => {
     const end = Date.now() + 30000;
     while (Date.now() < end) {
       if (await loggedIn()) return true;
@@ -105,17 +117,31 @@ try {
     return false;
   })();
 
-  await page.screenshot({ path: path.join(SHOTS, ok ? 'login-ok.png' : 'login-fail.png'), fullPage: true }).catch(() => {});
+  await page.screenshot({ path: path.join(SHOTS, done ? 'login-ok.png' : 'login-fail.png'), fullPage: true }).catch(() => {});
 
-  if (!ok) {
+  if (!done) {
     const text = await page.evaluate(() => (document.body.innerText || '').slice(0, 600)).catch(() => '');
     console.error('[login] FAILED. page text:\n' + text);
     console.error('[login] passport/login attempts:', JSON.stringify(loginAttempts, null, 1));
-    process.exitCode = 1;
   } else {
     await ctx.storageState({ path: OUT_STATE });
+    chmodSync(OUT_STATE, 0o600);   // session file: owner-only (like .account.json)
     console.error(`[login] SUCCESS — session saved to ${OUT_STATE}`);
   }
-} finally {
-  await browser.close().catch(() => {});
+  } finally {
+    await browser.close().catch(() => {});
+  }
+  return done;
+}
+
+const isMain = !!process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  const headful = process.argv.includes('--headful') || !!process.env.HEADFUL;
+  runLogin({ headful })
+    .then((ok) => process.exit(ok ? 0 : 1))
+    .catch((e) => {
+      console.error(`[login] fatal: ${e.message}`);
+      process.exit(1);
+    });
 }

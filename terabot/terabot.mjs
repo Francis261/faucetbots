@@ -1,10 +1,23 @@
 #!/usr/bin/env node
 // terabot.mjs — TeraBox share bot
-// Opens a 1024tera.com / TeraBox share link, extracts video metadata and
-// download links, and optionally downloads the full preview rendition.
+// Extracts video metadata and download links from a 1024tera.com / TeraBox
+// share link, optionally downloads, and runs the REST API — one command:
+//
+//   node terabot.mjs                start the REST API server on
+//                                   127.0.0.1:8788 (auto-login if
+//                                   .account.json exists but no cookies)
+//   node terabot.mjs serve [...]    same, with options (--port 9000
+//                                   --host 0.0.0.0 --out DIR --cookies FILE
+//                                   --concurrency N)
+//   node terabot.mjs login          log in (headless; HEADFUL=1 or
+//                                   --headful for a visible window) and
+//                                   save cookies.json
+//   node terabot.mjs help           this help
+//
+// One-shot extraction (any of the flags below = CLI mode):
 //
 //   node terabot.mjs [share-url] [--download] [--download-original]
-//                    [--json] [--out DIR] [--cookies FILE]
+//                    [--json] [--out DIR] [--cookies FILE] [--browser]
 //
 //   --download          fetch every HLS segment, stitch the full 480p
 //                       transcode and remux to .mp4 with ffmpeg (fast,
@@ -16,9 +29,13 @@
 //   --json              print the full metadata JSON to stdout
 //   --out DIR           output directory (default: <script dir>/output)
 //   --cookies FILE      Playwright storageState with a logged-in TeraBox
-//                       session (create with `node login.mjs`); anonymous
-//                       sessions get errno 2 / "need verify_v2" from
-//                       /share/download
+//                       session (create with `node terabot.mjs login`);
+//                       anonymous sessions get errno 2 / "need verify_v2"
+//                       from /share/download
+//   --browser           skip the fast path and use the Playwright flow
+//                       (extraction normally runs browser-free in ~3s:
+//                       curl --http2 fetches the share HTML for its
+//                       jsToken/pcftoken, every API call is plain fetch)
 //
 // How the preview download works (anonymous):
 //   /share/streaming serves HLS windows of ~3 segments (30s) at a RANDOM
@@ -36,12 +53,17 @@
 //   cookie-sharing request context, refreshing the dlink near expiry, then
 //   reassembles and verifies size + md5 against the share metadata.
 
-import { chromium } from 'playwright';
-import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
+// playwright is loaded lazily: the fast path never boots Chromium, and the
+// import itself costs ~3-4 s of startup.
+let _chromium;
+const getChromium = async () =>
+  (_chromium ||= (await import('playwright')).chromium);
+import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tmpdir } from 'node:os';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const DEFAULT_URL =
@@ -55,13 +77,14 @@ const STREAM_TYPE = 'M3U8_FLV_264_480'; // non-Safari 480p rendition
 function parseArgs(argv) {
   const opts = {
     url: DEFAULT_URL, download: false, downloadOriginal: false, json: false,
-    out: path.join(__dirname, 'output'), cookies: null,
+    out: path.join(__dirname, 'output'), cookies: null, mode: null,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--download') opts.download = true;
     else if (a === '--download-original') opts.downloadOriginal = true;
     else if (a === '--json') opts.json = true;
+    else if (a === '--browser') opts.mode = 'browser';
     else if (a === '--out') opts.out = path.resolve(argv[++i]);
     else if (a === '--cookies') opts.cookies = path.resolve(argv[++i]);
     else if (a === '--url') opts.url = argv[++i];
@@ -81,6 +104,377 @@ async function waitFor(fn, ms, step = 250) {
   return false;
 }
 
+// ============================================================ fast path
+// Browser-free extraction (~3 s instead of ~22 s).
+//
+// The share HTML embeds jsToken/pcftoken, but the server only issues USABLE
+// tokens when the HTML request itself looks like a browser's (HTTP/2 +
+// browser headers): a plain undici fetch() of the page yields tokens that
+// make /share/list and /share/download answer "need verify" (errno
+// 4000020/460020, and 400310 "need verify_v2" for the dlink).  curl --http2
+// with a browser UA is enough to get accepted tokens — then every API call
+// runs with plain fetch.  If curl is unavailable, the HTML document body is
+// taken from a short-lived Playwright page (commit stage only, no app boot).
+const ORIGIN = 'https://www.1024tera.com';
+
+class Jar {
+  constructor() { this.m = new Map(); }
+  load(storageStatePath) {
+    const st = JSON.parse(readFileSync(storageStatePath, 'utf8'));
+    for (const c of st.cookies || []) {
+      if (/(^|\.)1024tera\.com$/.test(String(c.domain).replace(/^\./, '')))
+        this.m.set(c.name, c.value);
+    }
+  }
+  setCookieLine(line) {
+    const kv = String(line).split(';')[0];
+    const i = kv.indexOf('=');
+    if (i > 0) this.m.set(kv.slice(0, i).trim(), kv.slice(i + 1).trim());
+  }
+  absorb(res) {
+    const all = res.headers.getSetCookie ? res.headers.getSetCookie() : [];
+    for (const c of all) this.setCookieLine(c);
+  }
+  header() { return [...this.m].map(([k, v]) => `${k}=${v}`).join('; '); }
+  get(name) { return this.m.get(name) || ''; }
+}
+
+const parseHtmlTokens = (html) => {
+  const jt = (decodeURIComponent(
+    (html.match(/eval\(decodeURIComponent\(`([^`]+)`\)\)/) || [])[1] || '',
+  ).match(/fn\("([0-9A-F]+)"\)/) || [])[1] || '';
+  const tdM = html.match(/var templateData = (\{.*?\});<\/script>/s) ||
+    html.match(/var templateData = (\{.*?\});/s);
+  let td = {};
+  try { td = tdM ? JSON.parse(tdM[1]) : {}; } catch { /* malformed */ }
+  return {
+    jsToken: jt,
+    pcftoken: (td && td.pcftoken) || '',
+    bdstoken: (td && td.bdstoken) || '',
+  };
+};
+
+let curlAvailable;
+const haveCurl = () => {
+  if (curlAvailable === undefined) {
+    curlAvailable =
+      spawnSync('curl', ['--version'], { encoding: 'utf8' }).status === 0;
+  }
+  return curlAvailable;
+};
+
+async function fetchShareHtml(url, jar, storageStatePath) {
+  if (haveCurl()) {
+    const hdrFile = path.join(tmpdir(), `terabot-${process.pid}.hdrs`);
+    const r = spawnSync('curl', [
+      '-sSL', '--http2', '--compressed', '--max-time', '25',
+      '-A', UA, '-H', `cookie: ${jar.header()}`, '-H', `referer: ${url}`,
+      '-D', hdrFile, url,
+    ], { encoding: 'utf8', maxBuffer: 1 << 24 });
+    let head = '';
+    try { head = readFileSync(hdrFile, 'utf8'); } catch { /* no file */ }
+    for (const m of head.matchAll(/^set-cookie:\s*(.+)$/gim)) jar.setCookieLine(m[1]);
+    if (r.status === 0 && r.stdout && r.stdout.includes('templateData'))
+      return r.stdout;
+  }
+  // fallback: document body from a browser request (commit stage — the app
+  // does not need to boot; jsToken/pcftoken are embedded in the HTML)
+  const chromium = await getChromium();
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const ctx = await browser.newContext({
+      userAgent: UA, viewport: { width: 1280, height: 800 },
+      ...(storageStatePath && existsSync(storageStatePath)
+        ? { storageState: storageStatePath } : {}),
+    });
+    const page = await ctx.newPage();
+    const bodyP = page.waitForResponse(
+      (res) => res.url().includes('/sharing/link?') &&
+        res.request().resourceType() === 'document');
+    await page.goto(url, { waitUntil: 'commit', timeout: 45000 });
+    const body = await (await bodyP).text();
+    for (const c of await ctx.cookies()) {
+      if (c.domain.includes('1024tera')) jar.m.set(c.name, c.value);
+    }
+    return body;
+  } finally {
+    await browser.close().catch(() => {});
+  }
+}
+
+// One full browser-free extraction.  Returns the same shape the browser
+// flow builds ({cap, videoFiles, downloads}) so the download/metadata tail
+// is shared verbatim.  Throws on any hard failure — the caller then falls
+// back to the proven Playwright flow.
+async function fastExtract(opts, { log, mark }) {
+  const jar = new Jar();
+  if (opts.cookies && existsSync(opts.cookies)) jar.load(opts.cookies);
+
+  log(`[terabot] opening ${opts.url} (fast path — no browser boot)`);
+  const html = await fetchShareHtml(opts.url, jar, opts.cookies);
+  const tok = parseHtmlTokens(html);
+  if (!tok.jsToken || !tok.pcftoken)
+    throw new Error('share page did not embed jsToken/pcftoken');
+  mark('html');
+
+  // dp-logid exactly as the frontend dplogid-2.0.3 lib generates it:
+  // sessionId(6 random digits) + "00"+8 digits + 4-digit counter
+  const dpSession = String(Math.floor((9 * Math.random() + 1) * 1e5));
+  const dpUser = '00' + Math.floor((9 * Math.random() + 1) * 1e7);
+  let dpCount = 0;
+  const nextDpLogid = () => {
+    dpCount = dpCount < 9999 ? dpCount + 1 : 0;
+    return dpSession + dpUser + String(dpCount).padStart(4, '0');
+  };
+  const common = (extra = {}) => new URLSearchParams({
+    clientfrom: 'h5', psign: '0', pcftoken: tok.pcftoken,
+    clienttype: '0', channel: 'dubox', app_id: '250528', web: '1',
+    jsToken: tok.jsToken, 'dp-logid': nextDpLogid(), ...extra,
+  });
+  const HEAD = (extra) => ({
+    'user-agent': UA, cookie: jar.header(), referer: opts.url,
+    accept: 'application/json, text/plain, */*',
+    'content-type': 'application/x-www-form-urlencoded',
+    'x-requested-with': 'XMLHttpRequest',
+    'sec-fetch-dest': 'empty', 'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-origin',
+    ...extra,
+  });
+  const parse = async (r) => {
+    jar.absorb(r);
+    const t = await r.text();
+    try { return JSON.parse(t); } catch { return null; }
+  };
+  const jget = async (p) => {
+    const j = await parse(await fetch(`${ORIGIN}${p}`, { headers: HEAD() }));
+    if (!j) throw new Error(`bad JSON from ${p.split('?')[0]}`);
+    return j;
+  };
+  const surl = new URL(opts.url).searchParams.get('surl');
+  if (!surl) throw new Error('url has no surl parameter');
+
+  // ---- share info (sign / shareid / uk) --------------------------------
+  let shareRaw = null;
+  for (const shorturl of ['1' + surl, surl]) {
+    const j = await jget(`/api/shorturlinfo?${common({
+      shorturl, root: '1', scene: '',
+    })}`);
+    if (j.errno === 0) { shareRaw = j; break; }
+  }
+  if (!shareRaw) throw new Error('shorturlinfo failed for both surl shapes');
+  mark('info');
+
+  // ---- file list (+ pagination for large shares) ------------------------
+  const listPage = (pageN) => jget(`/share/list?${common({
+    page: String(pageN), num: '20', shorturl: surl, root: '1',
+    by: 'time', order: 'desc', scene: '',
+  })}`);
+  const lj = await listPage(1);
+  if (!lj || (lj.errno !== 0 && lj.errno !== undefined) || !Array.isArray(lj.list))
+    throw new Error(`list failed (${lj ? lj.errno ?? lj.code : 'no JSON'}: ` +
+      `${(lj && (lj.errmsg || lj.show_msg)) || ''})`);
+  const files = [...lj.list];
+  let nextPage = 2;
+  while (files.length < Number(shareRaw.fcount || 0) && nextPage <= 10) {
+    const more = await listPage(nextPage++);
+    if (!more || more.errno !== 0 || !Array.isArray(more.list) || !more.list.length) break;
+    for (const f of more.list) if (!files.some((x) => x.fs_id === f.fs_id)) files.push(f);
+  }
+  if (!files.length) throw new Error('list returned no files');
+  mark('list');
+  log(`[terabot] share ${shareRaw.shareid} (uk ${shareRaw.uk}) — ` +
+    `${files.length} file(s)`);
+
+  const cap = {
+    shareRaw, files, listUrls: [], mediaMeta: {},
+    jsToken: tok.jsToken, dpLogid: null,
+  };
+  const si = {
+    shareid: shareRaw.shareid, uk: shareRaw.uk,
+    sign: shareRaw.sign, timestamp: String(shareRaw.timestamp ?? ''),
+  };
+
+  // ---- parallel: mediameta, HLS harvest, share transfer ------------------
+  const candidates = files.filter((f) => !(f.isdir === '1' || f.isdir === 1));
+  const metaOf = async (f) => {
+    if (String(f.category) !== '1') return null;
+    const j = await jget(`/share/mediameta?${common({
+      uk: String(si.uk), shareid: String(si.shareid), fid: String(f.fs_id),
+      timestamp: String(si.timestamp),
+    })}`);
+    if (j && j.errno === 0 && j.duration) { cap.mediaMeta[f.fs_id] = j; return j; }
+    return null;
+  };
+  const harvestHlsFast = async (fid, maxIter = 80) => {
+    const browserid = jar.get('browserid') || '';
+    const segs = new Map();
+    const ivs = [];
+    let tsSize = 0, covered = 0, err = null, fetches = 0, example = null;
+    const merge = () => {
+      ivs.sort((a, b) => a[0] - b[0]);
+      const m = [];
+      for (const iv of ivs) {
+        if (!m.length || iv[0] > m[m.length - 1][1] + 1) m.push([...iv]);
+        else m[m.length - 1][1] = Math.max(m[m.length - 1][1], iv[1]);
+      }
+      return m;
+    };
+    const one = async () => {
+      const ts = Math.floor(Date.now() / 1000);
+      const sign = createHmac('sha1', SALT)
+        .update(`0dubox${browserid}${ts}`).digest('hex');
+      const q = new URLSearchParams({
+        uk: String(si.uk), shareid: String(si.shareid), type: STREAM_TYPE,
+        fid: String(fid), sign, timestamp: String(ts),
+        jsToken: tok.jsToken, esl: '1', isplayer: '1', ehps: '1',
+        clienttype: '0', app_id: '250528', web: '1', channel: 'dubox',
+      });
+      fetches++;
+      const pl = await (await fetch(`${ORIGIN}/share/streaming?${q}`, {
+        headers: HEAD(),
+      })).text();
+      return { pl, url: `${ORIGIN}/share/streaming?${q}` };
+    };
+    const absorbWindow = ({ pl, url }) => {
+      if (!pl.startsWith('#EXTM3U')) { err = pl.slice(0, 200); return false; }
+      if (!example) example = url;
+      for (const line of pl.split('\n')) {
+        if (!line.startsWith('http')) continue;
+        const p = new URL(line);
+        const range = p.searchParams.get('range');
+        if (!range || segs.has(range)) continue;
+        segs.set(range, { range, url: line });
+        const b = Number(range.split('-')[1]);
+        ivs.push([Number(range.split('-')[0]), b]);
+        tsSize = Math.max(tsSize, Number(p.searchParams.get('ts_size') || 0));
+      }
+      covered = merge().reduce((s, [a, b]) => s + (b - a + 1), 0);
+      return true;
+    };
+    // one window first (logged-in sessions get the full playlist), then
+    // widen to batches of 4 — anonymous sessions serve random 30s windows
+    let batch = await Promise.all([one()]);
+    for (;;) {
+      let okAll = true;
+      for (const item of batch) if (!absorbWindow(item)) okAll = false;
+      if (!okAll || (tsSize && covered >= tsSize) || fetches >= maxIter) break;
+      const n = Math.min(4, maxIter - fetches);
+      batch = await Promise.all(Array.from({ length: n }, one));
+    }
+    return {
+      type: STREAM_TYPE, tsSize, covered, iterations: fetches,
+      complete: tsSize > 0 && covered >= tsSize, error: err,
+      segmentCount: segs.size, segments: [...segs.values()],
+      playlistUrl: example || null,
+    };
+  };
+
+  const transferP = opts.cookies
+    ? (async () => {
+      const r = await fetch(
+        `${ORIGIN}/share/querysurltransfer?${common({ bdstoken: tok.bdstoken || '' })}`,
+        {
+          method: 'POST', headers: HEAD(),
+          body: new URLSearchParams({
+            sid: String(si.shareid), suk: String(si.uk),
+          }).toString(),
+        });
+      const j = await parse(r);
+      log(`[terabot] share transfer: errno ${j ? j.errno : '?'}${j && j.data ? ` (has_transferred ${j.data.has_transferred})` : ''}`);
+      return j;
+    })()
+    : Promise.resolve(null);
+
+  const metasP = Promise.all(candidates.map(metaOf));
+  const harvestsP = Promise.all(
+    candidates.filter((f) => String(f.category) === '1').map(async (f) => ({
+      file: f, h: await harvestHlsFast(f.fs_id),
+    })),
+  );
+
+  const [metas] = await Promise.all([metasP, transferP]);
+  const videoFiles = candidates
+    .map((f, i) => ({ file: f, meta: metas[i] }))
+    .filter((v) => v.meta && v.meta.duration);
+  mark('meta');
+
+  // ---- original dlink (Wt shape; after the transfer handshake) ----------
+  const downloads = { original: null, previewHLS: [] };
+  const firstFile = videoFiles[0] ? videoFiles[0].file : files[0];
+  const firstFid = firstFile.fs_id;
+  log('[terabot] attempting original dlink…');
+  try {
+    const r = await fetch(`${ORIGIN}/share/download?${common({
+      scene: 'purchased_list', shareid: String(si.shareid),
+      sign: si.sign || '', timestamp: String(si.timestamp),
+      bdstoken: tok.bdstoken || '',
+    })}`, {
+      method: 'POST',
+      headers: HEAD({
+        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      }),
+      body: new URLSearchParams({
+        product: 'share', nozip: '0',
+        fid_list: JSON.stringify([String(firstFid)]),
+        uk: String(si.uk), primaryid: String(si.shareid),
+      }).toString(),
+    });
+    const j = await parse(r);
+    const dlink = (j && typeof j.dlink === 'string' && j.dlink) ||
+      (j && Array.isArray(j.dlink) && j.dlink[0]) || null;
+    downloads.original = {
+      errno: (j && j.errno) ?? 0, available: !!dlink, dlink,
+      file_info: j && j.file_info, raw: dlink ? undefined : j,
+    };
+  } catch (e) {
+    downloads.original = {
+      errno: -1, available: false, error: String(e).slice(0, 150),
+    };
+  }
+  if (downloads.original.available) {
+    log(`[terabot] original dlink OK: ` +
+      `${downloads.original.dlink.slice(0, 160)}…`);
+  } else {
+    log(
+      `[terabot] original dlink unavailable (errno ${downloads.original.errno})` +
+      `${downloads.original.errno === 2 || downloads.original.errno === 400310
+        ? ' — anonymous sessions need a logged-in cookie jar (--cookies)' : ''}`);
+  }
+  mark('dlink');
+  // errno 14 = share not accepted: the browser flow's in-page handshake can
+  // still register it — hand over to the fallback instead of returning junk
+  if (downloads.original.errno === 14)
+    throw new Error('dlink errno 14 (share not accepted) — trying browser flow');
+
+  // ---- harvest results ---------------------------------------------------
+  const harvests = await harvestsP;
+  mark('harvest');
+  if (harvests.length && harvests.every((x) => !x.h.segmentCount))
+    throw new Error(`streaming harvest yielded no segments ` +
+      `(${(harvests[0].h.error || '').slice(0, 120)}) — trying browser flow`);
+  for (const { file, h } of harvests) {
+    const meta = videoFiles.find((v) => v.file.fs_id === file.fs_id);
+    if (!meta) continue;            // not a video after all — ignore its harvest
+    if (h.error && !h.segmentCount) {
+      log(`[terabot] harvest failed: ${h.error}`);
+    } else {
+      log(
+        `[terabot] harvest: ${h.segmentCount} segments, ` +
+        `${h.covered}/${h.tsSize} bytes in ${h.iterations} fetches` +
+        `${h.complete ? ' (complete)' : ' (INCOMPLETE)'}`);
+    }
+    downloads.previewHLS.push({
+      fid: file.fs_id, filename: file.server_filename,
+      duration: meta.meta.duration, width: meta.meta.width,
+      height: meta.meta.height,
+      ...h,
+      note: 'playlist serves random 30s windows; segments are the ' +
+        'cookie-free signed CDN URLs covering the full 480p transcode',
+    });
+  }
+  return { cap, videoFiles, downloads };
+}
+
 // ---------------------------------------------------------------- main
 // Run one full extraction (optionally with downloads).
 //
@@ -95,10 +489,36 @@ export async function runTerabot(opts, hooks = {}) {
   const onProgress = hooks.onProgress || (() => {});
   const errors = [];
   mkdirSync(opts.out, { recursive: true });
+  const t0 = Date.now();
+  const timing = [];
+  const mark = (stage) =>
+    timing.push(`${stage}=${((Date.now() - t0) / 1000).toFixed(1)}s`);
 
-  const browser = await chromium.launch({ headless: true });
+  // ---- fast path first (browser-free); fall back to Playwright --------
+  // --download-original still goes straight to the browser flow: the
+  // chunked CDN download shares the page's request context.
+  let cap = null;
+  let videoFiles = [];
+  let downloads = null;
+  if (!opts.downloadOriginal && opts.mode !== 'browser') {
+    try {
+      const f = await fastExtract(opts, { log, mark });
+      cap = f.cap; videoFiles = f.videoFiles; downloads = f.downloads;
+      log('[terabot] fast path complete — no browser needed');
+    } catch (e) {
+      log(`[terabot] fast path failed: ${(e && e.message) || e} — using browser flow`);
+      cap = null;
+    }
+  }
+
+  let browser = null;
+  let ctx = null;
+  let tryOriginalDlink = null;
   try {
-    const ctx = await browser.newContext({
+    if (!cap) {
+    const chromium = await getChromium();
+    browser = await chromium.launch({ headless: true });
+    ctx = await browser.newContext({
       userAgent: UA,
       viewport: { width: 1280, height: 800 },
       ...(opts.cookies && existsSync(opts.cookies)
@@ -108,7 +528,7 @@ export async function runTerabot(opts, hooks = {}) {
     const page = await ctx.newPage();
 
     // ---- capture hooks ------------------------------------------------
-    const cap = {
+    cap = {
       shareRaw: null, files: [], listUrls: [], mediaMeta: {},
       jsToken: null, dpLogid: null,
     };
@@ -163,6 +583,7 @@ export async function runTerabot(opts, hooks = {}) {
     // ---- load ---------------------------------------------------------
     log(`[terabot] opening ${opts.url}`);
     await page.goto(opts.url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    mark('goto');
     const got = await waitFor(() => cap.shareRaw && cap.files.length > 0, 20000);
     if (!got) {
       const title = await page.title().catch(() => '?');
@@ -172,6 +593,7 @@ export async function runTerabot(opts, hooks = {}) {
       );
     }
     if (!cap.jsToken) cap.jsToken = await page.evaluate(() => window.jsToken || null);
+    mark('data');
 
     // ---- paginate the file list (root pages beyond page 1) ------------
     let nextPage = 2;
@@ -206,10 +628,11 @@ export async function runTerabot(opts, hooks = {}) {
       jsToken: window.jsToken || '',
     }));
 
+    mark('env');
     // exact frontend shape for /share/download — the Wt wrapper used by the
     // Download button (scene=purchased_list); the os wrapper (scene="") gets
     // errno 14 even when logged in
-    const tryOriginalDlink = (fid) =>
+    tryOriginalDlink = (fid) =>
       page.evaluate(async ({ si, fid, env, dpLogid }) => {
         const q = new URLSearchParams({
           clientfrom: 'h5', psign: '0', pcftoken: env.pcftoken,
@@ -308,7 +731,7 @@ export async function runTerabot(opts, hooks = {}) {
       });
 
     // ---- identify videos (mediameta; fire on demand for category 1) ----
-    const videoFiles = [];
+    videoFiles = [];
     for (const f of cap.files) {
       if (f.isdir === '1' || f.isdir === 1) continue;
       let meta = cap.mediaMeta[f.fs_id];
@@ -335,8 +758,9 @@ export async function runTerabot(opts, hooks = {}) {
       if (meta && meta.duration) videoFiles.push({ file: f, meta });
     }
 
+    mark('videos');
     // ---- original dlink attempt ---------------------------------------
-    const downloads = { original: null, previewHLS: [] };
+    downloads = { original: null, previewHLS: [] };
     const firstFile = videoFiles[0] ? videoFiles[0].file : cap.files[0];
     const firstFid = firstFile.fs_id;
     // logged-in pages register the share to the account via
@@ -344,12 +768,14 @@ export async function runTerabot(opts, hooks = {}) {
     // (plus /api/check/login) before asking for the dlink
     await waitFor(() => saw.checkLogin && saw.transfer, 12000);
     if (saw.transfer) await sleep(1500);
+    mark('handshake');
     log('[terabot] attempting original dlink…');
     downloads.original = await tryOriginalDlink(firstFid);
     if (downloads.original.available) {
       log(`[terabot] original dlink OK: ` +
         `${downloads.original.dlink.slice(0, 160)}…`);
     } else {
+    mark('dlink');
       log(
         `[terabot] original dlink unavailable (errno ${downloads.original.errno})` +
         `${downloads.original.errno === 2 || downloads.original.errno === 400310
@@ -372,6 +798,7 @@ export async function runTerabot(opts, hooks = {}) {
         phase: 'harvest', fid: file.fs_id, segments: h.segmentCount,
         bytes: h.covered, total: h.tsSize, complete: h.complete,
       });
+      mark('harvest');
       downloads.previewHLS.push({
         fid: file.fs_id, filename: file.server_filename,
         duration: meta.duration, width: meta.width, height: meta.height,
@@ -380,6 +807,11 @@ export async function runTerabot(opts, hooks = {}) {
           'cookie-free signed CDN URLs covering the full 480p transcode',
       });
     }
+    }   // end if (!cap) — browser extraction finished
+
+    // ---- shared anchors (valid for both extraction paths) ---------------
+    const firstFile = videoFiles[0] ? videoFiles[0].file : cap.files[0];
+    const firstFid = firstFile.fs_id;
 
     // ---- optional download --------------------------------------------
     const written = [];
@@ -656,6 +1088,9 @@ export async function runTerabot(opts, hooks = {}) {
       ],
     };
 
+    mark('total');
+    log(`[terabot] timing: ${timing.join(' ')}`);
+
     const jsonPath = path.join(opts.out, 'metadata.json');
     writeFileSync(jsonPath, JSON.stringify(metadata, null, 2));
     log(`[terabot] metadata -> ${jsonPath}`);
@@ -693,17 +1128,44 @@ export async function runTerabot(opts, hooks = {}) {
     const code = (noVideo || downloadFailed) ? 1 : 0;
     return { code, metadata, written, errors };
   } finally {
-    await browser.close().catch(() => {});
+    if (browser) await browser.close().catch(() => {});
   }
 }
 
 const isMain = !!process.argv[1] &&
   path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
-  runTerabot(parseArgs(process.argv.slice(2)))
-    .then((r) => process.exit(r.code ?? 0))
-    .catch((e) => {
-      console.error(`[terabot] fatal: ${e.message}`);
-      process.exit(1);
-    });
+  const argv = process.argv.slice(2);
+  const cmd = argv[0];
+  (async () => {
+    if (!cmd || cmd === 'serve' || cmd === 'server' ||
+        cmd === '--port' || cmd === '--host' || cmd === '--concurrency') {
+      // one command runs everything: API server (+ auto-login on boot);
+      // `node terabot.mjs`, `node terabot.mjs serve …` and even
+      // `node terabot.mjs --port 9000` all start it
+      const { startServer } = await import('./server.mjs');
+      return startServer(cmd === 'serve' || cmd === 'server'
+        ? argv.slice(1) : argv);
+    }
+    if (cmd === 'login') {
+      const { runLogin } = await import('./login.mjs');
+      const ok = await runLogin({
+        headful: argv.includes('--headful') || !!process.env.HEADFUL,
+      });
+      return process.exit(ok ? 0 : 1);
+    }
+    if (cmd === 'help' || cmd === '--help' || cmd === '-h') {
+      console.error(
+        'usage: node terabot.mjs [serve [server opts]] [login] [help]\n' +
+        '       node terabot.mjs [share-url] [--download] ' +
+        '[--download-original] [--json] [--out DIR] [--cookies FILE] ' +
+        '[--browser]');
+      return;
+    }
+    const r = await runTerabot(parseArgs(argv));
+    return process.exit(r.code ?? 0);
+  })().catch((e) => {
+    console.error(`[terabot] fatal: ${e.message}`);
+    process.exit(1);
+  });
 }

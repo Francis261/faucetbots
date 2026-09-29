@@ -3,7 +3,8 @@
 HTTP interface for terabot: extract TeraBox/1024tera share metadata + download
 links, trigger preview/original downloads, and fetch the resulting files.
 
-- **Server:** `node server.mjs [--port 8788] [--host 127.0.0.1] [--out DIR] [--cookies FILE] [--concurrency N]`
+- **Server:** `node terabot.mjs serve [--port 8788] [--host 127.0.0.1] [--out DIR] [--cookies FILE] [--concurrency N]`
+  (`node terabot.mjs` with no args = same thing; `node server.mjs …` also works)
 - **Base URL:** `http://127.0.0.1:8788` (default)
 - **Format:** JSON in/out, UTF-8, CORS enabled (`*`)
 
@@ -16,8 +17,10 @@ links, trigger preview/original downloads, and fetch the resulting files.
 ## Quick start
 
 ```bash
-node login.mjs      # once: log in -> cookies.json (enables original quality)
-node server.mjs     # start the API
+node terabot.mjs login   # once: log in -> cookies.json (enables original quality)
+                         #  (the server also auto-logins on boot when the
+                         #   credentials file exists but no session does)
+node terabot.mjs         # start the API
 
 # ONE call: metadata + download_url + stream_url (url in the JSON payload)
 curl -s -X POST http://127.0.0.1:8788/api/info \
@@ -25,9 +28,12 @@ curl -s -X POST http://127.0.0.1:8788/api/info \
   -d '{"url":"https://www.1024tera.com/sharing/link?surl=reCn7CaS8tLmcdVMe3SYWg"}'
 ```
 
-Typical responses take ~15-25 s for extract-style calls (a headless Chromium
-opens the share page); downloads take ~60 s (preview) or ~10 min (original,
-free accounts are throttled to ~50-70 KB/s).
+Extract-style calls typically take **~3-8 s** — extraction runs on the
+browser-free *fast path* (the share HTML is fetched with `curl --http2` for
+its `jsToken`/`pcftoken`, then every API call is plain `fetch`; a Playwright
+fallback engages only if that fails, or for `mode: "original"`). Downloads
+take ~20-30 s (preview) or ~10 min (original, free accounts are throttled to
+~50-70 KB/s).
 
 ---
 
@@ -95,7 +101,7 @@ same shape:
 | `download_errno` | `0` ok · `2` / `400310` anonymous gate (need `cookies.json`) · `14` share not accepted · `-1` network error |
 | `stream_url` | HLS playlist for **one random ~30 s window** of the 480p transcode. A player re-fetching it gets another random window; sign is timestamped, so treat it as short-lived. |
 | `stream_segments` | The reliable stream/download primitive: all 15 byte-ranged CDN URLs covering the whole transcode, valid ~8 h, no cookies needed. |
-| `stream_complete` | `true` when the segments cover `[0, stream_bytes)` exactly (usually 1-9 fetches when logged in, up to ~30 anonymously). |
+| `stream_complete` | `true` when the segments cover `[0, stream_bytes)` exactly (usually **1 fetch** when logged in, up to ~40 anonymously). |
 | `video.md5` | mediameta `real_md5` — the hash of the bytes the CDN actually serves (matches its `content-md5` header); `file.md5` in `metadata.files` is the file-record hash and may differ. |
 
 ---
@@ -120,7 +126,8 @@ Endpoint index (service name + short docs).
 Body: `{"url": "https://..."}` (`url` optional → default share link).
 
 Runs a full extraction synchronously through the queue and responds `200`
-with the envelope above. Waits ~15-25 s (plus any queued jobs ahead of it).
+with the envelope above. Waits **~3-8 s** (fast path; plus any queued jobs
+ahead of it).
 
 ```bash
 curl -s -X POST http://127.0.0.1:8788/api/info \
@@ -143,7 +150,7 @@ Body:
 
 | mode | What it fetches | Needs cookies | Duration |
 |---|---|---|---|
-| `preview` (default) | stitched 480p transcode → `<name>.preview480.ts` + `.mp4` (ffmpeg remux) | no | ~60 s |
+| `preview` (default) | stitched 480p transcode → `<name>.preview480.ts` + `.mp4` (ffmpeg remux) | no | ~20-30 s logged in (harvest is 1 playlist fetch); ~1-2 min anonymous (random windows) |
 | `original` | the original file → `<name>.mp4`, size + md5 verified | **yes** (else `400`) | ~10 min / 30 MB on free accounts |
 
 Returns `202 {"id", "status", "mode"}`.
@@ -215,10 +222,11 @@ the output directory → `400`. Also supports `HEAD`.
 
 ## Job model
 
-- **Queue:** jobs run FIFO with `--concurrency` slots (default **1** — each job
-  launches its own headless Chromium, ~300-400 MB RAM each).
+- **Queue:** jobs run FIFO with `--concurrency` slots (default **1**).
+  Extraction uses the browser-free fast path — Chromium is launched only by
+  the automatic fallback or `mode: "original"` jobs (~300-400 MB RAM).
 - **`POST /api/info` and `GET /api/metadata` obey the same queue** — they wait
-  for their slot before starting, so their latency = queue wait + ~15-25 s.
+  for their slot before starting, so their latency = queue wait + ~3-8 s.
 - **History:** last 100 jobs kept (oldest finished jobs drop out); logs capped
   at 300 lines per job.
 - **Side effect:** every job writes `metadata.json` into the output directory;
@@ -280,8 +288,9 @@ curl -s $BASE/api/jobs/$ID | python3 -c 'import sys,json;j=json.load(sys.stdin);
 
 ## Related
 
-- `terabot.mjs` — the bot itself (CLI: `node terabot.mjs --download ...`);
-  exported as `runTerabot(opts, hooks)` with `log` / `onProgress` hooks that
-  feed this API's `logs` and `progress`.
-- `login.mjs` — one-shot login → `cookies.json`.
-- `README.md` — how the extraction, HLS window-harvest and original dlink work.
+- `terabot.mjs` — the bot + CLI entry point (`node terabot.mjs [serve|login|help]`,
+  or one-shot `node terabot.mjs --json …`); exported as `runTerabot(opts, hooks)`
+  with `log` / `onProgress` hooks that feed this API's `logs` and `progress`.
+- `login.mjs` — login flow → `cookies.json` (exported `runLogin`; run it with
+  `node terabot.mjs login`).
+- `README.md` — how the fast path, HLS window-harvest and original dlink work.
