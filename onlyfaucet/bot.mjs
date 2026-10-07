@@ -73,6 +73,10 @@ async function bailOutOfPuzzle(page, reason, ret = 'aborted') {
 // the same call is exactly how you get from 1 failure to a 3-strike ban.
 // runLoop gates the next call on the captcha-failure ladder instead.
 const submitGuard = { used: false };
+// Dry-run (CLI `dryv5`): drive the full production v5 path — gate click,
+// payload capture, solve, taps, ca_ closed-loop check — then STOP before
+// Verify.  Never set outside runDryV5.
+let dryRunMode = false;
 
 function parseJSON(text) {
   const match = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/);
@@ -1517,6 +1521,13 @@ async function handlePuzzleV5(page, attempt = 0) {
     return bailOutOfPuzzle(page, `v5 tap mismatch ${nAns}!=${out.taps.length}`);
   }
 
+  if (dryRunMode) {
+    await sleep(600);
+    await page.screenshot({ path: `${SHOT_DIR}/v5-dryrun-${ts()}.png`, fullPage: true }).catch(() => {});
+    log('DRY-RUN: taps landed and ca_ confirmed — stopping BEFORE Verify');
+    return 'dryrun';   // no reload: only the gate click spent a round event
+  }
+
   // --- Phase E: ONE Verify per claim cycle ---
   if (pastBailWindow()) return bailOutOfPuzzle(page, 'past-bail-window-verify');
   if (submitGuard.used) {
@@ -2894,6 +2905,40 @@ export {
   BASE_URL, FAUCET_URL, SHOT_DIR,
 };
 
+// Dry-run of the v5 flow: full production path up to (but excluding) Verify.
+// Spends at most ONE round event (the gate click; no bail reload on success),
+// writes noteRoundStart via markWidgetShown, and never submits an attempt.
+async function runDryV5(email) {
+  if (roundSpacingLeft() > 0) {
+    log(`Round spacing active (${Math.round(roundSpacingLeft() / 1000)}s left) — dry-run refused`);
+    return 'spacing';
+  }
+  dryRunMode = true;
+  const ctx = await launchBrowser();
+  try {
+    const page = ctx.pages()[0] || (await ctx.newPage());
+    if (!(await gotoRetry(page, BASE_URL))) throw new Error('home nav failed');
+    await sleep(3000);
+    await ensureCleared(page);
+    if (!(await isLoggedIn(page))) {
+      if (!(await login(page, email))) throw new Error('login failed');
+    } else {
+      log('Already logged in');
+    }
+    if (!(await gotoRetry(page, FAUCET_URL))) throw new Error('faucet nav failed');
+    await sleep(4000);
+    await ensureCleared(page);
+    const st = await waitForFaucetReady(page);
+    if (st.success) { log('Dry-run: already successful, nothing to open'); return 'success'; }
+    if (st.cooldown) { log(`Dry-run: on cooldown (${st.waitSec}s), nothing to open`); return 'cooldown'; }
+    const r = await handlePuzzleV5(page, 0);
+    log(`Dry-run v5 result: ${r}`);
+    return r;
+  } finally {
+    await ctx.close().catch(() => {});
+  }
+}
+
 async function runCapture(count, maxMinutes = 12) {
   const accounts = loadAccounts();
   const email = process.env.LOGIN_EMAIL || process.env.EMAIL || accounts[0]?.email;
@@ -2939,6 +2984,13 @@ if (isMain) {
     if (!accounts.length) { console.error('No accounts'); process.exit(1); }
     acquireLock(); // one browser profile at a time — a concurrent loop/once pair corrupts it
     runOnce(accounts[0].email).then(r => { console.log(`done: ${r}`); process.exit(0); })
+      .catch(e => { console.error(e); process.exit(1); });
+  } else if (args[0] === 'dryv5') {
+    // Full v5 path minus Verify: gate -> capture -> solve -> taps -> stop.
+    const accounts = loadAccounts();
+    if (!accounts.length) { console.error('No accounts'); process.exit(1); }
+    acquireLock();
+    runDryV5(accounts[0].email).then(r => { console.log(`dry-run: ${r}`); process.exit(r === 'dryrun' ? 0 : 1); })
       .catch(e => { console.error(e); process.exit(1); });
   } else {
     acquireLock();
