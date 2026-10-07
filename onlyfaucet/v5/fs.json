@@ -1,0 +1,222 @@
+{
+ "0": {
+  "slots": {
+   "body": "six-sided body",
+   "wings": "a round wing",
+   "legs": "4 legs",
+   "head": "a long snout",
+   "tail": "a forked tail"
+  },
+  "ms": 8580,
+  "error": null
+ },
+ "1": {
+  "slots": {
+   "body": "oval body",
+   "wings": "a round wing",
+   "legs": "2 legs",
+   "head": "a round head",
+   "tail": "a curly tail"
+  },
+  "ms": 4096,
+  "error": null
+ },
+ "2": {
+  "slots": {
+   "body": "teardrop body",
+   "wings": "two wings",
+   "legs": "2 legs",
+   "head": "no head (eyes on the body)",
+   "tail": "a fan tail"
+  },
+  "ms": 3459,
+  "error": null
+ },
+ "3": {
+  "slots": {
+   "body": "spiky body",
+   "wings": "a round wing",
+   "legs": "2 legs",
+   "head": "a round head",
+   "tail": "no tail"
+  },
+  "ms": 3856,
+  "error": null
+ },
+ "4": {
+  "slots": {
+   "body": "bean-shaped body",
+   "wings": "two wings",
+   "legs": "2 legs",
+   "head": "a round head",
+   "tail": "a forked tail"
+  },
+  "ms": 4916,
+  "error": null
+ },
+ "5": {
+  "slots": {
+   "body": "oval body",
+   "wings": "no wings",
+   "legs": "no legs",
+   "head": "a round head",
+   "tail": "a curly tail"
+  },
+  "ms": 3162,
+  "error": null
+ },
+ "6": {
+  "slots": {
+   "body": "oval body",
+   "wings": "no wings",
+   "legs": "4 legs",
+   "head": "no head (eyes on the body)",
+   "tail": "no tail"
+  },
+  "ms": 12660,
+  "error": null
+ },
+ "7": {
+  "slots": {
+   "body": "oval body",
+   "wings": "no wings",
+   "legs": "no legs",
+   "head": "a round head",
+   "tail": "a curly tail"
+  },
+  "ms": 2979,
+  "error": null
+ },
+ "8": {
+  "slots": {
+   "body": "oval body",
+   "wings": "a round wing",
+   "legs": "no legs",
+   "head": "a round head",
+   "tail": "a forked tail"
+  },
+  "ms": 3263,
+  "error": null
+ },
+ "9": {
+  "slots": {
+   "body": "oval body",
+   "wings": "a pointed wing",
+   "legs": "2 legs",
+   "head": "a round head",
+   "tail": "a thin tail"
+  },
+  "ms": 4063,
+  "error": null
+ },
+ "10": {
+  "slots": {
+   "body": "oval body",
+   "wings": "two wings",
+   "legs": "4 legs",
+   "head": "a round head",
+   "tail": "a forked tail"
+  },
+  "ms": 3465,
+  "error": null
+ },
+ "11": {
+  "slots": {
+   "body": "oval body",
+   "wings": "no wings",
+   "legs": "2 legs",
+   "head": "a round head",
+   "tail": "a fan tail"
+  },
+  "ms": 4921,
+  "error": null
+ },
+ "12": {
+  "slots": {
+   "body": "spiky body",
+   "wings": "a pointed wing",
+   "legs": "4 legs",
+   "head": "a round head",
+   "tail": "a fan tail"
+  },
+  "ms": 4013,
+  "error": null
+ },
+ "13": {
+  "slots": {
+   "body": "spiky body",
+   "wings": "a round wing",
+   "legs": "4 legs",
+   "head": "a round head",
+   "tail": "a curly tail"
+  },
+  "ms": 3954,
+  "error": null
+ },
+ "14": {
+  "slots": {
+   "body": "six-sided body",
+   "wings": "a round wing",
+   "legs": "2 legs",
+   "head": "a round head",
+   "tail": "no tail"
+  },
+  "ms": 9899,
+  "error": null
+ },
+ "15": {
+  "slots": {
+   "body": "oval body",
+   "wings": "a pointed wing",
+   "legs": "no legs",
+   "head": "a round head",
+   "tail": "no tail"
+  },
+  "ms": 7280,
+  "error": null
+ },
+ "16": {
+  "slots": {
+   "body": "bean-shaped body",
+   "wings": "a pointed wing",
+   "legs": "no legs",
+   "head": "a round head",
+   "tail": "a forked tail"
+  },
+  "ms": 4140,
+  "error": null
+ },
+ "17": {
+  "slots": {
+   "body": "oval body",
+   "wings": "a pointed wing",
+   "legs": "2 legs",
+   "head": "a round head",
+   "tail": "a forked tail"
+  },
+  "ms": 4867,
+  "error": null
+ },
+ "18": {
+  "slots": {
+   "body": "oval body",
+   "wings": "a pointed wing",
+   "legs": "no legs",
+   "head": "a round head",
+   "tail": "a fan tail"
+  },
+  "ms": 3276,
+  "error": null
+ },
+ "19": {
+  "slots": {
+   "body": "oval body",
+   "wings": "a pointed wing",
+   "legs": "4 legs",
+   "head": "a round head",
+   "tail": "a fan tail"
+  },
+  "ms": 6282,
+  "error": null
+ }
+}

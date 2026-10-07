@@ -1,0 +1,340 @@
+{
+ "0": {
+  "n_cand": 9,
+  "cells": {
+   "3": "DDSSD",
+   "5": "DDSSD",
+   "4": "SDSSD",
+   "1": "DDDDD",
+   "0": "DDDSS",
+   "6": "SSSSS",
+   "2": "SSSSS",
+   "7": "DSSSS",
+   "8": "SDSSS"
+  },
+  "done": true
+ },
+ "1": {
+  "n_cand": 15,
+  "cells": {
+   "0": "DDDDD",
+   "2": "SSDSS",
+   "1": "DDDDD",
+   "5": "SSSSS",
+   "3": "DSDSS",
+   "4": "DSSSS",
+   "6": "DDDDD",
+   "7": "DDDDD",
+   "9": "SSSSD",
+   "8": "DDDSS",
+   "10": "DDDDD",
+   "12": "SSSSD",
+   "13": "DSSDS",
+   "11": "DDDDD",
+   "14": "DDDDD"
+  },
+  "done": true
+ },
+ "2": {
+  "n_cand": 9,
+  "cells": {
+   "1": "DSSDS",
+   "2": "SDSSD",
+   "0": "DSDSS",
+   "3": "DDDDD",
+   "5": "SSDSD",
+   "4": "SSSSD",
+   "6": "SDDSS",
+   "7": "SSSSS",
+   "8": "SSSSS"
+  },
+  "done": true
+ },
+ "3": {
+  "n_cand": 10,
+  "cells": {
+   "3": "SDDSS",
+   "4": "SSSDD",
+   "0": "DDDDD",
+   "5": "DSSDS",
+   "2": "DDSSS",
+   "1": "SSSSS",
+   "6": "SDSSD",
+   "7": "DDSSD",
+   "8": "DDDDD",
+   "9": "SSSSS"
+  },
+  "done": true
+ },
+ "4": {
+  "n_cand": 11,
+  "cells": {
+   "1": "SSSSD",
+   "2": "DDDDD",
+   "0": "SSSSS",
+   "3": "SSDSS",
+   "4": "SSSSS",
+   "6": "DSSSS",
+   "5": "SSSSD",
+   "7": "SDSSD",
+   "8": "SDDSS",
+   "9": "DDDDD",
+   "10": "DDDDD"
+  },
+  "done": true
+ },
+ "5": {
+  "n_cand": 10,
+  "cells": {
+   "0": "DDDDD",
+   "1": "SDDSS",
+   "2": "DSSSS",
+   "5": "DSDSS",
+   "3": "SDDSS",
+   "4": "DSSSS",
+   "8": "DSSSS",
+   "7": "SDDSS",
+   "6": "SSSSS",
+   "9": "SSSSS"
+  },
+  "done": true
+ },
+ "6": {
+  "n_cand": 11,
+  "cells": {
+   "0": "DDDDD",
+   "2": "SSSSS",
+   "3": "DDSSS",
+   "1": "DDDSD",
+   "4": "DSSDS",
+   "5": "SSSSD",
+   "6": "SDSSS",
+   "8": "DSSDS",
+   "9": "SSSSS",
+   "7": "DDDDD",
+   "10": "DDDDD"
+  },
+  "done": true
+ },
+ "7": {
+  "n_cand": 10,
+  "cells": {
+   "0": "DDDDD",
+   "1": "SSSSS",
+   "2": "SSSSS",
+   "3": "DSSSS",
+   "4": "DSSDS",
+   "5": "DSSDS",
+   "7": "DSSDS",
+   "8": "DDSDS",
+   "9": "DSSSS",
+   "6": "SSSSS"
+  },
+  "done": true
+ },
+ "8": {
+  "n_cand": 12,
+  "cells": {
+   "0": "DSSDS",
+   "1": "SDDSD",
+   "2": "DSSDS",
+   "3": "SSDSS",
+   "5": "DDDDD",
+   "4": "DDDDD",
+   "8": "SSSSS",
+   "6": "SSSSS",
+   "7": "SDDSS",
+   "9": "SDDSS",
+   "11": "DDDDD",
+   "10": "SSDSS"
+  },
+  "done": true
+ },
+ "9": {
+  "n_cand": 12,
+  "cells": {
+   "1": "DSSSS",
+   "0": "DDDDD",
+   "2": "DSSSS",
+   "3": "DSSSS",
+   "6": "DSSSS",
+   "4": "SSSSS",
+   "7": "DSSDS",
+   "8": "SSSSD",
+   "5": "DDDDD",
+   "9": "SSSSS",
+   "10": "SSSSS",
+   "11": "DDDDD"
+  },
+  "done": true
+ },
+ "10": {
+  "n_cand": 10,
+  "cells": {
+   "0": "SDDSS",
+   "1": "SDDSS",
+   "3": "SDDSS",
+   "4": "SSSSS",
+   "2": "SDDSS",
+   "5": "SDDSS",
+   "6": "SSSSD",
+   "8": "SDDSS",
+   "7": "SDDSS",
+   "9": "SDDSD"
+  },
+  "done": true
+ },
+ "11": {
+  "n_cand": 10,
+  "cells": {
+   "1": "SDDSD",
+   "3": "DDDDD",
+   "4": "SSSSS",
+   "2": "SDSSD",
+   "0": "SSSSS",
+   "8": "DSSSS",
+   "5": "SDDSS",
+   "9": "SDSSD",
+   "7": "DSSDS",
+   "6": "SSSSS"
+  },
+  "done": true
+ },
+ "12": {
+  "n_cand": 9,
+  "cells": {
+   "0": "DDDDD",
+   "1": "DSSDS",
+   "2": "DDSSS",
+   "6": "DDDSS",
+   "7": "SSSSD",
+   "3": "DDDSS",
+   "4": "SSSSS",
+   "8": "DDSSS",
+   "5": "SSSSS"
+  },
+  "done": true
+ },
+ "13": {
+  "n_cand": 11,
+  "cells": {
+   "1": "DDDDD",
+   "0": "SSSSD",
+   "2": "DSSDS",
+   "4": "SDSSS",
+   "3": "SSSSS",
+   "5": "DDDDD",
+   "6": "DSSSS",
+   "8": "DDDDD",
+   "9": "DDSSS",
+   "7": "DDDSS",
+   "10": "DDDDD"
+  },
+  "done": true
+ },
+ "14": {
+  "n_cand": 13,
+  "cells": {
+   "2": "DSSDS",
+   "1": "DDDDD",
+   "3": "SSSSD",
+   "0": "DDDDD",
+   "6": "DDDDD",
+   "5": "SSSSS",
+   "9": "DSSDS",
+   "4": "DSSDS",
+   "7": "SDSSD",
+   "11": "DDDSS",
+   "8": "DSSDS",
+   "12": "SSSSS",
+   "10": "DSSDS"
+  },
+  "done": true
+ },
+ "15": {
+  "n_cand": 12,
+  "cells": {
+   "0": "DSSDS",
+   "1": "SSSDS",
+   "3": "SSSSS",
+   "4": "SSSSS",
+   "2": "SDSSD",
+   "6": "DSSDS",
+   "5": "DSSDS",
+   "7": "DSSDS",
+   "9": "DSSDS",
+   "8": "DDDDD",
+   "11": "DDDDD",
+   "10": "DSSDS"
+  },
+  "done": true
+ },
+ "16": {
+  "n_cand": 12,
+  "cells": {
+   "1": "DDDDD",
+   "0": "SDDSS",
+   "2": "SSSDS",
+   "3": "DSSDS",
+   "4": "DDDDD",
+   "5": "DDDDD",
+   "7": "SSSSD",
+   "9": "SDSSD",
+   "6": "DSSDS",
+   "10": "SSSSS",
+   "8": "SDDSS",
+   "11": "DDDDD"
+  },
+  "done": true
+ },
+ "17": {
+  "n_cand": 10,
+  "cells": {
+   "0": "DSDSS",
+   "1": "DSSDS",
+   "2": "DSDSS",
+   "3": "DDSSS",
+   "4": "SSSSS",
+   "5": "SSSDD",
+   "6": "SSSSD",
+   "9": "DSSDS",
+   "8": "DDDDD",
+   "7": "SSSSS"
+  },
+  "done": true
+ },
+ "18": {
+  "n_cand": 8,
+  "cells": {
+   "1": "DSSDS",
+   "2": "SDDSS",
+   "0": "SDSDD",
+   "4": "SSDSD",
+   "5": "SSSDS",
+   "6": "DSSDS",
+   "7": "SSSSD",
+   "3": "SSSSS"
+  },
+  "done": true
+ },
+ "19": {
+  "n_cand": 12,
+  "cells": {
+   "0": {
+    "error": "I cannot provide a comparison because the image provided is incomplete; the \"CANDIDATE\" creature on the right is not visible."
+   },
+   "1": "DDDSS",
+   "2": "SSDSS",
+   "4": "SSSSS",
+   "5": "DSSDD",
+   "6": "SSSSS",
+   "3": "SSSSS",
+   "7": "DDDDD",
+   "8": "DSSDS",
+   "10": "SDSSD",
+   "11": "SDDSD",
+   "9": "SDSSD"
+  },
+  "done": true
+ }
+}

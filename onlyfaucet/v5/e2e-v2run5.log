@@ -1,0 +1,30 @@
+ex00 PASS 2/2 taps=2 seg=40ms vlm=15225ms wall=15.3s
+ex01 PASS 2/2 taps=2 seg=102ms vlm=16877ms wall=17.0s
+ex02 PASS 2/2 taps=2 seg=41ms vlm=14208ms wall=14.3s
+ex03 PASS 2/2 taps=2 seg=52ms vlm=12666ms wall=12.7s
+v5solve: _ask try 1/4 failed: ValueError: bad payload: I cannot provide a comparison because the image of the "CANDIDATE" creature on t
+v5solve: _ask try 2/4 failed: ValueError: bad payload: I cannot provide a comparison because the image of the CANDIDATE creature (left)
+v5solve: _ask try 3/4 failed: ValueError: bad payload: I cannot provide a comparison because the image of the candidate creature (left)
+v5solve: _ask try 4/4 failed: ValueError: bad payload: I cannot provide a comparison because the image of the "CANDIDATE" creature on t
+ex04 PASS 2/2 taps=2 seg=63ms vlm=41221ms wall=41.3s
+ex05 PASS 2/2 taps=2 seg=48ms vlm=15525ms wall=15.6s
+ex06 fail 2/3 taps=2 seg=60ms vlm=15988ms wall=16.0s
+ex07 PASS 3/3 taps=3 seg=45ms vlm=16373ms wall=16.4s
+ex08 fail 2/3 taps=2 seg=50ms vlm=17534ms wall=17.6s
+ex09 PASS 3/3 taps=3 seg=61ms vlm=30018ms wall=30.1s
+ex10 fail 1/2 taps=1 seg=56ms vlm=18854ms wall=18.9s
+ex11 PASS 3/3 taps=3 seg=51ms vlm=14722ms wall=14.8s
+ex12 PASS 2/2 taps=2 seg=57ms vlm=14796ms wall=14.9s
+ex13 fail 1/3 taps=2 seg=61ms vlm=17313ms wall=17.4s
+v5solve: _ask try 1/4 failed: ValueError: bad payload: ```json
+{"slots":"SDDSN"}
+```
+ex14 PASS 3/3 taps=3 seg=63ms vlm=27176ms wall=27.2s
+ex15 fail 2/3 taps=2 seg=54ms vlm=18513ms wall=18.6s
+ex16 PASS 3/3 taps=3 seg=64ms vlm=16692ms wall=16.8s
+ex17 fail 1/3 taps=1 seg=46ms vlm=14989ms wall=15.0s
+ex18 PASS 3/3 taps=3 seg=42ms vlm=12598ms wall=12.6s
+ex19 PASS 3/3 taps=3 seg=54ms vlm=16657ms wall=16.7s
+
+=== rule=safe-union  14/20 strict  recall 44/52  traps 0  fp 1
+wall: median 16.7s  max 41.3s  fails: 6:2/3 8:2/3 10:1/2 13:1/3F 15:2/3 17:1/3

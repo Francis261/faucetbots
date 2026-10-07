@@ -203,6 +203,11 @@ const CANVAS_W = 450, CANVAS_H = 280;
 let captchaGeom = null;
 let pageGeomHooked = new WeakSet();
 
+// v5 widget: captcha_image answers with JSON {scene, ref} (data URLs), both
+// 450x280 canvases (scene + reference cut-out) drawn into CLOSED shadow roots
+// — unreachable from page context, so the response body is the only source.
+let v5Challenge = null;
+
 function attachGeomCapture(page) {
   if (!page || pageGeomHooked.has(page)) return;
   pageGeomHooked.add(page);
@@ -210,7 +215,23 @@ function attachGeomCapture(page) {
     if (!res.url().includes('/faucet/captcha_image')) return;
     (async () => {
       const hdr = res.headers()['x-captcha-piece'];
-      if (!hdr) { log('captcha_image response without X-Captcha-Piece'); return; }
+      if (!hdr) {
+        // v5 challenge payload (JSON) — no legacy piece header
+        try {
+          const txt = await res.text();
+          const j = JSON.parse(txt);
+          if (j && j.scene && j.ref) {
+            const at = Date.now();
+            const scenePath = `${SHOT_DIR}/v5-scene-${at}.png`;
+            const refPath = `${SHOT_DIR}/v5-ref-${at}.png`;
+            writeFileSync(scenePath, Buffer.from(String(j.scene).replace(/^data:image\/[\w+]+;base64,/, ''), 'base64'));
+            writeFileSync(refPath, Buffer.from(String(j.ref).replace(/^data:image\/[\w+]+;base64,/, ''), 'base64'));
+            v5Challenge = { scenePath, refPath, at };
+            log(`v5 challenge: ${scenePath}`);
+          }
+        } catch (e) { log(`v5 capture failed: ${e.message}`); }
+        return;
+      }
       let g = null;
       try { g = JSON.parse(Buffer.from(hdr, 'base64').toString('utf8')); } catch (e) {
         log(`geom parse failed: ${e.message}`);
@@ -1076,7 +1097,7 @@ async function getPageState(page) {
   try {
     return await page.evaluate(() => {
       const text = document.body?.innerText || '';
-      const answer = document.querySelector('[name="captcha_answer"]')?.value || '';
+      const answer = document.querySelector('[name="captcha_answer"], [id^="ca_"]')?.value || '';
       const waitMatch = text.match(/Please wait\s*(\d+):(\d+)/i);
       const waitSec = waitMatch ? Number(waitMatch[1]) * 60 + Number(waitMatch[2]) : null;
       // Temporary ban: "Time remaining to unlock: 46 minutes 51 seconds"
@@ -1114,6 +1135,7 @@ async function getPageState(page) {
         success: text.includes('has been sent'),
         verification: text.includes('Verification Required'),
         puzzle: text.includes('Drag the shape'),
+        v5: text.includes('Tap every creature'),   // v5 tap-widget challenge card
         captchaError: text.includes('Please complete the captcha'),
         verificationFailed: /verification failed/i.test(text),
         cooldown: waitSec !== null && !temporarilyBlocked,
@@ -1127,7 +1149,7 @@ async function getPageState(page) {
       };
     });
   } catch (e) {
-    return { text: '', success: false, verification: false, puzzle: false, captchaError: false, verificationFailed: false, cooldown: false, waitSec: null, temporarilyBlocked: false, blockSec: null, claimBtn: false, captchaAnswer: '', hRect: null, cbRect: null, verifyRect: null, hasForm: false, navError: true };
+    return { text: '', success: false, verification: false, puzzle: false, v5: false, captchaError: false, verificationFailed: false, cooldown: false, waitSec: null, temporarilyBlocked: false, blockSec: null, claimBtn: false, captchaAnswer: '', hRect: null, cbRect: null, verifyRect: null, hasForm: false, navError: true };
   }
 }
 
@@ -1222,6 +1244,7 @@ async function captureWidgetFrame(page, tag, tries = 2) {
 }
 
 async function handlePuzzle(page, attempt = 0) {
+  if (await isV5Widget(page)) return handlePuzzleV5(page, attempt);
   log(`Solving puzzle (attempt ${attempt + 1})...`);
   if (attempt >= 4) { log('Max puzzle attempts'); return false; }
   const ts = () => new Date().toISOString().replace(/[:.]/g, '-');
@@ -1321,6 +1344,249 @@ async function handlePuzzle(page, attempt = 0) {
     return false;
   }
   return handlePuzzleContent(page, cap.shot, cap.path, cap.clip, attempt);
+}
+
+// ---------------------------------------------------------------------------
+// v5 tap CAPTCHA — "Tap every creature built like this one / Same body, wings,
+// legs, head and tail..."
+//
+// Anatomy (v5c-inline-0.js): the widget lives inline in the faucet page with a
+// start GATE (".mc-gate" = "Verification Required"); clicking it fires
+// GET /faucet/captcha_image which answers JSON {scene, ref} (data URLs,
+// both 450x280).  The canvases sit in CLOSED shadow roots — unreachable from
+// page context — so the response body (attachGeomCapture) is the only source.
+// Taps are click events on the scene canvas (coords -> ca_ = "x,y;x,y";
+// untap radius 18px, MAX_TAPS=8, TTL 60s from draw).  Verify (vf_) does a
+// NATIVE form submit -> full page navigation to POST /faucet/verify/usdt.
+// ---------------------------------------------------------------------------
+
+async function isV5Widget(page) {
+  return page.evaluate(() =>
+    !!document.querySelector('.mc-gate') ||
+    !!document.querySelector('[id^="st_"]') ||
+    (document.body?.innerText || '').includes('Tap every creature')
+  ).catch(() => false);
+}
+
+// Map canvas coords (450x280) onto the stage host rect (canvas fills host) and
+// click.  Re-reads the rect every tap: ads shift layout between taps.
+async function v5StageTap(page, cx, cy) {
+  const p = await page.evaluate(([tx, ty]) => {
+    const st = document.querySelector('[id^="st_"]');
+    if (!st) return null;
+    let r = st.getBoundingClientRect();
+    if (r.bottom < 4 || r.top > innerHeight - 4) {
+      st.scrollIntoView({ block: 'center' });
+      r = st.getBoundingClientRect();
+    }
+    return { x: r.left + (tx / 450) * r.width, y: r.top + (ty / 280) * r.height };
+  }, [cx, cy]).catch(() => null);
+  if (!p) return false;
+  const esc = await ensureClickable(page, p.x, p.y);
+  if (esc !== 'ok' && !esc.startsWith('clear')) log(`v5 tap: ${esc}`);
+  await page.mouse.move(p.x + (Math.random() * 5 - 2.5),
+                        p.y + (Math.random() * 5 - 2.5), { steps: 5 });
+  await sleep(40 + Math.random() * 60);
+  await page.mouse.click(p.x, p.y);
+  return true;
+}
+
+async function handlePuzzleV5(page, attempt = 0) {
+  const ts = () => new Date().toISOString().replace(/[:.]/g, '-');
+  log(`Solving v5 tap challenge (attempt ${attempt + 1})`);
+  if (attempt >= 4) { log('Max puzzle attempts'); return false; }
+
+  // A Verify already fired this claim cycle: whatever widget is on screen now
+  // is the platform's response — never touch it again (one Verify per claim).
+  if (submitGuard.used) return bailOutOfPuzzle(page, 'v5-after-verify-reentry', false);
+
+  await dismissSweetAlert(page);
+  await page.evaluate(() => { document.querySelectorAll('[class^="cc-"]').forEach(el => el.remove()); }).catch(() => {});
+  await sleep(300);
+
+  let st = await getPageState(page);
+  if (st.success || st.cooldown) return true;
+  let gateClickAt = 0;
+
+  if (!st.v5) {
+    // --- Phase A: gate click = the captcha_image REQUEST = round event #1 ---
+    let gate = null;
+    for (let i = 0; i < 8 && !gate; i++) {
+      gate = await page.evaluate(() => {
+        const g = document.querySelector('.mc-gate');
+        if (!g || g.hidden) return null;
+        g.scrollIntoView({ block: 'center' });
+        const r = g.getBoundingClientRect();
+        if (r.width <= 0 || r.height <= 0) return null;
+        return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+      }).catch(() => null);
+      if (gate) break;
+      const s2 = await getPageState(page);
+      if (s2.success || s2.cooldown) return true;
+      if (s2.v5) { st = s2; break; }   // card appeared without our click
+      await sleep(1000);
+    }
+    if (!gate && !st.v5) {
+      log('v5 gate not found');
+      await page.screenshot({ path: `${SHOT_DIR}/v5-no-gate-${ts()}.png`, fullPage: true }).catch(() => {});
+      return 'aborted';   // nothing was opened: no event, no attempt
+    }
+    if (gate) {
+      if (roundSpacingLeft() > 0) {
+        log(`Round spacing: previous round started ${Math.round(roundSpacingLeft() / 1000)}s ago — NOT opening v5 widget`);
+        return 'aborted';   // gate NOT clicked: untouched page costs zero events
+      }
+      const esc = await ensureClickable(page, gate.x, gate.y);
+      if (esc !== 'ok' && !esc.startsWith('clear')) log(`v5 gate: ${esc}`);
+      gateClickAt = Date.now();
+      clearWidgetClock();
+      await page.mouse.click(gate.x, gate.y);
+      markWidgetShown();     // also noteRoundStart(): this click fires the request
+      log('Clicked v5 gate');
+    }
+  } else {
+    markWidgetShown();       // challenge already on screen: TTL budget from now
+  }
+  if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 widget detection too slow');
+
+  // --- Phase B: wait for the challenge payload (scene + ref PNGs) ---
+  let ch = null;
+  for (let i = 0; i < 16 && !ch; i++) {
+    if (v5Challenge && Date.now() - v5Challenge.at < 120000 &&
+        v5Challenge.at >= gateClickAt) ch = v5Challenge;
+    if (ch) break;
+    await sleep(500);
+    if (i % 4 === 3) {
+      const s2 = await getPageState(page);
+      if (s2.success || s2.cooldown) return true;
+    }
+  }
+  if (!ch) {
+    log('v5 challenge payload not captured');
+    await page.screenshot({ path: `${SHOT_DIR}/v5-no-payload-${ts()}.png`, fullPage: true }).catch(() => {});
+    return bailOutOfPuzzle(page, 'v5-no-payload');
+  }
+  st = await getPageState(page);
+  if (!st.v5 && !st.success && !st.cooldown) {
+    log('v5 challenge card disappeared before solve');
+    return bailOutOfPuzzle(page, 'v5-card-gone');
+  }
+  if (st.success || st.cooldown) return true;
+
+  // --- Phase C: solve (segment -> parallel VLM majority -> safe-union taps) ---
+  if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 pre-solve past bail window');
+  let out = null;
+  try {
+    const buf = execFileSync('python3',
+      [join(import.meta.dirname, 'v5solve.py'), '--files', ch.scenePath, ch.refPath],
+      { encoding: 'utf8', timeout: 48000, maxBuffer: 1 << 24 });
+    out = parseJSON(buf);
+  } catch (e) {
+    log(`v5 solve error: ${String(e.message).slice(0, 180)}`);
+  }
+  const nT = out && out.taps ? out.taps.length : 0;
+  log(`v5 solve: ok=${!!(out && out.ok)} taps=${nT} reason=${(out && out.reason) || '-'} seg=${(out && out.seg_ms) != null ? out.seg_ms : '?'}ms vlm=${(out && out.vlm_ms) != null ? out.vlm_ms : '?'}ms wall=${(out && out.wall_ms) != null ? out.wall_ms : '?'}ms failedCells=${(out && out.failed_cells) || 0}`);
+  if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 solve past bail window');
+  if (!out || !out.ok || nT === 0 || nT > 8) {
+    // No strict-confidence solution: NEVER Verify.  Reload is free this side
+    // of the submit (no attempt recorded) and the abort backoff covers the
+    // round event the open just spent.
+    await page.screenshot({ path: `${SHOT_DIR}/v5-nosolve-${ts()}.png`, fullPage: true }).catch(() => {});
+    return bailOutOfPuzzle(page, 'v5-solve-unsafe');
+  }
+  try { await page.screenshot({ path: `${SHOT_DIR}/v5-pre-verify-${Date.now()}.png` }); } catch {}
+
+  // --- Phase D: taps ---
+  log(`v5 taps: ${JSON.stringify(out.taps)}`);
+  for (let k = 0; k < out.taps.length; k++) {
+    if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 ttl during taps');
+    const okTap = await v5StageTap(page, out.taps[k][0], out.taps[k][1]);
+    if (!okTap) return bailOutOfPuzzle(page, 'v5 stage gone');
+    await sleep(80 + Math.random() * 130);
+  }
+  await sleep(350);
+  // Closed loop: the widget rewrites ca_ = "x,y;x,y" on every tap change.
+  const ans = await page.evaluate(() =>
+    document.querySelector('[id^="ca_"], [name="captcha_answer"]')?.value || ''
+  ).catch(() => '');
+  const nAns = ans ? ans.split(';').filter(Boolean).length : 0;
+  log(`v5 taps landed: "${ans}" (${nAns}/${out.taps.length})`);
+  if (nAns !== out.taps.length) {
+    // A silent tap miss would make Verify a guaranteed burn — bail instead.
+    await page.screenshot({ path: `${SHOT_DIR}/v5-tapmismatch-${ts()}.png`, fullPage: true }).catch(() => {});
+    return bailOutOfPuzzle(page, `v5 tap mismatch ${nAns}!=${out.taps.length}`);
+  }
+
+  // --- Phase E: ONE Verify per claim cycle ---
+  if (pastBailWindow()) return bailOutOfPuzzle(page, 'past-bail-window-verify');
+  if (submitGuard.used) {
+    await bailOutOfPuzzle(page, 'second-verify-blocked');
+    return false;
+  }
+  await sleep(600);   // let the marker DOM write settle
+  const vfRect = await page.evaluate(() => {
+    const b = document.querySelector('[id^="vf_"]');
+    if (!b || b.disabled) return null;
+    b.scrollIntoView({ block: 'center' });
+    const r = b.getBoundingClientRect();
+    return r.width > 0 ? { x: r.x + r.width / 2, y: r.y + r.height / 2 } : null;
+  }).catch(() => null);
+  if (!vfRect) {
+    log('v5 Verify button unavailable — not submitting');
+    await page.screenshot({ path: `${SHOT_DIR}/v5-noverify-${ts()}.png`, fullPage: true }).catch(() => {});
+    return bailOutOfPuzzle(page, 'v5-verify-unavailable');
+  }
+  const escV = await ensureClickable(page, vfRect.x, vfRect.y);
+  if (escV !== 'ok' && !escV.startsWith('clear')) log(`v5 verify: ${escV}`);
+  const navPromise = page.waitForNavigation({ timeout: 15000, waitUntil: 'domcontentloaded' }).catch(() => null);
+  submitGuard.used = true;   // from here: exactly one real attempt exists
+  await page.mouse.click(vfRect.x, vfRect.y);
+  log('Clicked v5 Verify');
+  const nav = await navPromise;
+  await sleep(2000);
+  if (!nav) log('v5 Verify produced no navigation within 15s — polling before concluding');
+
+  // --- Phase F: result poll (same semantics as the legacy post-verify) ---
+  let submitted = !!nav;
+  for (let i = 0; i < 12; i++) {
+    const after = await getPageState(page);
+    if (after.navError) { await sleep(1500); continue; }
+    if (after.success) { log('v5 solved — claim successful!'); return true; }
+    if (after.cooldown) { log('Cooldown after v5 — claim likely succeeded'); return true; }
+    if (after.verificationFailed) {
+      await dismissSweetAlert(page);
+      await page.screenshot({ path: `${SHOT_DIR}/v5-verify-failed-${ts()}.png`, fullPage: true }).catch(() => {});
+      log('Site said: verification failed — account state now needs a reset');
+      return bailOutOfPuzzle(page, 'verification-failed', false);
+    }
+    if (after.captchaError) {
+      await dismissSweetAlert(page);
+      return bailOutOfPuzzle(page, 'captcha-rejected', false);
+    }
+    if (after.v5 && !after.verification) {
+      submitted = true;      // fresh card served -> platform responded to us
+      await dismissSweetAlert(page);
+      await page.screenshot({ path: `${SHOT_DIR}/v5-fresh-after-verify-${ts()}.png`, fullPage: true }).catch(() => {});
+      log('Fresh v5 card after Verify — rejected attempt');
+      return bailOutOfPuzzle(page, 'fresh-puzzle-after-verify', false);
+    }
+    if (after.verification && !after.success && i >= 4) break;   // gate back, no verdict text
+    await sleep(2000);
+  }
+
+  if (!submitted) {
+    // Native form submit always navigates; no navigation = no attempt sent.
+    log('v5 Verify did not submit — treating as no-attempt');
+    await page.screenshot({ path: `${SHOT_DIR}/v5-verify-nosubmit-${ts()}.png`, fullPage: true }).catch(() => {});
+    return bailOutOfPuzzle(page, 'v5-verify-not-submitted');   // ret 'aborted'
+  }
+  const mid = await getPageState(page);
+  if (mid.success || mid.cooldown) return true;
+  if (mid.verification && submitGuard.used) return bailOutOfPuzzle(page, 'verify-unconfirmed', false);
+  await page.screenshot({ path: `${SHOT_DIR}/v5-after-verify-${ts()}.png`, fullPage: true }).catch(() => {});
+  log(`After v5 verify: success=${mid.success} cooldown=${mid.cooldown} v5=${mid.v5} verif=${mid.verification}`);
+  if (attempt < 3) return handlePuzzleV5(page, attempt + 1);
+  return false;
 }
 
 function findPiecePy(path) {
@@ -2179,7 +2445,7 @@ async function waitForFaucetReady(page, timeout = 10000) {
   let st = await getPageState(page);
   while (Date.now() < end) {
     if (st.navError || st.claimBtn || st.hasForm || st.verification || st.puzzle
-      || st.success || st.cooldown || st.temporarilyBlocked) return st;
+      || st.v5 || st.success || st.cooldown || st.temporarilyBlocked) return st;
     await sleep(700);
     st = await getPageState(page);
   }
@@ -2275,7 +2541,7 @@ async function claimFaucet(page, email, retried = false) {
     }
   }
 
-  if (st.puzzle || st.verification) {
+  if (st.puzzle || st.verification || st.v5) {
     // A widget already on screen means its countdown is already running.
     if (st.puzzle) markWidgetShown();
     log('Verification/puzzle present — solving...');
@@ -2342,7 +2608,7 @@ async function claimFaucet(page, email, retried = false) {
       log(`Claim successful! Claims=${n}`);
       return 'success';
     }
-    if (st.puzzle || st.verification) {
+    if (st.puzzle || st.verification || st.v5) {
       const ok = await handlePuzzle(page);
       if (ok === 'aborted') return 'aborted'; // bailed pre-submit: no attempt burned
       st = await getPageState(page);

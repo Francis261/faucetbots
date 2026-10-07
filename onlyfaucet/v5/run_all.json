@@ -1,0 +1,2354 @@
+{
+ "0": {
+  "n_cand": 9,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "six-sided body",
+    "wings": "no wings",
+    "legs": "4 legs",
+    "head": "a round head",
+    "tail": "a forked tail"
+   },
+   "cells": {
+    "1": {
+     "body": "six-sided body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "2": null,
+    "3": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a forked tail"
+    },
+    "4": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "5": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "6": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "7": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a forked tail"
+    },
+    "8": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "9": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    }
+   },
+   "ms": 4829
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "DSDSS",
+    "2": "X",
+    "3": "SSSSS",
+    "4": "DDDSX",
+    "5": "DDS SS",
+    "6": "DDDSX",
+    "7": "SSSSS",
+    "8": "DDSSS",
+    "9": "SDSSS"
+   },
+   "ms": 3978,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "DDDDD",
+    "2": "DDDDD",
+    "3": "SSSSS",
+    "4": "DDSSD",
+    "5": "DDSSD",
+    "6": "DDDDD",
+    "7": "SSSSS",
+    "8": "SDSSD",
+    "9": "SDSSD"
+   },
+   "ms": 3855,
+   "error": null
+  }
+ },
+ "1": {
+  "n_cand": 15,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "no wings",
+    "legs": "4 legs",
+    "head": "a round head",
+    "tail": "a curly tail"
+   },
+   "cells": {
+    "1": null,
+    "2": null,
+    "3": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "4": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "5": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "6": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "7": null,
+    "8": null,
+    "9": null,
+    "10": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "11": null,
+    "12": null,
+    "13": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "14": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "15": null
+   },
+   "ms": 5726
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "X",
+    "2": "X",
+    "3": "DSDSS",
+    "4": "DSSDS",
+    "5": "DSDSS",
+    "6": "SSSSS",
+    "7": "X",
+    "8": "X",
+    "9": "X",
+    "10": "SSSSS",
+    "11": "X",
+    "12": "X",
+    "13": "DSSDS",
+    "14": "DSSDS",
+    "15": "X"
+   },
+   "ms": 4000,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "SSSSS",
+    "2": "SSSSD",
+    "3": "SSSSD",
+    "4": "DDSSD",
+    "5": "DSSSD",
+    "6": "SSSSD",
+    "7": "SSSSD",
+    "8": "SSSSD",
+    "9": "DDSSD",
+    "10": "SSSSS",
+    "11": "DDSSD",
+    "12": "DDSSD",
+    "13": "DDSSD",
+    "14": "DDSSD",
+    "15": "DDSSD"
+   },
+   "ms": 4302,
+   "error": null
+  }
+ },
+ "2": {
+  "n_cand": 9,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "a round wing",
+    "legs": "2 legs",
+    "head": "no head (eyes on the body)",
+    "tail": "a fan tail"
+   },
+   "cells": {
+    "1": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    },
+    "2": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    },
+    "3": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a thin tail"
+    },
+    "4": null,
+    "5": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    },
+    "6": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    },
+    "7": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    },
+    "8": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    },
+    "9": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    }
+   },
+   "ms": 6748
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "DSSSS",
+    "2": "DSSSS",
+    "3": "DDSSS",
+    "4": "X",
+    "5": "DDSSS",
+    "6": "DDSSS",
+    "7": "DSSSS",
+    "8": "SSSSS",
+    "9": "SSSSS"
+   },
+   "ms": 5736,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "SDSSS",
+    "2": "DDSSS",
+    "3": "DDSSS",
+    "4": "DDDDD",
+    "5": "SDSSS",
+    "6": "SDSSS",
+    "7": "SDSSS",
+    "8": "SSSSS",
+    "9": "SDSSS"
+   },
+   "ms": 4277,
+   "error": null
+  }
+ },
+ "3": {
+  "n_cand": 10,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "six-sided body",
+    "wings": "a round wing",
+    "legs": "2 legs",
+    "head": "a round head",
+    "tail": "no tail"
+   },
+   "cells": {
+    "1": null,
+    "2": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "3": {
+     "body": "six-sided body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "4": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "5": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "6": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "7": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "8": {
+     "body": "six-sided body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "9": null,
+    "10": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    }
+   },
+   "ms": 4961
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "X",
+    "2": "SSSSD",
+    "3": "DDSSD",
+    "4": "SSSDX",
+    "5": "SSSDD",
+    "6": "SSSDD",
+    "7": "SSSDD",
+    "8": "DDSDD",
+    "9": "X",
+    "10": "SSSSS"
+   },
+   "ms": 3722,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "SDSSS",
+    "2": "DSSSS",
+    "3": "SDSSS",
+    "4": "SDSSS",
+    "5": "DDSSS",
+    "6": "DDSSS",
+    "7": "SDSSS",
+    "8": "SDSSS",
+    "9": "DDDDD",
+    "10": "SDSSS"
+   },
+   "ms": 3346,
+   "error": null
+  }
+ },
+ "4": {
+  "n_cand": 11,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "bean-shaped body",
+    "wings": "two wings",
+    "legs": "2 legs",
+    "head": "a round head",
+    "tail": "no tail"
+   },
+   "cells": {
+    "1": {
+     "body": "bean-shaped body",
+     "wings": "two wings",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "2": {
+     "body": "oval body",
+     "wings": "two wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "3": null,
+    "4": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "2 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a thin tail"
+    },
+    "5": {
+     "body": "bean-shaped body",
+     "wings": "two wings",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "6": {
+     "body": "bean-shaped body",
+     "wings": "two wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "7": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "8": {
+     "body": "bean-shaped body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "9": {
+     "body": "oval body",
+     "wings": "two wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "10": null,
+    "11": null
+   },
+   "ms": 5637
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "SSSSS",
+    "2": "DSSDX",
+    "3": "X",
+    "4": "DSSDX",
+    "5": "SSSSS",
+    "6": "SDSS D",
+    "7": "DSSDX",
+    "8": "DSSDX",
+    "9": "SDSS D",
+    "10": "X",
+    "11": "X"
+   },
+   "ms": 3355,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "SSSSS",
+    "2": "DSSDS",
+    "3": "DDDDD",
+    "4": "DSSSS",
+    "5": "DSSDS",
+    "6": "DDDDD",
+    "7": "DSSDS",
+    "8": "DSSDS",
+    "9": "DDDDD",
+    "10": "DDDDD",
+    "11": "DDDDD"
+   },
+   "ms": 16809,
+   "error": null
+  }
+ },
+ "5": {
+  "n_cand": 10,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "no wings",
+    "legs": "no legs",
+    "head": "a round head",
+    "tail": "a curly tail"
+   },
+   "cells": {
+    "1": null,
+    "2": {
+     "body": "bean-shaped body",
+     "wings": "two wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "3": {
+     "body": "bean-shaped body",
+     "wings": "two wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "4": {
+     "body": "bean-shaped body",
+     "wings": "two wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "5": {
+     "body": "six-sided body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "6": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "7": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "8": {
+     "body": "bean-shaped body",
+     "wings": "two wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "9": {
+     "body": "oval body",
+     "wings": "two wings",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "10": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    }
+   },
+   "ms": 17760
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "X",
+    "2": "DDDSS",
+    "3": "DDDSS",
+    "4": "DDDSS",
+    "5": "SSSD S",
+    "6": "SSSSS",
+    "7": "SSSSS",
+    "8": "DDDSS",
+    "9": "DDDSS",
+    "10": "SSSSS"
+   },
+   "ms": 4812,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "SDSSD",
+    "2": "SDSSD",
+    "3": "SDSSD",
+    "4": "SDSSD",
+    "5": "SDSSD",
+    "6": "SDSSD",
+    "7": "SSSSD",
+    "8": "SDSSD",
+    "9": "SDSSD",
+    "10": "SDSSD"
+   },
+   "ms": 3412,
+   "error": null
+  }
+ },
+ "6": {
+  "n_cand": 11,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "no wings",
+    "legs": "4 legs",
+    "head": "no head (eyes on the body)",
+    "tail": "no tail"
+   },
+   "cells": {
+    "1": null,
+    "2": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a curly tail"
+    },
+    "3": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    },
+    "4": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a thin tail"
+    },
+    "5": {
+     "body": "teardrop body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a curly tail"
+    },
+    "6": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    },
+    "7": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    },
+    "8": null,
+    "9": {
+     "body": "teardrop body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a curly tail"
+    },
+    "10": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    },
+    "11": null
+   },
+   "ms": 16473
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "X",
+    "2": "DDDSS",
+    "3": "SSSSS",
+    "4": "DDSSD",
+    "5": "DDDS D",
+    "6": "DDDSS",
+    "7": "DDDSS",
+    "8": "X",
+    "9": "DDDSS",
+    "10": "SSSSS",
+    "11": "X"
+   },
+   "ms": 4056,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "DDDDD",
+    "2": "DSSDS",
+    "3": "DSSDS",
+    "4": "SDSSS",
+    "5": "DDSDS",
+    "6": "DDSDS",
+    "7": "SDSSS",
+    "8": "DDDDD",
+    "9": "DDSDS",
+    "10": "SSSSS",
+    "11": "DDDDD"
+   },
+   "ms": 3336,
+   "error": null
+  }
+ },
+ "7": {
+  "n_cand": 10,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "no wings",
+    "legs": "no legs",
+    "head": "a round head",
+    "tail": "a curly tail"
+   },
+   "cells": {
+    "1": null,
+    "2": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "3": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "4": {
+     "body": "six-sided body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "5": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "6": {
+     "body": "bean-shaped body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "7": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "8": {
+     "body": "bean-shaped body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "9": {
+     "body": "six-sided body",
+     "wings": "a pointed wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a fan tail"
+    },
+    "10": {
+     "body": "bean-shaped body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    }
+   },
+   "ms": 5228
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "X",
+    "2": "SSSSS",
+    "3": "SSSSS",
+    "4": "DDSSS",
+    "5": "SDSSS",
+    "6": "DDDSS",
+    "7": "SSSSS",
+    "8": "DDDSS",
+    "9": "DDDSS",
+    "10": "DDDSS"
+   },
+   "ms": 4752,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "SSSSD",
+    "2": "SSSSS",
+    "3": "SSSSS",
+    "4": "SDSSD",
+    "5": "DSSSD",
+    "6": "DDSSD",
+    "7": "SSSSD",
+    "8": "DDSSD",
+    "9": "DDSSD",
+    "10": "DSSSD"
+   },
+   "ms": 3462,
+   "error": null
+  }
+ },
+ "8": {
+  "n_cand": 12,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "a round wing",
+    "legs": "no legs",
+    "head": "a round head",
+    "tail": "a forked tail"
+   },
+   "cells": {
+    "1": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a forked tail"
+    },
+    "2": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a fan tail"
+    },
+    "3": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "4": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a forked tail"
+    },
+    "5": null,
+    "6": null,
+    "7": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a forked tail"
+    },
+    "8": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "9": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "10": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a forked tail"
+    },
+    "11": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "12": null
+   },
+   "ms": 4780
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "DDS S S",
+    "2": "DDS S D",
+    "3": "DDS S D",
+    "4": "SSSSS",
+    "5": "X",
+    "6": "X",
+    "7": "SSSSS",
+    "8": "DDS S D",
+    "9": "SSSSS",
+    "10": "SSSSS",
+    "11": "DDS S X",
+    "12": "X"
+   },
+   "ms": 5321,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "DSSSS",
+    "2": "DSSSS",
+    "3": "DDSSS",
+    "4": "SDSSS",
+    "5": "DDDDD",
+    "6": "DDDDD",
+    "7": "SDSSS",
+    "8": "DSSSS",
+    "9": "SDSSS",
+    "10": "SSSSS",
+    "11": "DSSSS",
+    "12": "DDDDD"
+   },
+   "ms": 3413,
+   "error": null
+  }
+ },
+ "9": {
+  "n_cand": 12,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "a pointed wing",
+    "legs": "2 legs",
+    "head": "a round head",
+    "tail": "a thin tail"
+   },
+   "cells": {
+    "1": null,
+    "2": {
+     "body": "teardrop body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "3": {
+     "body": "teardrop body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "4": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a fan tail"
+    },
+    "5": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "6": null,
+    "7": {
+     "body": "teardrop body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "8": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a fan tail"
+    },
+    "9": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "10": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "11": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "12": null
+   },
+   "ms": 4915
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "X",
+    "2": "DSSDS",
+    "3": "DSSDS",
+    "4": "DDSDS",
+    "5": "SSSSS",
+    "6": "X",
+    "7": "DSSDS",
+    "8": "DDDDD",
+    "9": "DDSSD",
+    "10": "SSSSS",
+    "11": "SSSSS",
+    "12": "X"
+   },
+   "ms": 4092,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "DSSDS",
+    "2": "DSSSS",
+    "3": "DSSSS",
+    "4": "DDSSD",
+    "5": "SSSSS",
+    "6": "DDDDD",
+    "7": "DSSSS",
+    "8": "DDDDD",
+    "9": "DSSSD",
+    "10": "SSSSS",
+    "11": "SSSSS",
+    "12": "DDDDD"
+   },
+   "ms": 3783,
+   "error": null
+  }
+ },
+ "10": {
+  "n_cand": 10,
+  "mode": "dark",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "two wings",
+    "legs": "4 legs",
+    "head": "no head (eyes on the body)",
+    "tail": "no tail"
+   },
+   "cells": {
+    "1": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a thin tail"
+    },
+    "2": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a thin tail"
+    },
+    "3": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a thin tail"
+    },
+    "4": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a thin tail"
+    },
+    "5": {
+     "body": "oval body",
+     "wings": "two wings",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a thin tail"
+    },
+    "6": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a thin tail"
+    },
+    "7": {
+     "body": "oval body",
+     "wings": "two wings",
+     "legs": "2 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a thin tail"
+    },
+    "8": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a thin tail"
+    },
+    "9": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a thin tail"
+    },
+    "10": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a thin tail"
+    }
+   },
+   "ms": 4621
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "SDSS D",
+    "2": "SDSS D",
+    "3": "SDSS D",
+    "4": "SDSS D",
+    "5": "SSSSS",
+    "6": "SDSS D",
+    "7": "SSSSD",
+    "8": "SDSS D",
+    "9": "SDSS D",
+    "10": "SDSS D"
+   },
+   "ms": 3052,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "SDDS S",
+    "2": "SDDS S",
+    "3": "SDDS S",
+    "4": "SDDS S",
+    "5": "SDDS S",
+    "6": "SDDS S",
+    "7": "SSDS S",
+    "8": "SDDS S",
+    "9": "SDDS S",
+    "10": "SDDS S"
+   },
+   "ms": 9401,
+   "error": null
+  }
+ },
+ "11": {
+  "n_cand": 10,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "no wings",
+    "legs": "2 legs",
+    "head": "no head (eyes on the body)",
+    "tail": "a fan tail"
+   },
+   "cells": {
+    "1": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "2 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    },
+    "2": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    },
+    "3": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    },
+    "4": null,
+    "5": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "2 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    },
+    "6": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    },
+    "7": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "2 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    },
+    "8": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    },
+    "9": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    },
+    "10": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    }
+   },
+   "ms": 6719
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "SSSSS",
+    "2": "SDDSS",
+    "3": "DDSXS",
+    "4": "X",
+    "5": "SSSSS",
+    "6": "SDDSS",
+    "7": "SSSSS",
+    "8": "DDSXS",
+    "9": "DDSXS",
+    "10": "DDSXS"
+   },
+   "ms": 3700,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "SSSSS",
+    "2": "SSSSD",
+    "3": "DSSDS",
+    "4": "SSSSS",
+    "5": "SDSSD",
+    "6": "SDSSD",
+    "7": "SSSSS",
+    "8": "SDSSD",
+    "9": "DSSDS",
+    "10": "SSSSS"
+   },
+   "ms": 3888,
+   "error": null
+  }
+ },
+ "12": {
+  "n_cand": 9,
+  "mode": "dark",
+  "B": {
+   "ref": {
+    "body": "six-sided body",
+    "wings": "a pointed wing",
+    "legs": "4 legs",
+    "head": "a round head",
+    "tail": "a fan tail"
+   },
+   "cells": {
+    "1": null,
+    "2": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    },
+    "3": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    },
+    "4": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    },
+    "5": {
+     "body": "six-sided body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a fan tail"
+    },
+    "6": {
+     "body": "six-sided body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a fan tail"
+    },
+    "7": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    },
+    "8": {
+     "body": "six-sided body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a fan tail"
+    },
+    "9": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "no tail"
+    }
+   },
+   "ms": 6950
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "X",
+    "2": "DDDSS",
+    "3": "DDDSS",
+    "4": "DDDSS",
+    "5": "SSSSS",
+    "6": "SSSSS",
+    "7": "DDDSS",
+    "8": "SDSSS",
+    "9": "DDDSS"
+   },
+   "ms": 4543,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "DDSSD",
+    "2": "DDSSD",
+    "3": "DDSSD",
+    "4": "DDSSD",
+    "5": "SDSSD",
+    "6": "SDSSD",
+    "7": "DDSSD",
+    "8": "DDSSD",
+    "9": "DDSSD"
+   },
+   "ms": 4886,
+   "error": null
+  }
+ },
+ "13": {
+  "n_cand": 11,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "six-sided body",
+    "wings": "no wings",
+    "legs": "4 legs",
+    "head": "a round head",
+    "tail": "a curly tail"
+   },
+   "cells": {
+    "1": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "2": {
+     "body": "bean-shaped body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "3": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "4": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "5": {
+     "body": "six-sided body",
+     "wings": "a round wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "6": {
+     "body": "six-sided body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "7": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "8": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "9": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "10": {
+     "body": "six-sided body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "11": null
+   },
+   "ms": 7703
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "SDSSS",
+    "2": "DDDSX",
+    "3": "SDSSX",
+    "4": "SSSSS",
+    "5": "SDSSS",
+    "6": "DDDSX",
+    "7": "DSSDX",
+    "8": "DDDSX",
+    "9": "DDDSX",
+    "10": "DDSSX",
+    "11": "X"
+   },
+   "ms": 2872,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "SSSSS",
+    "2": "SSDSD",
+    "3": "SSSSS",
+    "4": "SSDSD",
+    "5": "DDSSD",
+    "6": "SSSSD",
+    "7": "SSSSD",
+    "8": "SSDSD",
+    "9": "SSSSD",
+    "10": "SSSSD",
+    "11": "DDDDD"
+   },
+   "ms": 3845,
+   "error": null
+  }
+ },
+ "14": {
+  "n_cand": 13,
+  "mode": "dark",
+  "B": {
+   "ref": {
+    "body": "six-sided body",
+    "wings": "no wings",
+    "legs": "2 legs",
+    "head": "a round head",
+    "tail": "no tail"
+   },
+   "cells": {
+    "1": null,
+    "2": null,
+    "3": {
+     "body": "bean-shaped body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "4": {
+     "body": "six-sided body",
+     "wings": "no wings",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "5": {
+     "body": "bean-shaped body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "6": {
+     "body": "six-sided body",
+     "wings": "no wings",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "7": null,
+    "8": null,
+    "9": {
+     "body": "bean-shaped body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "10": {
+     "body": "bean-shaped body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "11": {
+     "body": "bean-shaped body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "12": {
+     "body": "bean-shaped body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "13": {
+     "body": "six-sided body",
+     "wings": "no wings",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    }
+   },
+   "ms": 5423
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "X",
+    "2": "X",
+    "3": "DDSSD",
+    "4": "SDSSD",
+    "5": "DDSSD",
+    "6": "SDSSD",
+    "7": "X",
+    "8": "X",
+    "9": "DDSSD",
+    "10": "DDSSD",
+    "11": "DDSSD",
+    "12": "DDSSD",
+    "13": "SDSSD"
+   },
+   "ms": 4180,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "SSSSS",
+    "2": "DSSDS",
+    "3": "DSSDS",
+    "4": "SSSSS",
+    "5": "DDSSD",
+    "6": "DDSSD",
+    "7": "SSSSS",
+    "8": "DSSDS",
+    "9": "DSSDS",
+    "10": "DSSDS",
+    "11": "DSSDS",
+    "12": "DSSDS",
+    "13": "SSSSS"
+   },
+   "ms": 4901,
+   "error": null
+  }
+ },
+ "15": {
+  "n_cand": 12,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "one long wing",
+    "legs": "no legs",
+    "head": "a round head",
+    "tail": "no tail"
+   },
+   "cells": {
+    "1": {
+     "body": "oval body",
+     "wings": "one long wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "2": {
+     "body": "oval body",
+     "wings": "one long wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "3": {
+     "body": "oval body",
+     "wings": "one long wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "4": {
+     "body": "oval body",
+     "wings": "one long wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "5": {
+     "body": "oval body",
+     "wings": "one long wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "6": {
+     "body": "oval body",
+     "wings": "one long wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "7": {
+     "body": "oval body",
+     "wings": "one long wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "8": {
+     "body": "oval body",
+     "wings": "one long wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "9": null,
+    "10": {
+     "body": "oval body",
+     "wings": "one long wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "11": {
+     "body": "oval body",
+     "wings": "one long wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "12": null
+   },
+   "ms": 4889
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "SDSSS",
+    "2": "SDSSX",
+    "3": "SSSDD",
+    "4": "SSSSS",
+    "5": "SSSSS",
+    "6": "SDSSD",
+    "7": "SSSDD",
+    "8": "SDSDD",
+    "9": "X",
+    "10": "SDSSX",
+    "11": "SDSDD",
+    "12": "X"
+   },
+   "ms": 3520,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "SDSSD",
+    "2": "SSSSD",
+    "3": "SSSSD",
+    "4": "SDSSD",
+    "5": "DSSSD",
+    "6": "DSSSD",
+    "7": "SDSSD",
+    "8": "DSSSD",
+    "9": "DDDDD",
+    "10": "SDSSD",
+    "11": "DSSSD",
+    "12": "DDDDD"
+   },
+   "ms": 4917,
+   "error": null
+  }
+ },
+ "16": {
+  "n_cand": 12,
+  "mode": "dark",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "a pointed wing",
+    "legs": "no legs",
+    "head": "a round head",
+    "tail": "a forked tail"
+   },
+   "cells": {
+    "1": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a forked tail"
+    },
+    "2": null,
+    "3": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a forked tail"
+    },
+    "4": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "5": null,
+    "6": null,
+    "7": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "8": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a forked tail"
+    },
+    "9": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "10": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a forked tail"
+    },
+    "11": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a forked tail"
+    },
+    "12": null
+   },
+   "ms": 8917
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "SDSSD",
+    "2": "X",
+    "3": "SSSSS",
+    "4": "DSSSD",
+    "5": "X",
+    "6": "X",
+    "7": "DSSSD",
+    "8": "SSSSS",
+    "9": "DSSSD",
+    "10": "SDSSD",
+    "11": "SSSSS",
+    "12": "X"
+   },
+   "ms": 5285,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "DSSDS",
+    "2": "DSSDS",
+    "3": "DDSSS",
+    "4": "DDSSS",
+    "5": "DSSDS",
+    "6": "DDSSS",
+    "7": "DDSSS",
+    "8": "DSSSS",
+    "9": "DDSSS",
+    "10": "DSSSS",
+    "11": "DSSSS",
+    "12": "DSSDS"
+   },
+   "ms": 3518,
+   "error": null
+  }
+ },
+ "17": {
+  "n_cand": 10,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "a pointed wing",
+    "legs": "2 legs",
+    "head": "a round head",
+    "tail": "a forked tail"
+   },
+   "cells": {
+    "1": {
+     "body": "six-sided body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "2": {
+     "body": "six-sided body",
+     "wings": "no wings",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "3": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "4": {
+     "body": "six-sided body",
+     "wings": "no wings",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "5": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a forked tail"
+    },
+    "6": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "7": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "8": {
+     "body": "six-sided body",
+     "wings": "a pointed wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "a forked tail"
+    },
+    "9": null,
+    "10": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    }
+   },
+   "ms": 4477
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "SSSSD",
+    "2": "DDSSD",
+    "3": "SSSSD",
+    "4": "DDSSD",
+    "5": "SDSSD",
+    "6": "DDSSD",
+    "7": "SDSSD",
+    "8": "SSSSD",
+    "9": "X",
+    "10": "DDSSD"
+   },
+   "ms": 2992,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "DSSDS",
+    "2": "DSSDS",
+    "3": "DSSDS",
+    "4": "DSSDS",
+    "5": "DSSDS",
+    "6": "DSSDS",
+    "7": "DSSDS",
+    "8": "DSSDS",
+    "9": "DDDDD",
+    "10": "DSSDS"
+   },
+   "ms": 3945,
+   "error": null
+  }
+ },
+ "18": {
+  "n_cand": 8,
+  "mode": "dark",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "a pointed wing",
+    "legs": "no legs",
+    "head": "no head (eyes on the body)",
+    "tail": "a fan tail"
+   },
+   "cells": {
+    "1": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a forked tail"
+    },
+    "2": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a forked tail"
+    },
+    "3": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "4 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    },
+    "4": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    },
+    "5": {
+     "body": "oval body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a forked tail"
+    },
+    "6": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    },
+    "7": {
+     "body": "oval body",
+     "wings": "no wings",
+     "legs": "2 legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a forked tail"
+    },
+    "8": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "no head (eyes on the body)",
+     "tail": "a fan tail"
+    }
+   },
+   "ms": 4853
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "SDXSS",
+    "2": "SSSSD",
+    "3": "SSDSS",
+    "4": "SSSSS",
+    "5": "SDXSS",
+    "6": "DSSSS",
+    "7": "SDDSS",
+    "8": "SSSSS"
+   },
+   "ms": 3726,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "SDSSD",
+    "2": "SDSSD",
+    "3": "SDSSD",
+    "4": "SSSSD",
+    "5": "SDSSD",
+    "6": "SDSSD",
+    "7": "SDSSD",
+    "8": "SDSSD"
+   },
+   "ms": 3189,
+   "error": null
+  }
+ },
+ "19": {
+  "n_cand": 12,
+  "mode": "light",
+  "B": {
+   "ref": {
+    "body": "oval body",
+    "wings": "a pointed wing",
+    "legs": "4 legs",
+    "head": "a round head",
+    "tail": "a fan tail"
+   },
+   "cells": {
+    "1": null,
+    "2": {
+     "body": "bean-shaped body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "3": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "2 legs",
+     "head": "a round head",
+     "tail": "no tail"
+    },
+    "4": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a fan tail"
+    },
+    "5": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a fan tail"
+    },
+    "6": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "7": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a fan tail"
+    },
+    "8": null,
+    "9": {
+     "body": "bean-shaped body",
+     "wings": "a round wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "10": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "4 legs",
+     "head": "a round head",
+     "tail": "a thin tail"
+    },
+    "11": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    },
+    "12": {
+     "body": "oval body",
+     "wings": "a pointed wing",
+     "legs": "no legs",
+     "head": "a round head",
+     "tail": "a curly tail"
+    }
+   },
+   "ms": 5982
+  },
+  "done": [
+   "B",
+   "E",
+   "F"
+  ],
+  "E": {
+   "cells": {
+    "1": "X",
+    "2": "DDDS D",
+    "3": "SSSSD",
+    "4": "SSSSS",
+    "5": "SSSSS",
+    "6": "DDDDD",
+    "7": "SSSSS",
+    "8": "X",
+    "9": "DDDS D",
+    "10": "DDSSD",
+    "11": "DDSSD",
+    "12": "DDSSD"
+   },
+   "ms": 3880,
+   "error": null
+  },
+  "F": {
+   "cells": {
+    "1": "DSSDS",
+    "2": "DSSDS",
+    "3": "DSSDS",
+    "4": "SSSSS",
+    "5": "DSSDS",
+    "6": "DDSDS",
+    "7": "DSSDS",
+    "8": "DSSDS",
+    "9": "DDSDS",
+    "10": "DSSDS",
+    "11": "DSSDS",
+    "12": "DDSDS"
+   },
+   "ms": 6754,
+   "error": null
+  }
+ }
+}
