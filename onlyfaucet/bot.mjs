@@ -220,7 +220,10 @@ function attachGeomCapture(page) {
     (async () => {
       const hdr = res.headers()['x-captcha-piece'];
       if (!hdr) {
-        // v5 challenge payload (JSON) — no legacy piece header
+        // v5 challenge payload (JSON) — no legacy piece header.
+        // Log WHICH frame issued it: idle-phase captures with no gate click
+        // were observed (09:49/09:51), and distinguishing the main page from
+        // an ad/popup frame tells us whether they count as round events.
         try {
           const txt = await res.text();
           const j = JSON.parse(txt);
@@ -231,7 +234,8 @@ function attachGeomCapture(page) {
             writeFileSync(scenePath, Buffer.from(String(j.scene).replace(/^data:image\/[\w+]+;base64,/, ''), 'base64'));
             writeFileSync(refPath, Buffer.from(String(j.ref).replace(/^data:image\/[\w+]+;base64,/, ''), 'base64'));
             v5Challenge = { scenePath, refPath, at };
-            log(`v5 challenge: ${scenePath}`);
+            const furl = (() => { try { return res.frame().url(); } catch { return '?'; } })();
+            log(`v5 challenge: ${scenePath} (frame: ${furl.slice(0, 110)})`);
           }
         } catch (e) { log(`v5 capture failed: ${e.message}`); }
         return;
