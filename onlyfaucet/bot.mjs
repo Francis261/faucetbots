@@ -1470,12 +1470,21 @@ async function handlePuzzleV5(page, attempt = 0) {
     await page.screenshot({ path: `${SHOT_DIR}/v5-no-payload-${ts()}.png`, fullPage: true }).catch(() => {});
     return bailOutOfPuzzle(page, 'v5-no-payload');
   }
-  st = await getPageState(page);
-  if (!st.v5 && !st.success && !st.cooldown) {
-    log('v5 challenge card disappeared before solve');
+  // The payload lands before the widget finishes drawing the card (image
+  // decode + ~300ms gate hide — measured 1-3s after the click).  Poll for the
+  // card instead of checking once, or a fast capture reads as "card gone".
+  let cardReady = false;
+  for (let i = 0; i < 8 && !cardReady; i++) {
+    st = await getPageState(page);
+    if (st.success || st.cooldown) return true;
+    if (st.v5) { cardReady = true; break; }
+    await sleep(400);
+  }
+  if (!cardReady) {
+    log('v5 challenge card did not appear after capture');
+    await page.screenshot({ path: `${SHOT_DIR}/v5-card-gone-${ts()}.png`, fullPage: true }).catch(() => {});
     return bailOutOfPuzzle(page, 'v5-card-gone');
   }
-  if (st.success || st.cooldown) return true;
 
   // --- Phase C: solve (segment -> parallel VLM majority -> safe-union taps) ---
   if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 pre-solve past bail window');
