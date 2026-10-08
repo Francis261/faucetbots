@@ -259,6 +259,8 @@ function attachGeomCapture(page) {
                 caller = (last.stack || '').split('\n').slice(1, 5)
                   .map(s => s.trim()).join(' <- ').slice(0, 420);
               }
+              const gc = await res.frame().evaluate(() => (window.__gateClicks || []).slice(-1)[0] || null);
+              if (gc) caller += ` | gate ${gc.kind} trusted=${gc.trusted}${gc.key ? ' key=' + gc.key : ''}`;
             } catch { /* page gone */ }
             log(`v5 challenge: ${scenePath} (frame: ${furl.slice(0, 110)})\n    caller: ${caller}`);
           }
@@ -359,6 +361,8 @@ async function launchBrowser() {
   // Who fetches /faucet/captcha_image without our gate click?  Idle-phase
   // auto-requests (~every 50-90s after a rejected Verify) were observed from
   // the main frame; capture a call-time stack so the log names the caller.
+  // Also record WHO clicked .mc-gate: isTrusted=false means a page script
+  // (synthetic), true means a human or Playwright input event.
   await ctx.addInitScript(() => {
     try {
       const mark = (url) => {
@@ -378,6 +382,18 @@ async function launchBrowser() {
         try { mark(u); } catch (e) {}
         return oo.call(this, m, u, ...rest);
       };
+      const rec = (kind, e) => {
+        try {
+          const t = e.target;
+          const gate = t && t.closest && t.closest('.mc-gate');
+          if (!gate) return;
+          (window.__gateClicks = window.__gateClicks || [])
+            .push({ at: Date.now(), kind, trusted: !!e.isTrusted, key: e.key || '' });
+        } catch (e2) { /* ignore */ }
+      };
+      for (const ev of ['pointerdown', 'click', 'keydown']) {
+        document.addEventListener(ev, (e) => rec(ev, e), true);
+      }
     } catch (e) { /* ignore */ }
   });
   ctx.on('page', attachGeomCapture);
@@ -1553,6 +1569,31 @@ async function handlePuzzleV5(page, attempt = 0) {
     await page.screenshot({ path: `${SHOT_DIR}/v5-card-gone-${ts()}.png`, fullPage: true }).catch(() => {});
     return bailOutOfPuzzle(page, 'v5-card-gone');
   }
+  // Widget readiness: an EXPIRED card or error box silently ignores every
+  // stage tap (observed 10:28:35 — two taps, ca_ stayed empty).  Bail BEFORE
+  // spending the solve, or wait out a transient loading spinner.
+  for (let i = 0; i < 6; i++) {
+    const wst = await page.evaluate(() => {
+      const vis = (sel) => {
+        const el = document.querySelector(sel);
+        if (!el || el.hidden) return false;
+        const r = el.getBoundingClientRect();
+        const cs = getComputedStyle(el);
+        return r.width > 0 && r.height > 0 && cs.display !== 'none' && cs.visibility !== 'hidden';
+      };
+      return { expired: vis('[id^="ex_"]'), err: vis('[id^="eb_"]'), spinner: vis('[id^="sp_"]') };
+    }).catch(() => ({ expired: false, err: false, spinner: false }));
+    if (wst.expired) {
+      log('v5 card expired before solve');
+      return bailOutOfPuzzle(page, 'v5-expired-pre-solve');
+    }
+    if (wst.err) {
+      log('v5 widget error box shown');
+      return bailOutOfPuzzle(page, 'v5-error-shown');
+    }
+    if (!wst.spinner) break;
+    await sleep(500);   // spinner mid-load: taps would be swallowed
+  }
 
   // --- Phase C: solve (segment -> parallel VLM majority -> safe-union taps) ---
   if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 pre-solve past bail window');
@@ -1609,6 +1650,15 @@ async function handlePuzzleV5(page, attempt = 0) {
       await sleep(90);
       coords = parseAns(await readAns());
       if (coords.length !== k + 1 || !near(coords[coords.length - 1], ix, iy)) {
+        const under = await page.evaluate(([tx, ty]) => {
+          const st = document.querySelector('[id^="st_"]');
+          if (!st) return 'no-st';
+          const r = st.getBoundingClientRect();
+          const x = r.left + (tx / 450) * r.width, y = r.top + (ty / 280) * r.height;
+          const el = document.elementFromPoint(x, y);
+          return el ? `${el.tagName}#${el.id || '-'}.${(typeof el.className === 'string' ? el.className : '').slice(0, 40)}` : 'null';
+        }, [ix, iy]).catch(() => 'eval-failed');
+        log(`v5 tap${k} repair failed — ca_=${JSON.stringify(coords)} under=${under}`);
         await page.screenshot({ path: `${SHOT_DIR}/v5-tapoff-${ts()}.png`, fullPage: true }).catch(() => {});
         return bailOutOfPuzzle(page, `v5 tap${k} off-target after repair ${JSON.stringify(coords)}`);
       }
@@ -2812,6 +2862,7 @@ async function waitOutBlock(page, blockSec) {
 async function waitManualSolve(page) {
   log('CAPTCHA FAIL PAUSE: 2 failed solves — waiting for you to solve manually (3rd fail would ban).');
   await page.screenshot({ path: `${SHOT_DIR}/manual-pause-${Date.now()}.png`, fullPage: true }).catch(() => {});
+  let clearStreak = 0;
   for (let i = 0; ; i++) {
     try {
       const st = await getPageState(page);
@@ -2819,10 +2870,20 @@ async function waitManualSolve(page) {
         log('Manual solve detected (success/cooldown) — failure counter reset');
         return 'reset';
       }
-      // Puzzle cleared and claim button back without block → ready again
-      if (!st.puzzle && !st.verification && !st.temporarilyBlocked && st.claimBtn) {
-        log('Manual solve detected (claim ready) — failure counter reset');
-        return 'reset';
+      // Puzzle cleared and claim button back without block → ready again.
+      // st.v5 MUST be checked: the v5 card hides the gate (verif=false), so a
+      // card the user just opened read as "claim ready" and the bot hijacked
+      // their manual attempt (observed 10:28).  Two consecutive clean polls
+      // ~3s apart guard the gate-hidden/card-drawing window too.
+      const clear = !st.puzzle && !st.verification && !st.v5
+        && !st.temporarilyBlocked && st.claimBtn;
+      if (clear) {
+        if (++clearStreak >= 2) {
+          log('Manual solve detected (claim ready) — failure counter reset');
+          return 'reset';
+        }
+      } else {
+        clearStreak = 0;
       }
       if (st.temporarilyBlocked) {
         return { status: 'blocked', blockSec: st.blockSec ?? 3600 };
