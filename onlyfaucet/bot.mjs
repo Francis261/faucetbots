@@ -200,6 +200,22 @@ function bumpClaim(email) {
   return 0;
 }
 
+// The 2-fail captcha ladder must survive restarts: the platform's penalty is
+// server-side and does NOT reset when we relaunch, so an in-memory counter
+// would silently allow a 3rd attempt after a reboot.  Persist per account.
+function getCaptchaFails(email) {
+  const a = loadAccounts().find(x => x.email === email);
+  return a ? (a.captchaFails || 0) : 0;
+}
+function setCaptchaFails(email, n) {
+  const accounts = loadAccounts();
+  const idx = accounts.findIndex(a => a.email === email);
+  if (idx >= 0) {
+    accounts[idx].captchaFails = n;
+    saveAccounts(accounts);
+  }
+}
+
 // Piece geometry from the widget's own captcha_image response header.
 // {x,y} is the piece CENTER in canvas coordinates (450x280); sprite is the
 // exact silhouette used to draw it — a perfect template for finding the hole.
@@ -235,7 +251,16 @@ function attachGeomCapture(page) {
             writeFileSync(refPath, Buffer.from(String(j.ref).replace(/^data:image\/[\w+]+;base64,/, ''), 'base64'));
             v5Challenge = { scenePath, refPath, at };
             const furl = (() => { try { return res.frame().url(); } catch { return '?'; } })();
-            log(`v5 challenge: ${scenePath} (frame: ${furl.slice(0, 110)})`);
+            let caller = '?';
+            try {
+              const stks = await res.frame().evaluate(() => (window.__capStacks || []).slice(-3));
+              if (stks && stks.length) {
+                const last = stks[stks.length - 1];
+                caller = (last.stack || '').split('\n').slice(1, 5)
+                  .map(s => s.trim()).join(' <- ').slice(0, 420);
+              }
+            } catch { /* page gone */ }
+            log(`v5 challenge: ${scenePath} (frame: ${furl.slice(0, 110)})\n    caller: ${caller}`);
           }
         } catch (e) { log(`v5 capture failed: ${e.message}`); }
         return;
@@ -328,6 +353,30 @@ async function launchBrowser() {
           }
         } catch (e) { /* ignore */ }
         return orig(obj);
+      };
+    } catch (e) { /* ignore */ }
+  });
+  // Who fetches /faucet/captcha_image without our gate click?  Idle-phase
+  // auto-requests (~every 50-90s after a rejected Verify) were observed from
+  // the main frame; capture a call-time stack so the log names the caller.
+  await ctx.addInitScript(() => {
+    try {
+      const mark = (url) => {
+        try {
+          if (String(url).indexOf('captcha_image') < 0) return;
+          const st = (new Error()).stack || '';
+          (window.__capStacks = window.__capStacks || [])
+            .push({ at: Date.now(), href: String(location.href), stack: st.slice(0, 1500) });
+        } catch (e) { /* ignore */ }
+      };
+      const of = window.fetch;
+      if (of) {
+        window.fetch = function (...a) { try { mark(a[0]); } catch (e) {} return of.apply(this, a); };
+      }
+      const oo = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function (m, u, ...rest) {
+        try { mark(u); } catch (e) {}
+        return oo.call(this, m, u, ...rest);
       };
     } catch (e) { /* ignore */ }
   });
@@ -1298,7 +1347,7 @@ async function handlePuzzle(page, attempt = 0) {
           // Opening now would push the 7-minute event window over the block
           // threshold.  The widget is NOT open yet, so leaving the page
           // untouched costs zero events — let the caller back off instead.
-          log(`Round spacing: previous round started ${Math.round(spacingLeft / 1000)}s ago — NOT opening the widget`);
+          log(`Round spacing: ${Math.round(spacingLeft / 1000)}s left before the next widget open — NOT opening the widget`);
           return 'aborted';
         }
       }
@@ -1379,6 +1428,11 @@ async function isV5Widget(page) {
 // Map canvas coords (450x280) onto the stage host rect (canvas fills host) and
 // click.  Re-reads the rect every tap: ads shift layout between taps.
 async function v5StageTap(page, cx, cy) {
+  // Measure AND neutralize overlays in one evaluate, then click immediately:
+  // the old path measured, ran a second evaluate, moved with jitter and slept
+  // 40-100ms — enough for an ad resize to shift the widget ~60 canvas-px
+  // (observed: intended (155,66) landed at (154,127)).  The window between
+  // protocol calls is now ~5-15ms with no deliberate delay.
   const p = await page.evaluate(([tx, ty]) => {
     const st = document.querySelector('[id^="st_"]');
     if (!st) return null;
@@ -1387,14 +1441,24 @@ async function v5StageTap(page, cx, cy) {
       st.scrollIntoView({ block: 'center' });
       r = st.getBoundingClientRect();
     }
-    return { x: r.left + (tx / 450) * r.width, y: r.top + (ty / 280) * r.height };
+    const x = r.left + (tx / 450) * r.width;
+    const y = r.top + (ty / 280) * r.height;
+    const stack = document.elementsFromPoint(x, y) || [];
+    const vw = innerWidth, vh = innerHeight;
+    const ov = stack.find(el => {
+      const cs = getComputedStyle(el);
+      if (cs.position !== 'fixed') return false;
+      const z = parseInt(cs.zIndex, 10);
+      if (!Number.isFinite(z) || z < 1000000) return false;
+      const rr = el.getBoundingClientRect();
+      return rr.width >= vw * 0.85 && rr.height >= vh * 0.85
+        && rr.left <= x && rr.top <= y && rr.right >= x && rr.bottom >= y;
+    });
+    if (ov) ov.style.setProperty('pointer-events', 'none', 'important');
+    return { x, y, esc: ov ? 'neutralized' : 'clear' };
   }, [cx, cy]).catch(() => null);
   if (!p) return false;
-  const esc = await ensureClickable(page, p.x, p.y);
-  if (esc !== 'ok' && !esc.startsWith('clear')) log(`v5 tap: ${esc}`);
-  await page.mouse.move(p.x + (Math.random() * 5 - 2.5),
-                        p.y + (Math.random() * 5 - 2.5), { steps: 5 });
-  await sleep(40 + Math.random() * 60);
+  await page.mouse.move(p.x, p.y, { steps: 3 });
   await page.mouse.click(p.x, p.y);
   return true;
 }
@@ -1441,7 +1505,7 @@ async function handlePuzzleV5(page, attempt = 0) {
     }
     if (gate) {
       if (roundSpacingLeft() > 0) {
-        log(`Round spacing: previous round started ${Math.round(roundSpacingLeft() / 1000)}s ago — NOT opening v5 widget`);
+        log(`Round spacing: ${Math.round(roundSpacingLeft() / 1000)}s left before the next widget open — NOT opening v5 widget`);
         return 'aborted';   // gate NOT clicked: untouched page costs zero events
       }
       const esc = await ensureClickable(page, gate.x, gate.y);
@@ -1513,25 +1577,57 @@ async function handlePuzzleV5(page, attempt = 0) {
   }
   try { await page.screenshot({ path: `${SHOT_DIR}/v5-pre-verify-${Date.now()}.png` }); } catch {}
 
-  // --- Phase D: taps ---
+  // --- Phase D: taps — each verified against ca_ with one repair attempt ---
+  // The count alone is not enough: an ad shift can land a press on a DIFFERENT
+  // creature (count matches, answer wrong -> rejected Verify burns an attempt).
+  // ca_ records the widget's own registered coords, so compare per tap.
   log(`v5 taps: ${JSON.stringify(out.taps)}`);
+  const readAns = () => page.evaluate(() =>
+    document.querySelector('[id^="ca_"], [name="captcha_answer"]')?.value || ''
+  ).catch(() => '');
+  const parseAns = v => v
+    ? v.split(';').filter(Boolean).map(s => s.split(',').map(n => parseInt(n, 10)))
+    : [];
+  const near = (c, ix, iy) => Math.abs(c[0] - ix) <= 8 && Math.abs(c[1] - iy) <= 8;
   for (let k = 0; k < out.taps.length; k++) {
     if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 ttl during taps');
-    const okTap = await v5StageTap(page, out.taps[k][0], out.taps[k][1]);
-    if (!okTap) return bailOutOfPuzzle(page, 'v5 stage gone');
-    await sleep(80 + Math.random() * 130);
+    const [ix, iy] = out.taps[k];
+    if (!(await v5StageTap(page, ix, iy))) return bailOutOfPuzzle(page, 'v5 stage gone');
+    await sleep(70 + Math.random() * 60);
+    let coords = parseAns(await readAns());
+    if (coords.length !== k + 1 || !near(coords[coords.length - 1], ix, iy)) {
+      log(`v5 tap ${k} landed off-target: ${JSON.stringify(coords)} — repairing`);
+      // Repair once: untap any wrong marker (same coords -> distance 0 -> untap),
+      // then re-tap with a freshly measured rect.
+      if (coords.length > k) {
+        const w = coords[coords.length - 1];
+        if (!(await v5StageTap(page, w[0], w[1]))) return bailOutOfPuzzle(page, 'v5 stage gone untap');
+        await sleep(70);
+      }
+      if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 ttl during tap repair');
+      if (!(await v5StageTap(page, ix, iy))) return bailOutOfPuzzle(page, 'v5 stage gone retap');
+      await sleep(90);
+      coords = parseAns(await readAns());
+      if (coords.length !== k + 1 || !near(coords[coords.length - 1], ix, iy)) {
+        await page.screenshot({ path: `${SHOT_DIR}/v5-tapoff-${ts()}.png`, fullPage: true }).catch(() => {});
+        return bailOutOfPuzzle(page, `v5 tap${k} off-target after repair ${JSON.stringify(coords)}`);
+      }
+      log(`v5 tap ${k} repaired: ${JSON.stringify(coords[coords.length - 1])}`);
+    }
+    await sleep(60 + Math.random() * 90);
   }
   await sleep(350);
   // Closed loop: the widget rewrites ca_ = "x,y;x,y" on every tap change.
-  const ans = await page.evaluate(() =>
-    document.querySelector('[id^="ca_"], [name="captcha_answer"]')?.value || ''
-  ).catch(() => '');
-  const nAns = ans ? ans.split(';').filter(Boolean).length : 0;
+  const ans = await readAns();
+  const landed = parseAns(ans);
+  const nAns = landed.length;
   log(`v5 taps landed: "${ans}" (${nAns}/${out.taps.length})`);
-  if (nAns !== out.taps.length) {
+  // Every intended tap must have a landed marker within 8px (order-independent).
+  const unmatched = out.taps.filter(t => !landed.some(c => near(c, t[0], t[1])));
+  if (nAns !== out.taps.length || unmatched.length) {
     // A silent tap miss would make Verify a guaranteed burn — bail instead.
     await page.screenshot({ path: `${SHOT_DIR}/v5-tapmismatch-${ts()}.png`, fullPage: true }).catch(() => {});
-    return bailOutOfPuzzle(page, `v5 tap mismatch ${nAns}!=${out.taps.length}`);
+    return bailOutOfPuzzle(page, `v5 tap mismatch ${nAns}!=${out.taps.length} unmatched=${unmatched.length}`);
   }
 
   if (dryRunMode) {
@@ -2770,8 +2866,11 @@ async function runLoop(email) {
   let fails = 0;
   // Separate from generic fails: only failed captcha/puzzle solves count toward the 2-attempt pause.
   // 3 failed CAPTCHA attempts = site ban; never auto-attempt a 3rd.
-  let captchaFails = 0;
+  // Persisted: the platform's penalty is server-side and outlives restarts.
+  let captchaFails = getCaptchaFails(email);
   const MAX_CAPTCHA_FAILS = 2;
+  const setCF = (n) => { captchaFails = n; setCaptchaFails(email, n); };
+  if (captchaFails) log(`Resuming with ${captchaFails}/${MAX_CAPTCHA_FAILS} persisted captcha fails`);
   // Safe bail-outs (deadline / low-confidence read) are not failures: no
   // attempt was submitted, so they never touch the failure ladder.
   let aborts = 0;
@@ -2807,11 +2906,11 @@ async function runLoop(email) {
           await gotoRetry(page, FAUCET_URL);
           await sleep(3000);
           await ensureCleared(page);
-          captchaFails = 0;
+          setCF(0);
           fails = 0;
           continue;
         }
-        captchaFails = 0;
+        setCF(0);
         fails = 0;
         log('Resuming after manual solve');
         continue;
@@ -2824,7 +2923,7 @@ async function runLoop(email) {
         await gotoRetry(page, FAUCET_URL);
         await sleep(4000);
         await ensureCleared(page);
-        captchaFails = 0;
+        setCF(0);
         fails = 0;
         continue;
       }
@@ -2849,7 +2948,7 @@ async function runLoop(email) {
 
       if (result === 'success') {
         fails = 0;
-        captchaFails = 0;
+        setCF(0);
         aborts = 0;
         // Wait cooldown then claim again on same page (no refresh unless needed)
         const ready = await waitForCooldown(page, 60);
@@ -2858,7 +2957,7 @@ async function runLoop(email) {
           await gotoRetry(page, FAUCET_URL);
           await sleep(4000);
           await ensureCleared(page);
-          captchaFails = 0;
+          setCF(0);
           fails = 0;
           continue;
         }
@@ -2868,11 +2967,11 @@ async function runLoop(email) {
         }
         await sleep(2000);
       } else if (result === 'cooldown') {
-        captchaFails = 0;
+        setCF(0);
         await waitForCooldown(page, 60);
         await sleep(2000);
       } else if (result === 'puzzle-failed') {
-        captchaFails++;
+        setCF(captchaFails + 1);
         fails = 0; // captcha fail is its own ladder — don't stack with generic reload fails
         log(`Captcha solve failed (${captchaFails}/${MAX_CAPTCHA_FAILS}) — will pause before next attempt if limit hit`);
         if (captchaFails >= MAX_CAPTCHA_FAILS) {
