@@ -394,6 +394,24 @@ async function launchBrowser() {
       for (const ev of ['pointerdown', 'click', 'keydown']) {
         document.addEventListener(ev, (e) => rec(ev, e), true);
       }
+      // Press-point clearance: neutralize whatever covers our target so the
+      // click reaches it (full-screen fixed overlays AND smaller ad layers
+      // that elementFromPoint reports as topmost).  Returns 'clear' only
+      // when the target selector itself is on top after neutralizing.
+      window.__pressClear = function (x, y, allow) {
+        try {
+          let top = null;
+          for (let i = 0; i < 4; i++) {
+            top = document.elementFromPoint(x, y);
+            if (!top) return 'null';
+            if (top.matches && (top.matches(allow) || top.closest(allow))) return 'clear';
+            top.style.setProperty('pointer-events', 'none', 'important');
+          }
+          top = document.elementFromPoint(x, y);
+          if (top && top.matches && (top.matches(allow) || top.closest(allow))) return 'cleared';
+          return 'blocked:' + (top ? `${top.tagName}#${top.id || '-'}` : 'null');
+        } catch (e) { return 'err:' + e.message; }
+      };
     } catch (e) { /* ignore */ }
   });
   ctx.on('page', attachGeomCapture);
@@ -1459,21 +1477,21 @@ async function v5StageTap(page, cx, cy) {
     }
     const x = r.left + (tx / 450) * r.width;
     const y = r.top + (ty / 280) * r.height;
-    const stack = document.elementsFromPoint(x, y) || [];
-    const vw = innerWidth, vh = innerHeight;
-    const ov = stack.find(el => {
-      const cs = getComputedStyle(el);
-      if (cs.position !== 'fixed') return false;
-      const z = parseInt(cs.zIndex, 10);
-      if (!Number.isFinite(z) || z < 1000000) return false;
-      const rr = el.getBoundingClientRect();
-      return rr.width >= vw * 0.85 && rr.height >= vh * 0.85
-        && rr.left <= x && rr.top <= y && rr.right >= x && rr.bottom >= y;
-    });
-    if (ov) ov.style.setProperty('pointer-events', 'none', 'important');
-    return { x, y, esc: ov ? 'neutralized' : 'clear' };
+    // Press-clear catches ANY top interceptor (full-screen fixed overlays AND
+    // smaller ad layers) — not just the fixed/z>=1e6 class.
+    const esc = (typeof window.__pressClear === 'function')
+      ? window.__pressClear(x, y, '[id^="st_"]') : 'no-fn';
+    return { x, y, esc };
   }, [cx, cy]).catch(() => null);
   if (!p) return false;
+  // Blocked/unclear press point: do NOT press (would hit whatever covers the
+  // stage — an ad click).  Return true so Phase D's per-tap ca_ verification
+  // triggers its repair (re-measures) or a safe bail.
+  if (p.esc && (p.esc.startsWith('blocked') || p.esc.startsWith('err') || p.esc === 'null' || p.esc === 'no-fn')) {
+    if (p.esc !== 'no-fn') log(`v5 stage press blocked (${p.esc}) — skipping press`);
+    else { await page.mouse.move(p.x, p.y, { steps: 3 }); await page.mouse.click(p.x, p.y); }
+    return true;
+  }
   await page.mouse.move(p.x, p.y, { steps: 3 });
   await page.mouse.click(p.x, p.y);
   return true;
@@ -1694,30 +1712,82 @@ async function handlePuzzleV5(page, attempt = 0) {
     return false;
   }
   await sleep(600);   // let the marker DOM write settle
-  const vfRect = await page.evaluate(() => {
+
+  // Measure + clear the press point in ONE evaluate, press immediately, then
+  // read the widget's OWN taken-signal (11:26 no-submit: the click never
+  // reached btnVf or its guard early-returned — both leave disabled=false,
+  // and form.submit() is only reachable from that handler, so disabled=false
+  // after the press proves NO attempt exists and a re-measured retry is safe).
+  const readTaken = () => page.evaluate(() => {
+    const b = document.querySelector('[id^="vf_"]');
+    if (!b) return null;                       // gone => probably navigating
+    return b.disabled || String(b.textContent || '').indexOf('Verifying') !== -1;
+  }).catch(() => null);
+  const clickVf = () => page.evaluate(() => {
     const b = document.querySelector('[id^="vf_"]');
     if (!b || b.disabled) return null;
     b.scrollIntoView({ block: 'center' });
     const r = b.getBoundingClientRect();
-    return r.width > 0 ? { x: r.x + r.width / 2, y: r.y + r.height / 2 } : null;
+    if (!(r.width > 0)) return null;
+    const x = r.x + r.width / 2, y = r.y + r.height / 2;
+    const esc = (typeof window.__pressClear === 'function')
+      ? window.__pressClear(x, y, '[id^="vf_"]') : 'no-fn';
+    return { x, y, esc };
   }).catch(() => null);
-  if (!vfRect) {
-    log('v5 Verify button unavailable — not submitting');
+
+  const clrOk = (p) => p && (p.esc === 'clear' || p.esc === 'cleared' || p.esc === 'no-fn');
+  let vfRect = await clickVf();
+  if (vfRect && !clrOk(vfRect)) vfRect = await clickVf();   // 2nd measure picks up the neutralization
+  if (!clrOk(vfRect)) {
+    log(`v5 Verify button unusable (esc=${vfRect ? vfRect.esc : 'absent'}) — not submitting`);
     await page.screenshot({ path: `${SHOT_DIR}/v5-noverify-${ts()}.png`, fullPage: true }).catch(() => {});
     return bailOutOfPuzzle(page, 'v5-verify-unavailable');
   }
-  const escV = await ensureClickable(page, vfRect.x, vfRect.y);
-  if (escV !== 'ok' && !escV.startsWith('clear')) log(`v5 verify: ${escV}`);
   const navPromise = page.waitForNavigation({ timeout: 15000, waitUntil: 'domcontentloaded' }).catch(() => null);
-  submitGuard.used = true;   // from here: exactly one real attempt exists
+  submitGuard.used = true;   // from here: no other verify path may run
   await page.mouse.click(vfRect.x, vfRect.y);
   log('Clicked v5 Verify');
+  const takenOnce = async () => {
+    let t = await readTaken();
+    if (t === null) t = await readTaken();
+    return t;   // null twice => page mid-unload; treat as taken (conservative)
+  };
+  let taken = await takenOnce();
+  if (taken === null) { log('v5 Verify taken-state unknown (page unloading) — treating as submitted'); taken = true; }
+
+  if (!taken) {
+    // Provably no attempt sent — dump the guard the widget bailed on, then
+    // re-measure (ads shift) and press exactly once more.
+    const why = await page.evaluate(() => {
+      const q = (s) => document.querySelector(s);
+      const b = q('[id^="vf_"]'), ex = q('[id^="ex_"]'), sp = q('[id^="sp_"]');
+      const ca = q('[id^="ca_"], [name="captcha_answer"]');
+      return JSON.stringify({
+        btn: b ? `${b.disabled ? 'disabled' : 'enabled'} ${(b.textContent || '').trim().slice(0, 14)}` : 'absent',
+        expired: !!(ex && !ex.hidden),
+        spinner: !!(sp && sp.style.display !== 'none'),
+        taps: ca ? (ca.value || '').split(';').filter(Boolean).length : -1,
+      });
+    }).catch(() => '?');
+    log(`v5 Verify not taken (${why}) — re-measuring and pressing once more`);
+    const again = await clickVf();
+    if (clrOk(again)) {
+      await page.mouse.click(again.x, again.y);
+      taken = await takenOnce();
+      if (taken === null) taken = true;
+    }
+    if (!taken) {
+      log('v5 Verify press not accepted after retry — no attempt sent');
+      await page.screenshot({ path: `${SHOT_DIR}/v5-verify-nosubmit-${ts()}.png`, fullPage: true }).catch(() => {});
+      return bailOutOfPuzzle(page, 'v5-verify-not-submitted');   // ret 'aborted'
+    }
+  }
   const nav = await navPromise;
   await sleep(2000);
-  if (!nav) log('v5 Verify produced no navigation within 15s — polling before concluding');
+  if (!nav) log('v5 Verify taken (btn disabled) but no navigation within 15s — polling before concluding');
 
   // --- Phase F: result poll (same semantics as the legacy post-verify) ---
-  let submitted = !!nav;
+  let submitted = taken || !!nav;   // taken => form.submit() dispatched
   for (let i = 0; i < 12; i++) {
     const after = await getPageState(page);
     if (after.navError) { await sleep(1500); continue; }
@@ -1745,7 +1815,8 @@ async function handlePuzzleV5(page, attempt = 0) {
   }
 
   if (!submitted) {
-    // Native form submit always navigates; no navigation = no attempt sent.
+    // Safety net (unreachable via the taken path): native form.submit always
+    // navigates, so no navigation plus no taken-signal = no attempt.
     log('v5 Verify did not submit — treating as no-attempt');
     await page.screenshot({ path: `${SHOT_DIR}/v5-verify-nosubmit-${ts()}.png`, fullPage: true }).catch(() => {});
     return bailOutOfPuzzle(page, 'v5-verify-not-submitted');   // ret 'aborted'
@@ -2719,7 +2790,11 @@ async function claimFaucet(page, email, retried = false) {
     if (ok === 'aborted') return 'aborted'; // bailed pre-submit: no attempt burned
     st = await getPageState(page);
     if (st.temporarilyBlocked) {
-      return { status: 'blocked', blockSec: st.blockSec ?? 3600 };
+      // ok===false => a Verify WAS submitted and rejected just before the block
+      // surfaced.  Carry the reject so the loop counts the fail and runs the
+      // logout/login reset — swallowing it (old unconditional setCF(0)) let the
+      // bot keep auto-attempting past the manual-pause ladder.
+      return { status: 'blocked', blockSec: st.blockSec ?? 3600, reject: ok === false };
     }
     if (ok || st.success || st.cooldown) {
       await dismissSweetAlert(page);
@@ -2783,7 +2858,7 @@ async function claimFaucet(page, email, retried = false) {
       if (ok === 'aborted') return 'aborted'; // bailed pre-submit: no attempt burned
       st = await getPageState(page);
       if (st.temporarilyBlocked) {
-        return { status: 'blocked', blockSec: st.blockSec ?? 3600 };
+        return { status: 'blocked', blockSec: st.blockSec ?? 3600, reject: ok === false };
       }
       if (ok || st.success || st.cooldown) {
         await dismissSweetAlert(page);
@@ -2967,7 +3042,8 @@ async function runLoop(email) {
           await gotoRetry(page, FAUCET_URL);
           await sleep(3000);
           await ensureCleared(page);
-          setCF(0);
+          // Never reset the ladder here: a block does not erase the rejects
+          // that put us in the pause (old setCF(0) un-paused us for free).
           fails = 0;
           continue;
         }
@@ -2984,7 +3060,19 @@ async function runLoop(email) {
         await gotoRetry(page, FAUCET_URL);
         await sleep(4000);
         await ensureCleared(page);
-        setCF(0);
+        if (result.reject) {
+          // Rejected Verify rode in with the block: count it (ladder) and run
+          // the logout/login reset — this path used to fall through to
+          // setCF(0), silently erasing the fail and disabling the pause gate.
+          setCF(captchaFails + 1);
+          log(`Captcha solve failed around block (${captchaFails}/${MAX_CAPTCHA_FAILS}) — recovering session`);
+          await recoverSession(page, email);
+          if (captchaFails >= MAX_CAPTCHA_FAILS) {
+            log('Reached 2 captcha fails — entering manual-solve pause (no auto 3rd attempt)');
+            fails = 0;
+            continue; // pause gate runs next iteration
+          }
+        }
         fails = 0;
         continue;
       }
@@ -3165,6 +3253,26 @@ if (isMain) {
     acquireLock();
     runDryV5(accounts[0].email).then(r => { console.log(`dry-run: ${r}`); process.exit(r === 'dryrun' ? 0 : 1); })
       .catch(e => { console.error(e); process.exit(1); });
+  } else if (args[0] === 'recover') {
+    // One-shot logout -> login reset (no round events): for a reject whose
+    // recovery was skipped, e.g. when the block return swallowed it.
+    const accounts = loadAccounts();
+    if (!accounts.length) { console.error('No accounts'); process.exit(1); }
+    acquireLock();
+    (async () => {
+      const ctx = await launchBrowser();
+      const page = ctx.pages()[0] || (await ctx.newPage());
+      let ok = false;
+      try {
+        if (!(await gotoRetry(page, BASE_URL))) throw new Error('home nav failed');
+        await sleep(2000);
+        await ensureCleared(page);
+        if (!(await isLoggedIn(page))) { console.log('recover: not logged in — nothing to reset'); await ctx.close().catch(() => {}); process.exit(0); }
+        ok = await recoverSession(page, accounts[0].email);
+      } finally { await ctx.close().catch(() => {}); }
+      console.log(`recover: ${ok ? 'ok' : 'failed'}`);
+      process.exit(ok ? 0 : 1);
+    })().catch(e => { console.error(e); process.exit(1); });
   } else {
     acquireLock();
     const accounts = loadAccounts();
