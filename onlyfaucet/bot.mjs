@@ -2764,6 +2764,14 @@ async function claimFaucet(page, email, retried = false) {
   if (st.temporarilyBlocked) {
     await page.screenshot({ path: `${SHOT_DIR}/blocked-${Date.now()}.png`, fullPage: true }).catch(() => {});
     log(`TEMPORARILY BLOCKED — remaining ${st.blockSec ?? '?'}s. Will wait until unlock.`);
+    if (st.success) {
+      // Credit + block on the same read (observed 13:28: a manual widget solve
+      // auto-claims, then the block surfaces).  Record it here — the success
+      // branch below never runs once we return blocked.  No dismiss: the
+      // block banner's text is what waitOutBlock polls.
+      const n = bumpClaim(email);
+      log(`Success already shown. Claims=${n} (recorded during block)`);
+    }
     return { status: 'blocked', blockSec: st.blockSec ?? 3600 };
   }
 
@@ -2794,6 +2802,16 @@ async function claimFaucet(page, email, retried = false) {
       // surfaced.  Carry the reject so the loop counts the fail and runs the
       // logout/login reset — swallowing it (old unconditional setCF(0)) let the
       // bot keep auto-attempting past the manual-pause ladder.
+      if (ok !== false && (ok || st.success || st.cooldown)) {
+        // Credit + block on the same read (observed 14:32: the platform
+        // accepted the solve and slammed the 1h block together).  The success
+        // branch below never runs once we return blocked, so record the
+        // credit here — but never on ok===false (a stale banner must not
+        // mask a rejected Verify).  No dismiss while the block modal is up:
+        // waitOutBlock polls its text and a closed modal could fake a clear.
+        const n = bumpClaim(email);
+        log(`Claim via puzzle. Claims=${n} (recorded during block)`);
+      }
       return { status: 'blocked', blockSec: st.blockSec ?? 3600, reject: ok === false };
     }
     if (ok || st.success || st.cooldown) {
@@ -2837,6 +2855,14 @@ async function claimFaucet(page, email, retried = false) {
     await page.screenshot({ path: `${SHOT_DIR}/after-submit-${Date.now()}.png`, fullPage: true }).catch(() => {});
 
     if (st.temporarilyBlocked) {
+      if (st.success) {
+        // Submit credited AND block surfaced on the same read — record the
+        // credit before returning blocked (the success branch below is
+        // otherwise unreachable).  Banner left up on purpose: waitOutBlock
+        // polls the block text and a dismiss could fake an early clear.
+        const n = bumpClaim(email);
+        log(`Claim successful! Claims=${n} (recorded during block)`);
+      }
       return { status: 'blocked', blockSec: st.blockSec ?? 3600 };
     }
     if (st.captchaError) {
@@ -2858,6 +2884,12 @@ async function claimFaucet(page, email, retried = false) {
       if (ok === 'aborted') return 'aborted'; // bailed pre-submit: no attempt burned
       st = await getPageState(page);
       if (st.temporarilyBlocked) {
+        if (ok !== false && (ok || st.success || st.cooldown)) {
+          // Same credit+block co-occurrence as the standalone puzzle path —
+          // record the claim, keep the reject flag semantics intact.
+          const n = bumpClaim(email);
+          log(`Claim via puzzle after submit. Claims=${n} (recorded during block)`);
+        }
         return { status: 'blocked', blockSec: st.blockSec ?? 3600, reject: ok === false };
       }
       if (ok || st.success || st.cooldown) {
