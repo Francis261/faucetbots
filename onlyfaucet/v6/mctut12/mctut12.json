@@ -1,0 +1,506 @@
+[
+ {
+  "zones": [
+   [
+    277.1,
+    77.6,
+    32.4
+   ],
+   [
+    165.6,
+    91.8,
+    35.6
+   ]
+  ],
+  "near": [
+   [
+    158.1,
+    188.8,
+    32.9
+   ],
+   [
+    388.4,
+    215.8,
+    30.6
+   ]
+  ],
+  "hint": [
+   "pointy ears",
+   "arms with claws",
+   "four little feet",
+   "no wings"
+  ],
+  "trap": [
+   [
+    "nothing on top instead of pointy ears",
+    "no arms instead of arms with claws"
+   ],
+   [
+    "long arms with hands instead of arms with claws",
+    "no legs instead of four little feet"
+   ]
+  ]
+ },
+ {
+  "zones": [
+   [
+    279,
+    61.1,
+    33.1
+   ],
+   [
+    176.8,
+    190.9,
+    30.7
+   ]
+  ],
+  "near": [
+   [
+    389.2,
+    81,
+    33.1
+   ],
+   [
+    62.5,
+    93.8,
+    29
+   ]
+  ],
+  "hint": [
+   "a propeller",
+   "no arms",
+   "spring legs",
+   "butterfly wings"
+  ],
+  "trap": [
+   [
+    "long arms with hands instead of no arms",
+    "no legs instead of spring legs"
+   ],
+   [
+    "nothing on top instead of a propeller",
+    "no legs instead of spring legs"
+   ]
+  ]
+ },
+ {
+  "zones": [
+   [
+    59.4,
+    76.4,
+    30.6
+   ],
+   [
+    279.9,
+    76.8,
+    30.2
+   ]
+  ],
+  "near": [
+   [
+    380.5,
+    205.3,
+    30.1
+   ],
+   [
+    65.7,
+    198.4,
+    28.1
+   ]
+  ],
+  "hint": [
+   "a propeller",
+   "crab pincers",
+   "four little feet",
+   "no wings"
+  ],
+  "trap": [
+   [
+    "no arms instead of crab pincers",
+    "no legs instead of four little feet"
+   ],
+   [
+    "nothing on top instead of a propeller",
+    "spring legs instead of four little feet"
+   ]
+  ]
+ },
+ {
+  "zones": [
+   [
+    164.2,
+    64.5,
+    27.5
+   ],
+   [
+    271.4,
+    210.7,
+    28.2
+   ]
+  ],
+  "near": [
+   [
+    377.4,
+    76.4,
+    29.3
+   ],
+   [
+    381.3,
+    184.4,
+    28.9
+   ]
+  ],
+  "hint": [
+   "pointy ears",
+   "no arms",
+   "four little feet",
+   "bat wings"
+  ],
+  "trap": [
+   [
+    "nothing on top instead of pointy ears",
+    "no legs instead of four little feet"
+   ],
+   [
+    "nothing on top instead of pointy ears",
+    "crab pincers instead of no arms"
+   ]
+  ]
+ },
+ {
+  "zones": [
+   [
+    174.1,
+    69.1,
+    28.4
+   ],
+   [
+    386.7,
+    213.9,
+    27.2
+   ]
+  ],
+  "near": [
+   [
+    63.1,
+    77.5,
+    25.8
+   ],
+   [
+    281.1,
+    214.1,
+    27.4
+   ]
+  ],
+  "hint": [
+   "a little sprout",
+   "no arms",
+   "tentacle legs",
+   "bat wings"
+  ],
+  "trap": [
+   [
+    "arms with claws instead of no arms",
+    "no legs instead of tentacle legs"
+   ],
+   [
+    "nothing on top instead of a little sprout",
+    "no legs instead of tentacle legs"
+   ]
+  ]
+ },
+ {
+  "zones": [
+   [
+    390.2,
+    64.5,
+    32.9
+   ],
+   [
+    166.8,
+    195.7,
+    29.1
+   ]
+  ],
+  "near": [
+   [
+    70.8,
+    191,
+    32.9
+   ],
+   [
+    278.1,
+    204.2,
+    34.6
+   ]
+  ],
+  "hint": [
+   "a propeller",
+   "tentacle arms",
+   "no legs",
+   "no wings"
+  ],
+  "trap": [
+   [
+    "nothing on top instead of a propeller",
+    "no arms instead of tentacle arms"
+   ],
+   [
+    "nothing on top instead of a propeller",
+    "long legs instead of no legs"
+   ]
+  ]
+ },
+ {
+  "zones": [
+   [
+    274.4,
+    72.4,
+    26.5
+   ],
+   [
+    287.5,
+    193,
+    28.9
+   ]
+  ],
+  "near": [
+   [
+    56.3,
+    66.3,
+    27.1
+   ],
+   [
+    185.4,
+    75.4,
+    28.5
+   ]
+  ],
+  "hint": [
+   "long bunny ears",
+   "no arms",
+   "long legs",
+   "no wings"
+  ],
+  "trap": [
+   [
+    "arms with claws instead of no arms",
+    "no legs instead of long legs"
+   ],
+   [
+    "nothing on top instead of long bunny ears",
+    "no legs instead of long legs"
+   ]
+  ]
+ },
+ {
+  "zones": [
+   [
+    278.6,
+    54.1,
+    32.6
+   ],
+   [
+    387.9,
+    196.4,
+    30.4
+   ]
+  ],
+  "near": [
+   [
+    170.4,
+    71.1,
+    32.1
+   ],
+   [
+    62.9,
+    195.9,
+    32.4
+   ]
+  ],
+  "hint": [
+   "nothing on top",
+   "tentacle arms",
+   "spring legs",
+   "bat wings"
+  ],
+  "trap": [
+   [
+    "no arms instead of tentacle arms",
+    "no legs instead of spring legs"
+   ],
+   [
+    "antennae instead of nothing on top",
+    "no arms instead of tentacle arms"
+   ]
+  ]
+ },
+ {
+  "zones": [
+   [
+    384,
+    61,
+    28
+   ],
+   [
+    170.7,
+    206.2,
+    31.6
+   ]
+  ],
+  "near": [
+   [
+    173.9,
+    67.3,
+    27
+   ],
+   [
+    385.8,
+    213.9,
+    27.9
+   ]
+  ],
+  "hint": [
+   "a spiky mohawk",
+   "long arms with hands",
+   "no legs",
+   "bat wings"
+  ],
+  "trap": [
+   [
+    "nothing on top instead of a spiky mohawk",
+    "no arms instead of long arms with hands"
+   ],
+   [
+    "no arms instead of long arms with hands",
+    "dragonfly wings instead of bat wings"
+   ]
+  ]
+ },
+ {
+  "zones": [
+   [
+    276.7,
+    77.4,
+    35.1
+   ],
+   [
+    387.3,
+    196.7,
+    32.6
+   ]
+  ],
+  "near": [
+   [
+    64.3,
+    199.2,
+    33.7
+   ],
+   [
+    167.5,
+    219.3,
+    33.5
+   ]
+  ],
+  "hint": [
+   "nothing on top",
+   "long arms with hands",
+   "tentacle legs",
+   "no wings"
+  ],
+  "trap": [
+   [
+    "no arms instead of long arms with hands",
+    "no legs instead of tentacle legs"
+   ],
+   [
+    "a spiky mohawk instead of nothing on top",
+    "no legs instead of tentacle legs"
+   ]
+  ]
+ },
+ {
+  "zones": [
+   [
+    281.3,
+    83.9,
+    32.4
+   ],
+   [
+    65.8,
+    198.8,
+    29
+   ]
+  ],
+  "near": [
+   [
+    391.8,
+    89.4,
+    28.9
+   ],
+   [
+    284.2,
+    203.7,
+    31.6
+   ]
+  ],
+  "hint": [
+   "one horn",
+   "no arms",
+   "two feet",
+   "dragonfly wings"
+  ],
+  "trap": [
+   [
+    "nothing on top instead of one horn",
+    "no legs instead of two feet"
+   ],
+   [
+    "nothing on top instead of one horn",
+    "crab pincers instead of no arms"
+   ]
+  ]
+ },
+ {
+  "zones": [
+   [
+    282.1,
+    74,
+    30.3
+   ],
+   [
+    169.2,
+    194.7,
+    33.9
+   ]
+  ],
+  "near": [
+   [
+    64.6,
+    92.3,
+    31.3
+   ],
+   [
+    64,
+    205,
+    33.6
+   ]
+  ],
+  "hint": [
+   "nothing on top",
+   "long arms with hands",
+   "tentacle legs",
+   "bat wings"
+  ],
+  "trap": [
+   [
+    "a spiky mohawk instead of nothing on top",
+    "no legs instead of tentacle legs"
+   ],
+   [
+    "no arms instead of long arms with hands",
+    "no legs instead of tentacle legs"
+   ]
+  ]
+ }
+]
