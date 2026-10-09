@@ -54,6 +54,42 @@ function noteRoundStart() {
 function roundSpacingLeft() {
   return Math.max(0, roundState.lastStart + ROUND_SPACING_MS - Date.now());
 }
+// A BAIL costs a round event of its own (the mid-widget reload), so an open
+// that follows a bail must still wait out the 7min event floor — two
+// abandoned rounds = 4 events in 104s drew a 1h block.  A CLEAN round costs
+// only its single checkbox start, so when the widget is already sitting on
+// screen the bot clicks it instead of idling: an unclicked visible widget
+// stalls every claim while spending zero events (the old fixed 420-900s
+// abort ladder froze the loop for 18min with the widget up).  Persisted in
+// the round state so fresh processes honour it too.
+function markBail() {
+  roundState.bailAt = Date.now();
+  recoveryPermit.used = true;   // a fresh bail revokes any unused permit
+  try { writeFileSync(ROUND_SPACING_FILE, JSON.stringify(roundState)); } catch {}
+}
+function bailFresh() {
+  return Number.isFinite(roundState.bailAt) && Date.now() - roundState.bailAt < ROUND_SPACING_MS;
+}
+// ONE-SHOT recovery engage permit (user decision 2026-10-09): after an
+// error reload + relogin with a captcha still pending, open it IMMEDIATELY
+// instead of waiting out the 7-min floor — exactly once per recovery.
+// Safety caps: consumed on first use, expires after 120s, and any new
+// markBail() revokes an unused permit — so a failing retry cannot loop
+// (the fail ladder still pauses at 2/2; the floor governs everything after
+// the single engage).
+const recoveryPermit = { at: 0, used: false };
+function noteRecoveryDone() {
+  if (!bailFresh()) return;   // floor not active — gates are already open
+  recoveryPermit.at = Date.now();
+  recoveryPermit.used = false;
+}
+function consumeRecoveryPermit() {
+  if (recoveryPermit.used) return false;
+  if (!recoveryPermit.at || Date.now() - recoveryPermit.at > 120000) return false;
+  recoveryPermit.used = true;
+  log('Recovery permit: opening the pending captcha immediately (one-shot; floor resumes if this round does not verify)');
+  return true;
+}
 
 // Abandon the current puzzle WITHOUT submitting: reloading before the 50s
 // mark means no attempt is recorded (forceFail only fires while the page lives).
@@ -62,6 +98,7 @@ function roundSpacingLeft() {
 async function bailOutOfPuzzle(page, reason, ret = 'aborted') {
   log(`BAILOUT (${reason}) after ${widgetAgeMs()}ms — reloading before forceFail, no attempt recorded (returns ${ret})`);
   clearWidgetClock();
+  markBail(); // reload = a round event: next open owes the 7min floor
   try { await page.goto(FAUCET_URL, { waitUntil: 'domcontentloaded', timeout: 30000 }); } catch {}
   await sleep(3000);
   await ensureCleared(page);
@@ -1377,11 +1414,11 @@ async function handlePuzzle(page, attempt = 0) {
       // not abort the very round it just measured.
       if (cbClicks === 0) {
         const spacingLeft = roundSpacingLeft();
-        if (spacingLeft > 0) {
+        if (spacingLeft > 0 && bailFresh() && !consumeRecoveryPermit()) {
           // Opening now would push the 7-minute event window over the block
-          // threshold.  The widget is NOT open yet, so leaving the page
-          // untouched costs zero events — let the caller back off instead.
-          log(`Round spacing: ${Math.round(spacingLeft / 1000)}s left before the next widget open — NOT opening the widget`);
+          // threshold — but only a BAIL-fresh open owes that floor; a clean
+          // round may start immediately (visible widget = click it).
+          log(`Round spacing: ${Math.round(spacingLeft / 1000)}s left (bail-fresh) — NOT opening the widget`);
           return 'aborted';
         }
       }
@@ -1467,28 +1504,66 @@ async function v5StageTap(page, cx, cy) {
   // 40-100ms — enough for an ad resize to shift the widget ~60 canvas-px
   // (observed: intended (155,66) landed at (154,127)).  The window between
   // protocol calls is now ~5-15ms with no deliberate delay.
-  const p = await page.evaluate(([tx, ty]) => {
+  const tapEval = () => page.evaluate(([tx, ty]) => {
     const st = document.querySelector('[id^="st_"]');
     if (!st) return null;
     let r = st.getBoundingClientRect();
     if (r.bottom < 4 || r.top > innerHeight - 4) {
-      st.scrollIntoView({ block: 'center' });
+      st.scrollIntoView({ block: 'center', inline: 'center' });
       r = st.getBoundingClientRect();
     }
-    const x = r.left + (tx / 450) * r.width;
-    const y = r.top + (ty / 280) * r.height;
+    let x = r.left + (tx / 450) * r.width;
+    let y = r.top + (ty / 280) * r.height;
+    // An ad shift can push the stage sideways: the point then falls outside
+    // the viewport and elementFromPoint/Playwright both reject it.  Recenter
+    // both axes before concluding it is dead.
+    if (!(x >= 2 && x <= innerWidth - 2 && y >= 2 && y <= innerHeight - 2)) {
+      st.scrollIntoView({ block: 'center', inline: 'center' });
+      r = st.getBoundingClientRect();
+      x = r.left + (tx / 450) * r.width;
+      y = r.top + (ty / 280) * r.height;
+    }
+    const rect = [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)];
+    const on = x >= 2 && x <= innerWidth - 2 && y >= 2 && y <= innerHeight - 2;
     // Press-clear catches ANY top interceptor (full-screen fixed overlays AND
     // smaller ad layers) — not just the fixed/z>=1e6 class.
-    const esc = (typeof window.__pressClear === 'function')
-      ? window.__pressClear(x, y, '[id^="st_"]') : 'no-fn';
-    return { x, y, esc };
+    const esc = !on ? 'null'
+      : (typeof window.__pressClear === 'function')
+        ? window.__pressClear(x, y, '[id^="st_"]') : 'no-fn';
+    return { x, y, on, esc, r: rect, vw: innerWidth };
   }, [cx, cy]).catch(() => null);
+  // The stage moves DYNAMICALLY mid-round (observed 10:07 and 10:39: tap0
+  // lands, tap1's point goes dead ~150ms later).  On a dead point, sample
+  // every 400ms and only press once two consecutive samples agree on the
+  // rect — a single fixed retry can hit the same moving frame twice.
+  let p = await tapEval();
+  // Dead stage / destroyed context: ad reflows rebuild st_ and the rect can
+  // stay [0,0,0,0] for seconds (observed 10:07/10:39/10:46 — all three bails
+  // today).  Sample up to ~6s until two consecutive samples agree; a bail
+  // here costs the 7min round floor, patience costs only TTL headroom, and
+  // pastBailWindow() inside guarantees we never outlive the widget.
+  let prevR = null;
+  for (let i = 0; i < 12; i++) {
+    if (p && p.esc !== 'null') {
+      if (!prevR || !p.r
+        || (Math.abs(p.r[0] - prevR[0]) <= 1 && Math.abs(p.r[1] - prevR[1]) <= 1)) break; // alive + settled
+      prevR = p.r; // alive but just moved: remember and require one more sample
+    } else if (p && p.r) {
+      prevR = p.r; // dead with known rect: remember for the stability compare
+    }
+    // TTL exhausted mid-wait: return false so the CALLER runs the bail
+    // (v5StageTap's contract is boolean — a truthy string here would read
+    // as a successful press).
+    if (pastBailWindow()) return false;
+    await sleep(500);
+    p = await tapEval();
+  }
   if (!p) return false;
   // Blocked/unclear press point: do NOT press (would hit whatever covers the
   // stage — an ad click).  Return true so Phase D's per-tap ca_ verification
   // triggers its repair (re-measures) or a safe bail.
   if (p.esc && (p.esc.startsWith('blocked') || p.esc.startsWith('err') || p.esc === 'null' || p.esc === 'no-fn')) {
-    if (p.esc !== 'no-fn') log(`v5 stage press blocked (${p.esc}) — skipping press`);
+    if (p.esc !== 'no-fn') log(`v5 stage press blocked (${p.esc}) r=${JSON.stringify(p.r)} vw=${p.vw} — skipping press`);
     else { await page.mouse.move(p.x, p.y, { steps: 3 }); await page.mouse.click(p.x, p.y); }
     return true;
   }
@@ -1538,8 +1613,11 @@ async function handlePuzzleV5(page, attempt = 0) {
       return 'aborted';   // nothing was opened: no event, no attempt
     }
     if (gate) {
-      if (roundSpacingLeft() > 0) {
-        log(`Round spacing: ${Math.round(roundSpacingLeft() / 1000)}s left before the next widget open — NOT opening v5 widget`);
+      // Click a widget that is already on screen — the visible-widget stall
+      // the user flagged.  Only BAIL-FRESH opens keep the 7min floor (their
+      // reload just cost an event); clean rounds may open immediately.
+      if (roundSpacingLeft() > 0 && bailFresh() && !consumeRecoveryPermit()) {
+        log(`Round spacing: ${Math.round(roundSpacingLeft() / 1000)}s left (bail-fresh) — NOT opening v5 widget`);
         return 'aborted';   // gate NOT clicked: untouched page costs zero events
       }
       const esc = await ensureClickable(page, gate.x, gate.y);
@@ -1617,8 +1695,12 @@ async function handlePuzzleV5(page, attempt = 0) {
   if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 pre-solve past bail window');
   let out = null;
   try {
-    const buf = execFileSync('python3',
-      [join(import.meta.dirname, 'v5solve.py'), '--files', ch.scenePath, ch.refPath],
+  // safe-union-cap4: identical to safe-union unless it proposes >=4 taps,
+  // where it takes the arm intersection instead (analyze14: all observed >=4
+  // answers were rejected; dormancy proven on official mcaptchav5 labels).
+  // Revert = change this string to 'safe-union'.
+  const buf = execFileSync('python3',
+      [join(import.meta.dirname, 'v5solve.py'), '--files', ch.scenePath, ch.refPath, 'safe-union-cap4'],
       { encoding: 'utf8', timeout: 48000, maxBuffer: 1 << 24 });
     out = parseJSON(buf);
   } catch (e) {
@@ -2751,6 +2833,7 @@ async function recoverSession(page, email) {
     log('Session recovery: LOGIN FAILED — skipping faucet nav');
   }
   log(`Session recovery ${ok ? 'done' : 'LOGIN FAILED'} in ${Math.round((Date.now() - t0) / 1000)}s`);
+  if (ok) noteRecoveryDone();  // pending captcha may be engaged once, immediately
   return ok;
 }
 
@@ -3056,6 +3139,7 @@ async function runLoop(email) {
         if (!(await gotoRetry(page, FAUCET_URL))) throw new Error('faucet nav failed');
         await sleep(4000);
         await ensureCleared(page);
+        noteRecoveryDone();  // connection-error relaunch + relogin: permit one immediate engage
         fails = 0;
       }
 
@@ -3112,16 +3196,18 @@ async function runLoop(email) {
       if (result === 'aborted') {
         aborts++;
         log(`Puzzle abandoned safely (${aborts}) — nothing submitted, retrying without penalty`);
-        // Every aborted cycle re-claims, and the claim re-opens a widget.
-        // The block counts ROUND EVENTS — checkbox starts AND mid-widget bail
-        // reloads — at >=3 within ~7min (observed: 3 opens in ~7min => 1h
-        // block; and 2 abandoned rounds = 4 events in 104s => 1h block,
-        // issued lazily on the next faucet page load).  So one abandoned
-        // round per 7min, ever: the first backoff is a full spacing window
-        // (roundSpacingLeft() in the cb-click path enforces the same floor
-        // even for manual runs).  Aborting itself is free.
-        const backoff = [420000, 600000, 900000];
-        const wait = backoff[Math.min(aborts - 1, backoff.length - 1)];
+        // Retry as soon as it is legal.  A BAIL-fresh round still owes the
+        // 7min event floor (its reload cost an event; >=3 events/~7min =>
+        // 1h block, issued lazily on the next load) — roundSpacingLeft() IS
+        // that floor, so wait exactly that instead of the old fixed
+        // 420/600/900s ladder: the ladder overshot (abort with 171s of
+        // spacing left still waited 420s) and froze the loop for minutes
+        // with a visible widget and zero events being spent.  Free aborts
+        // (nothing opened) and clean rounds retry after a short pause —
+        // the gate-open guards apply the floor only while bailFresh().
+        const wait = bailFresh() && roundSpacingLeft() > 0
+          ? roundSpacingLeft() + 5000
+          : 20000;
         log(`Open-rate protection: waiting ${Math.round(wait / 1000)}s before re-claim`);
         await sleep(wait);
         continue;
