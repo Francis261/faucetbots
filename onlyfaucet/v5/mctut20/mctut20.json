@@ -1,0 +1,722 @@
+[
+ {
+  "i": 0,
+  "zones": [
+   [
+    162.1,
+    58.2,
+    36.1
+   ],
+   [
+    48.8,
+    187.1,
+    35.9
+   ]
+  ],
+  "near": [
+   [
+    312.4,
+    213.2,
+    31.3
+   ]
+  ],
+  "trap": [
+   "two wings instead of a round wing",
+   "no tail instead of a forked tail"
+  ],
+  "hint": [
+   "six-sided body",
+   "a round wing",
+   "4 legs",
+   "a long snout",
+   "a forked tail"
+  ]
+ },
+ {
+  "i": 1,
+  "zones": [
+   [
+    80,
+    111.1,
+    29.8
+   ],
+   [
+    53.4,
+    194.6,
+    36
+   ]
+  ],
+  "near": [
+   [
+    274.7,
+    78.2,
+    36.1
+   ]
+  ],
+  "trap": [
+   "no wings instead of a round wing",
+   "2 legs instead of 4 legs"
+  ],
+  "hint": [
+   "oval body",
+   "a round wing",
+   "4 legs",
+   "a long snout",
+   "a curly tail"
+  ]
+ },
+ {
+  "i": 2,
+  "zones": [
+   [
+    251.1,
+    195.1,
+    33.1
+   ],
+   [
+    128.9,
+    220.2,
+    35.8
+   ]
+  ],
+  "near": [
+   [
+    182,
+    144,
+    34
+   ]
+  ],
+  "trap": [
+   "one long wing instead of two wings",
+   "a long snout instead of no head (eyes on the body)"
+  ],
+  "hint": [
+   "teardrop body",
+   "two wings",
+   "2 legs",
+   "no head (eyes on the body)",
+   "a fan tail"
+  ]
+ },
+ {
+  "i": 3,
+  "zones": [
+   [
+    374.1,
+    89.4,
+    36.9
+   ],
+   [
+    209.3,
+    217,
+    34.8
+   ]
+  ],
+  "near": [
+   [
+    70,
+    127.5,
+    31.7
+   ]
+  ],
+  "trap": [
+   "no legs instead of 2 legs",
+   "no head (eyes on the body) instead of a long snout"
+  ],
+  "hint": [
+   "spiky body",
+   "one long wing",
+   "2 legs",
+   "a long snout",
+   "no tail"
+  ]
+ },
+ {
+  "i": 4,
+  "zones": [
+   [
+    287.8,
+    68.4,
+    35.4
+   ],
+   [
+    154.8,
+    146.2,
+    36.3
+   ]
+  ],
+  "near": [
+   [
+    229.6,
+    117.2,
+    31.5
+   ]
+  ],
+  "trap": [
+   "no wings instead of two wings",
+   "no head (eyes on the body) instead of a round head"
+  ],
+  "hint": [
+   "bean-shaped body",
+   "two wings",
+   "4 legs",
+   "a round head",
+   "a forked tail"
+  ]
+ },
+ {
+  "i": 5,
+  "zones": [
+   [
+    324.3,
+    143,
+    33.3
+   ],
+   [
+    362.8,
+    213.7,
+    38.9
+   ]
+  ],
+  "near": [
+   [
+    195.4,
+    144.1,
+    32.9
+   ]
+  ],
+  "trap": [
+   "a round wing instead of no wings",
+   "no tail instead of a curly tail"
+  ],
+  "hint": [
+   "teardrop body",
+   "no wings",
+   "no legs",
+   "a round head",
+   "a curly tail"
+  ]
+ },
+ {
+  "i": 6,
+  "zones": [
+   [
+    273.6,
+    188.3,
+    30.6
+   ],
+   [
+    64.8,
+    154,
+    32.5
+   ],
+   [
+    384.8,
+    58.7,
+    34.6
+   ]
+  ],
+  "near": [
+   [
+    346.6,
+    130.9,
+    36.4
+   ]
+  ],
+  "trap": [
+   "one long wing instead of no wings",
+   "2 legs instead of 4 legs"
+  ],
+  "hint": [
+   "oval body",
+   "no wings",
+   "4 legs",
+   "no head (eyes on the body)",
+   "no tail"
+  ]
+ },
+ {
+  "i": 7,
+  "zones": [
+   [
+    326,
+    74.1,
+    32.9
+   ],
+   [
+    51.1,
+    163.8,
+    34
+   ],
+   [
+    56.5,
+    90.5,
+    38.5
+   ]
+  ],
+  "near": [
+   [
+    125.8,
+    133.3,
+    33.3
+   ]
+  ],
+  "trap": [
+   "4 legs instead of no legs",
+   "a fan tail instead of a curly tail"
+  ],
+  "hint": [
+   "teardrop body",
+   "no wings",
+   "no legs",
+   "a long snout",
+   "a curly tail"
+  ]
+ },
+ {
+  "i": 8,
+  "zones": [
+   [
+    345.1,
+    120.3,
+    30.5
+   ],
+   [
+    191.5,
+    195.7,
+    29.2
+   ],
+   [
+    393.6,
+    216.1,
+    35.9
+   ]
+  ],
+  "near": [
+   [
+    310.6,
+    57.2,
+    31
+   ]
+  ],
+  "trap": [
+   "2 legs instead of no legs",
+   "a fan tail instead of a forked tail"
+  ],
+  "hint": [
+   "teardrop body",
+   "a round wing",
+   "no legs",
+   "a long snout",
+   "a forked tail"
+  ]
+ },
+ {
+  "i": 9,
+  "zones": [
+   [
+    128.6,
+    199.6,
+    32.4
+   ],
+   [
+    371.2,
+    229.4,
+    30.5
+   ],
+   [
+    63.7,
+    97,
+    30.4
+   ]
+  ],
+  "near": [
+   [
+    205.9,
+    200,
+    36.3
+   ]
+  ],
+  "trap": [
+   "2 legs instead of 4 legs",
+   "no head (eyes on the body) instead of a long snout"
+  ],
+  "hint": [
+   "teardrop body",
+   "a pointed wing",
+   "4 legs",
+   "a long snout",
+   "a thin tail"
+  ]
+ },
+ {
+  "i": 10,
+  "zones": [
+   [
+    103.3,
+    155.9,
+    34.5
+   ],
+   [
+    304,
+    174.1,
+    32.5
+   ]
+  ],
+  "near": [
+   [
+    155.7,
+    106.9,
+    32.4
+   ]
+  ],
+  "trap": [
+   "no wings instead of two wings",
+   "no legs instead of 4 legs"
+  ],
+  "hint": [
+   "teardrop body",
+   "two wings",
+   "4 legs",
+   "no head (eyes on the body)",
+   "a forked tail"
+  ]
+ },
+ {
+  "i": 11,
+  "zones": [
+   [
+    305.6,
+    154.8,
+    36.7
+   ],
+   [
+    236.3,
+    137.9,
+    32.5
+   ],
+   [
+    127.7,
+    79.8,
+    34.6
+   ]
+  ],
+  "near": [
+   [
+    299.3,
+    83.2,
+    34.4
+   ]
+  ],
+  "trap": [
+   "4 legs instead of 2 legs",
+   "no tail instead of a fan tail"
+  ],
+  "hint": [
+   "oval body",
+   "no wings",
+   "2 legs",
+   "no head (eyes on the body)",
+   "a fan tail"
+  ]
+ },
+ {
+  "i": 12,
+  "zones": [
+   [
+    390.7,
+    98.3,
+    34.5
+   ],
+   [
+    203,
+    166,
+    36.7
+   ]
+  ],
+  "near": [
+   [
+    133.3,
+    197.2,
+    33.6
+   ]
+  ],
+  "trap": [
+   "no wings instead of a pointed wing",
+   "2 legs instead of 4 legs"
+  ],
+  "hint": [
+   "spiky body",
+   "a pointed wing",
+   "4 legs",
+   "a round head",
+   "a fan tail"
+  ]
+ },
+ {
+  "i": 13,
+  "zones": [
+   [
+    115.6,
+    118.1,
+    33.1
+   ],
+   [
+    370.7,
+    118.2,
+    28
+   ],
+   [
+    219.5,
+    48,
+    28.5
+   ]
+  ],
+  "near": [
+   [
+    53.3,
+    67.4,
+    29.8
+   ]
+  ],
+  "trap": [
+   "two wings instead of a round wing",
+   "no tail instead of a curly tail"
+  ],
+  "hint": [
+   "spiky body",
+   "a round wing",
+   "4 legs",
+   "a round head",
+   "a curly tail"
+  ]
+ },
+ {
+  "i": 14,
+  "zones": [
+   [
+    59.8,
+    102.5,
+    35.1
+   ],
+   [
+    138.2,
+    110.8,
+    34.6
+   ],
+   [
+    206.4,
+    232.4,
+    30.8
+   ]
+  ],
+  "near": [
+   [
+    291.1,
+    159,
+    34.4
+   ]
+  ],
+  "trap": [
+   "no legs instead of 2 legs",
+   "no head (eyes on the body) instead of a round head"
+  ],
+  "hint": [
+   "six-sided body",
+   "a round wing",
+   "2 legs",
+   "a round head",
+   "no tail"
+  ]
+ },
+ {
+  "i": 15,
+  "zones": [
+   [
+    399.2,
+    54.6,
+    35.5
+   ],
+   [
+    337.7,
+    110,
+    35.2
+   ],
+   [
+    184.5,
+    74.2,
+    30.5
+   ]
+  ],
+  "near": [
+   [
+    192.4,
+    185.5,
+    31.6
+   ]
+  ],
+  "trap": [
+   "a round wing instead of a pointed wing",
+   "2 legs instead of no legs"
+  ],
+  "hint": [
+   "oval body",
+   "a pointed wing",
+   "no legs",
+   "a long snout",
+   "no tail"
+  ]
+ },
+ {
+  "i": 16,
+  "zones": [
+   [
+    233.6,
+    113,
+    36.7
+   ],
+   [
+    308.2,
+    208.7,
+    30.8
+   ],
+   [
+    54.6,
+    170,
+    31.2
+   ]
+  ],
+  "near": [
+   [
+    64.6,
+    90,
+    36.3
+   ]
+  ],
+  "trap": [
+   "2 legs instead of no legs",
+   "a long snout instead of a round head"
+  ],
+  "hint": [
+   "bean-shaped body",
+   "a pointed wing",
+   "no legs",
+   "a round head",
+   "a forked tail"
+  ]
+ },
+ {
+  "i": 17,
+  "zones": [
+   [
+    124.2,
+    195.4,
+    32.9
+   ],
+   [
+    202.6,
+    186.1,
+    29.3
+   ],
+   [
+    393.9,
+    161.4,
+    32.5
+   ]
+  ],
+  "near": [
+   [
+    301.2,
+    182.2,
+    30.4
+   ]
+  ],
+  "trap": [
+   "a long snout instead of no head (eyes on the body)",
+   "a curly tail instead of a forked tail"
+  ],
+  "hint": [
+   "oval body",
+   "a pointed wing",
+   "2 legs",
+   "no head (eyes on the body)",
+   "a forked tail"
+  ]
+ },
+ {
+  "i": 18,
+  "zones": [
+   [
+    315.2,
+    114.9,
+    32.5
+   ],
+   [
+    389.2,
+    172.9,
+    34.3
+   ],
+   [
+    174.9,
+    199.2,
+    28.6
+   ]
+  ],
+  "near": [
+   [
+    130.5,
+    94.5,
+    30.4
+   ]
+  ],
+  "trap": [
+   "no wings instead of a pointed wing",
+   "4 legs instead of no legs"
+  ],
+  "hint": [
+   "oval body",
+   "a pointed wing",
+   "no legs",
+   "a round head",
+   "a fan tail"
+  ]
+ },
+ {
+  "i": 19,
+  "zones": [
+   [
+    68,
+    104.5,
+    34.5
+   ],
+   [
+    334.5,
+    116.7,
+    36
+   ],
+   [
+    235.6,
+    161.5,
+    34.7
+   ]
+  ],
+  "near": [
+   [
+    315.3,
+    206.4,
+    33.1
+   ]
+  ],
+  "trap": [
+   "no head (eyes on the body) instead of a long snout",
+   "a forked tail instead of a fan tail"
+  ],
+  "hint": [
+   "oval body",
+   "a pointed wing",
+   "4 legs",
+   "a long snout",
+   "a fan tail"
+  ]
+ }
+]

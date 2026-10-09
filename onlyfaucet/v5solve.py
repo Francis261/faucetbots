@@ -52,6 +52,33 @@ def _safe_union(v, n):
     return a | b
 
 
+def _safe_union_cap4(v, n):
+    """safe-union, but when it proposes >=4 taps take the intersection of the
+    two arms (majcore) instead of the union.
+
+    analyze14 (2026-10-09 battery, 11 labeled live rounds + tutorial20):
+      - all observed >=4 safe-union answers were site-REJECTED (0/5) and
+        every accepted answer today had <=3 taps -> the cap never changes
+        any observed-correct answer (dormant on tutorial20 too, |SU|<4
+        there in every cached verdict);
+      - cap4->majcore recovered the rejected rounds that were caused by
+        extra cells while never producing a cell outside safe-union
+        (intersection <= union, so it can only drop, never add);
+      - a dropped-set of 0 taps falls through to the caller's existing
+        v5-solve-unsafe bail (proven safe path), never a wrong Verify.
+    Logs engagement to stderr (visible in bot-loop.log) for forensics.
+    """
+    su = _safe_union(v, n)
+    if su is None or len(su) < 4:
+        return su
+    a = _maj([v.get('B'), v.get('E'), v.get('P2')], 2, n)
+    b = _maj([v.get('B'), v.get('E2'), v.get('P2')], 2, n)
+    core = a & b
+    print(f'v5solve: cap4-engaged su={sorted(su)} -> core={sorted(core)}',
+          file=sys.stderr, flush=True)
+    return core
+
+
 RULES = {
     'B':                (lambda v, n: _solo(v, 'B', n),               ('B',)),
     'E':                (lambda v, n: _solo(v, 'E', n),               ('E',)),
@@ -61,6 +88,7 @@ RULES = {
     'maj3(B,E,P2)':     (lambda v, n: _maj([v['B'], v['E'], v['P2']], 2, n),
                          ('B', 'E', 'P2')),
     'safe-union':       (_safe_union, ('B', 'E', 'E2', 'P2')),
+    'safe-union-cap4':  (_safe_union_cap4, ('B', 'E', 'E2', 'P2')),
 }
 # safe-union (analyze11 V2: tutorial20 16/20 strict, 0 traps, 0 fp):
 #   accept iff maj2(B, E_maj3, P2) OR maj2(B, E2, P2).
