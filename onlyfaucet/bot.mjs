@@ -30,14 +30,15 @@ function widgetAgeMs() { return widgetClock.shownAt ? Date.now() - widgetClock.s
 function pastBailWindow() { return widgetClock.shownAt > 0 && widgetAgeMs() > BAIL_MS; }
 function clearWidgetClock() { widgetClock.shownAt = 0; }
 
-// ---- Round spacing (open-rate protection) --------------------------------
+// ---- Round spacing (FLOOR REMOVED — user decision 2026-10-09) -----------
 // The site issues a 1h block, lazily on the next page load, once >=3 "round
-// events" land within ~7 minutes, where an event is EITHER a checkbox start
-// OR a mid-widget bail reload (observed: 2 abandoned rounds = 4 events in
-// 104s => 1h block; separately, 3 plain opens in ~7min => 1h block).  The
-// state is PERSISTED because fresh `once` processes must respect it too —
-// two manual runs 86s apart are exactly how the last block happened — and
-// because the server keeps its own count across restarts.
+// events" land within ~7 minutes (a checkbox start or a mid-widget bail
+// reload).  The 7-minute floor that used to gate round starts, bails and
+// claims is GONE: the bot now retries immediately after an error/fail/
+// timeout, never pauses for manual solves, and on any ban/block banner
+// waits 20 min then retries (repeating every 20 min while banned).  The
+// round state below is still written as forensics and still honoured by
+// capturePuzzles (manual rehearsal opens), nothing else.
 const ROUND_SPACING_FILE = join(import.meta.dirname, '.round-state.json');
 const ROUND_SPACING_MS = 7 * 60 * 1000;
 const roundState = (() => {
@@ -54,41 +55,12 @@ function noteRoundStart() {
 function roundSpacingLeft() {
   return Math.max(0, roundState.lastStart + ROUND_SPACING_MS - Date.now());
 }
-// A BAIL costs a round event of its own (the mid-widget reload), so an open
-// that follows a bail must still wait out the 7min event floor — two
-// abandoned rounds = 4 events in 104s drew a 1h block.  A CLEAN round costs
-// only its single checkbox start, so when the widget is already sitting on
-// screen the bot clicks it instead of idling: an unclicked visible widget
-// stalls every claim while spending zero events (the old fixed 420-900s
-// abort ladder froze the loop for 18min with the widget up).  Persisted in
-// the round state so fresh processes honour it too.
+// A BAIL still records its timestamp as forensics in the round state.
+// (The 7-min floor gates and the recovery-permit bypass were removed with
+// the floor itself — bails now retry immediately.)
 function markBail() {
   roundState.bailAt = Date.now();
-  recoveryPermit.used = true;   // a fresh bail revokes any unused permit
   try { writeFileSync(ROUND_SPACING_FILE, JSON.stringify(roundState)); } catch {}
-}
-function bailFresh() {
-  return Number.isFinite(roundState.bailAt) && Date.now() - roundState.bailAt < ROUND_SPACING_MS;
-}
-// ONE-SHOT recovery engage permit (user decision 2026-10-09): after an
-// error reload + relogin with a captcha still pending, open it IMMEDIATELY
-// instead of waiting out the 7-min floor — exactly once per recovery.
-// Safety caps: consumed on first use, expires after 120s, and any new
-// markBail() revokes an unused permit — so a failing retry cannot loop
-// (the fail ladder still pauses at 2/2; the floor governs everything after
-// the single engage).
-const recoveryPermit = { at: 0, used: false };
-function noteRecoveryDone() {
-  if (!bailFresh()) return;   // floor not active — gates are already open
-  recoveryPermit.at = Date.now();
-  recoveryPermit.used = false;
-}
-function consumeRecoveryPermit() {
-  if (recoveryPermit.used) return false;
-  if (!recoveryPermit.at || Date.now() - recoveryPermit.at > 120000) return false;
-  recoveryPermit.used = true;
-  log('Recovery permit: opening the pending captcha immediately (one-shot; floor resumes if this round does not verify)');
-  return true;
 }
 
 // Abandon the current puzzle WITHOUT submitting: reloading before the 50s
@@ -98,7 +70,7 @@ function consumeRecoveryPermit() {
 async function bailOutOfPuzzle(page, reason, ret = 'aborted') {
   log(`BAILOUT (${reason}) after ${widgetAgeMs()}ms — reloading before forceFail, no attempt recorded (returns ${ret})`);
   clearWidgetClock();
-  markBail(); // reload = a round event: next open owes the 7min floor
+  markBail(); // forensics: when this bail reload happened
   try { await page.goto(FAUCET_URL, { waitUntil: 'domcontentloaded', timeout: 30000 }); } catch {}
   await sleep(3000);
   await ensureCleared(page);
@@ -1409,19 +1381,6 @@ async function handlePuzzle(page, attempt = 0) {
     }
     // Cap checkbox re-clicks: spinning cb_ when widget never reopens wastes a claim
     if (st.cbRect && st.verification && cbClicks < 2) {
-      // Gate only the FIRST click of this round: after our own click
-      // spacingLeft() is nonzero by construction (noteRoundStart) and must
-      // not abort the very round it just measured.
-      if (cbClicks === 0) {
-        const spacingLeft = roundSpacingLeft();
-        if (spacingLeft > 0 && bailFresh() && !consumeRecoveryPermit()) {
-          // Opening now would push the 7-minute event window over the block
-          // threshold — but only a BAIL-fresh open owes that floor; a clean
-          // round may start immediately (visible widget = click it).
-          log(`Round spacing: ${Math.round(spacingLeft / 1000)}s left (bail-fresh) — NOT opening the widget`);
-          return 'aborted';
-        }
-      }
       await page.evaluate(() => document.querySelector('[id^="cb_"]')?.scrollIntoView({ block: 'center' })).catch(() => {});
       await sleep(400);
       const cb = await getPageState(page);
@@ -1540,7 +1499,7 @@ async function v5StageTap(page, cx, cy) {
   // Dead stage / destroyed context: ad reflows rebuild st_ and the rect can
   // stay [0,0,0,0] for seconds (observed 10:07/10:39/10:46 — all three bails
   // today).  Sample up to ~6s until two consecutive samples agree; a bail
-  // here costs the 7min round floor, patience costs only TTL headroom, and
+  // here wastes the round, patience costs only TTL headroom, and
   // pastBailWindow() inside guarantees we never outlive the widget.
   let prevR = null;
   for (let i = 0; i < 12; i++) {
@@ -1613,13 +1572,8 @@ async function handlePuzzleV5(page, attempt = 0) {
       return 'aborted';   // nothing was opened: no event, no attempt
     }
     if (gate) {
-      // Click a widget that is already on screen — the visible-widget stall
-      // the user flagged.  Only BAIL-FRESH opens keep the 7min floor (their
-      // reload just cost an event); clean rounds may open immediately.
-      if (roundSpacingLeft() > 0 && bailFresh() && !consumeRecoveryPermit()) {
-        log(`Round spacing: ${Math.round(roundSpacingLeft() / 1000)}s left (bail-fresh) — NOT opening v5 widget`);
-        return 'aborted';   // gate NOT clicked: untouched page costs zero events
-      }
+      // Click a widget that is already on screen immediately — no floor
+      // after a bail/error (user decision 2026-10-09: visible widget = click it).
       const esc = await ensureClickable(page, gate.x, gate.y);
       if (esc !== 'ok' && !esc.startsWith('clear')) log(`v5 gate: ${esc}`);
       gateClickAt = Date.now();
@@ -1711,8 +1665,8 @@ async function handlePuzzleV5(page, attempt = 0) {
   if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 solve past bail window');
   if (!out || !out.ok || nT === 0 || nT > 8) {
     // No strict-confidence solution: NEVER Verify.  Reload is free this side
-    // of the submit (no attempt recorded) and the abort backoff covers the
-    // round event the open just spent.
+    // of the submit (no attempt recorded) and the loop retries after its
+    // short breather — no floor since the 2026-10-09 policy change.
     await page.screenshot({ path: `${SHOT_DIR}/v5-nosolve-${ts()}.png`, fullPage: true }).catch(() => {});
     return bailOutOfPuzzle(page, 'v5-solve-unsafe');
   }
@@ -2545,10 +2499,6 @@ async function handlePuzzleContent(page, shot, shotPath, clip, attempt) {
         // "malfunctioning" double-widget sequence).  Bail cleanly instead;
         // claimFaucet resets the stuck session before the next round.
         if (submitGuard.used) return bailOutOfPuzzle(page, 'verify-unconfirmed', false);
-        if (roundSpacingLeft() > 0) {
-          log(`Round spacing: ${Math.round(roundSpacingLeft() / 1000)}s left — not re-opening widget`);
-          return bailOutOfPuzzle(page, 'round-spacing', 'aborted');
-        }
         const clicked = await page.evaluate(() => {
           const c = document.querySelector('[id^="cb_"]');
           if (c) { c.click(); return true; }
@@ -2833,7 +2783,6 @@ async function recoverSession(page, email) {
     log('Session recovery: LOGIN FAILED — skipping faucet nav');
   }
   log(`Session recovery ${ok ? 'done' : 'LOGIN FAILED'} in ${Math.round((Date.now() - t0) / 1000)}s`);
-  if (ok) noteRecoveryDone();  // pending captcha may be engaged once, immediately
   return ok;
 }
 
@@ -3021,10 +2970,13 @@ async function waitForCooldown(page, maxSec = 120) {
   return false;
 }
 
-// Sleep until temporary ban unlocks (poll every 30s; never start a 3rd captcha attempt).
+// Block/banner retry policy (user decision 2026-10-09): NEVER sit out the
+// full ban and never pause for it.  Wait at most 20 minutes, then retry; if
+// still banned this runs again and we wait another 20 minutes — repeating
+// forever.  Polls the banner so we resume the moment it clears (even sooner).
 async function waitOutBlock(page, blockSec) {
-  const total = Math.max(30, Math.min(blockSec || 3600, 3700));
-  log(`Waiting out temporary block for ~${total}s (${Math.round(total / 60)} min)...`);
+  const total = 20 * 60;
+  log(`BLOCKED — re-checking in ${Math.round(total / 60)} min (retries every 20 min while banned; banner says ~${blockSec ?? '?'}s)...`);
   const end = Date.now() + total * 1000;
   while (Date.now() < end) {
     const remain = Math.ceil((end - Date.now()) / 1000);
@@ -3043,45 +2995,8 @@ async function waitOutBlock(page, blockSec) {
       }
     } catch {}
   }
-  log('Block wait finished');
+  log('Block wait finished — retrying');
   return true;
-}
-
-// After 2 failed captcha solves, pause until the user solves manually.
-// Manual success (or clear claim-ready state) resets the failure counter.
-async function waitManualSolve(page) {
-  log('CAPTCHA FAIL PAUSE: 2 failed solves — waiting for you to solve manually (3rd fail would ban).');
-  await page.screenshot({ path: `${SHOT_DIR}/manual-pause-${Date.now()}.png`, fullPage: true }).catch(() => {});
-  let clearStreak = 0;
-  for (let i = 0; ; i++) {
-    try {
-      const st = await getPageState(page);
-      if (st.success || st.cooldown) {
-        log('Manual solve detected (success/cooldown) — failure counter reset');
-        return 'reset';
-      }
-      // Puzzle cleared and claim button back without block → ready again.
-      // st.v5 MUST be checked: the v5 card hides the gate (verif=false), so a
-      // card the user just opened read as "claim ready" and the bot hijacked
-      // their manual attempt (observed 10:28).  Two consecutive clean polls
-      // ~3s apart guard the gate-hidden/card-drawing window too.
-      const clear = !st.puzzle && !st.verification && !st.v5
-        && !st.temporarilyBlocked && st.claimBtn;
-      if (clear) {
-        if (++clearStreak >= 2) {
-          log('Manual solve detected (claim ready) — failure counter reset');
-          return 'reset';
-        }
-      } else {
-        clearStreak = 0;
-      }
-      if (st.temporarilyBlocked) {
-        return { status: 'blocked', blockSec: st.blockSec ?? 3600 };
-      }
-    } catch {}
-    if (i % 4 === 0) log(`Still paused for manual solve... (${i * 15}s)`);
-    await sleep(15000);
-  }
 }
 
 async function runOnce(email) {
@@ -3115,13 +3030,13 @@ async function runLoop(email) {
   let ctx = null;
   let page = null;
   let fails = 0;
-  // Separate from generic fails: only failed captcha/puzzle solves count toward the 2-attempt pause.
-  // 3 failed CAPTCHA attempts = site ban; never auto-attempt a 3rd.
+  // Separate from generic fails: only failed captcha/puzzle solves count here.
+  // 3 failed CAPTCHA attempts = site ban (user decision 2026-10-09: the bot
+  // NEVER pauses anyway — if banned, waitOutBlock retries every 20 min).
   // Persisted: the platform's penalty is server-side and outlives restarts.
   let captchaFails = getCaptchaFails(email);
-  const MAX_CAPTCHA_FAILS = 2;
   const setCF = (n) => { captchaFails = n; setCaptchaFails(email, n); };
-  if (captchaFails) log(`Resuming with ${captchaFails}/${MAX_CAPTCHA_FAILS} persisted captcha fails`);
+  if (captchaFails) log(`Resuming with ${captchaFails} persisted captcha fails (telemetry only — no pause)`);
   // Safe bail-outs (deadline / low-confidence read) are not failures: no
   // attempt was submitted, so they never touch the failure ladder.
   let aborts = 0;
@@ -3139,7 +3054,6 @@ async function runLoop(email) {
         if (!(await gotoRetry(page, FAUCET_URL))) throw new Error('faucet nav failed');
         await sleep(4000);
         await ensureCleared(page);
-        noteRecoveryDone();  // connection-error relaunch + relogin: permit one immediate engage
         fails = 0;
       }
 
@@ -3150,25 +3064,8 @@ async function runLoop(email) {
         await ensureCleared(page);
       }
 
-      // Pause gate: after 2 captcha fails, do nothing until user solves (resets counter).
-      if (captchaFails >= MAX_CAPTCHA_FAILS) {
-        const pause = await waitManualSolve(page);
-        if (pause && pause.status === 'blocked') {
-          await waitOutBlock(page, pause.blockSec);
-          await gotoRetry(page, FAUCET_URL);
-          await sleep(3000);
-          await ensureCleared(page);
-          // Never reset the ladder here: a block does not erase the rejects
-          // that put us in the pause (old setCF(0) un-paused us for free).
-          fails = 0;
-          continue;
-        }
-        setCF(0);
-        fails = 0;
-        log('Resuming after manual solve');
-        continue;
-      }
-
+      // No manual-solve pause ever (user decision 2026-10-09): the ladder
+      // counter is telemetry only; the bot always attempts the next claim.
       const result = await claimFaucet(page, email);
 
       if (result && result.status === 'blocked') {
@@ -3177,17 +3074,11 @@ async function runLoop(email) {
         await sleep(4000);
         await ensureCleared(page);
         if (result.reject) {
-          // Rejected Verify rode in with the block: count it (ladder) and run
-          // the logout/login reset — this path used to fall through to
-          // setCF(0), silently erasing the fail and disabling the pause gate.
+          // Rejected Verify rode in with the block: count it (telemetry) and
+          // run the logout/login reset — then retry straight away (no pause).
           setCF(captchaFails + 1);
-          log(`Captcha solve failed around block (${captchaFails}/${MAX_CAPTCHA_FAILS}) — recovering session`);
+          log(`Captcha solve failed around block (${captchaFails}) — recovering session`);
           await recoverSession(page, email);
-          if (captchaFails >= MAX_CAPTCHA_FAILS) {
-            log('Reached 2 captcha fails — entering manual-solve pause (no auto 3rd attempt)');
-            fails = 0;
-            continue; // pause gate runs next iteration
-          }
         }
         fails = 0;
         continue;
@@ -3195,21 +3086,11 @@ async function runLoop(email) {
 
       if (result === 'aborted') {
         aborts++;
-        log(`Puzzle abandoned safely (${aborts}) — nothing submitted, retrying without penalty`);
-        // Retry as soon as it is legal.  A BAIL-fresh round still owes the
-        // 7min event floor (its reload cost an event; >=3 events/~7min =>
-        // 1h block, issued lazily on the next load) — roundSpacingLeft() IS
-        // that floor, so wait exactly that instead of the old fixed
-        // 420/600/900s ladder: the ladder overshot (abort with 171s of
-        // spacing left still waited 420s) and froze the loop for minutes
-        // with a visible widget and zero events being spent.  Free aborts
-        // (nothing opened) and clean rounds retry after a short pause —
-        // the gate-open guards apply the floor only while bailFresh().
-        const wait = bailFresh() && roundSpacingLeft() > 0
-          ? roundSpacingLeft() + 5000
-          : 20000;
-        log(`Open-rate protection: waiting ${Math.round(wait / 1000)}s before re-claim`);
-        await sleep(wait);
+        log(`Puzzle abandoned safely (${aborts}) — nothing submitted, retrying immediately`);
+        // No floor, no backoff ladder (user decision 2026-10-09): retry right
+        // away after a bail/error/timeout.  The 10s breather only paces page
+        // work — it is not a penalty wait.
+        await sleep(10000);
         continue;
       }
 
@@ -3239,12 +3120,8 @@ async function runLoop(email) {
         await sleep(2000);
       } else if (result === 'puzzle-failed') {
         setCF(captchaFails + 1);
-        fails = 0; // captcha fail is its own ladder — don't stack with generic reload fails
-        log(`Captcha solve failed (${captchaFails}/${MAX_CAPTCHA_FAILS}) — will pause before next attempt if limit hit`);
-        if (captchaFails >= MAX_CAPTCHA_FAILS) {
-          log('Reached 2 captcha fails — entering manual-solve pause (no auto 3rd attempt)');
-          continue; // pause gate runs next iteration
-        }
+        fails = 0; // captcha fail is its own counter — don't stack with generic reload fails
+        log(`Captcha solve failed (${captchaFails}) — auto-retry (no manual pause)`);
         await sleep(10000);
       } else {
         fails++;
@@ -3277,7 +3154,7 @@ export {
   solveTurnstile, isLoggedIn, login, dismissSweetAlert, getPageState, getPuzzleBox,
   handlePuzzle, capturePuzzles, findHolePy, findPiecePy, analyzePuzzle, claimFaucet,
   recoverSession,
-  waitForCooldown, waitOutBlock, waitManualSolve, loadAccounts,
+  waitForCooldown, waitOutBlock, loadAccounts,
   getCanvasTransform, canvasRectFor, freshGeom, freshBgPath, clampClip, consensusGate,
   ensureClickable, captureWidgetFrame, noteRoundStart, roundSpacingLeft,
   canvasToPage, dragCanvas,
@@ -3288,10 +3165,6 @@ export {
 // Spends at most ONE round event (the gate click; no bail reload on success),
 // writes noteRoundStart via markWidgetShown, and never submits an attempt.
 async function runDryV5(email) {
-  if (roundSpacingLeft() > 0) {
-    log(`Round spacing active (${Math.round(roundSpacingLeft() / 1000)}s left) — dry-run refused`);
-    return 'spacing';
-  }
   dryRunMode = true;
   const ctx = await launchBrowser();
   try {
