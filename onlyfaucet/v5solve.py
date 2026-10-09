@@ -362,8 +362,12 @@ def main():
             res = {'ok': False, 'reason': f'exception: {e}'}
         res['verdict'] = {k: (sorted(s) if isinstance(s, set) else s)
                           for k, s in (res.get('verdict') or {}).items()}
-        print(json.dumps(res))
+        # flush BEFORE the hard _exit: stdout is block-buffered on a pipe and
+        # os._exit skips the flush — an unflushed deadline round handed the bot
+        # an empty string (observed 14:44:23, 'ok=false reason=- seg=?').
+        print(json.dumps(res), flush=True)
         if res.get('deadline_hit'):
+            sys.stdout.flush()
             os._exit(0)   # cancelled straggler threads would block exit
         return
     i = int(sys.argv[1])
