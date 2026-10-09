@@ -17,7 +17,7 @@ waitManualSolve).
 
 CLI:  v5solve.py <example_idx> [rule]   # tutorial20, prints verdict + timing
 """
-import json, sys, time
+import json, os, sys, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
@@ -214,8 +214,16 @@ def _sig_S(j, ref, scene, cands, mode):
 
 # ---------------------------------------------------------------- solver
 
-def solve(scene, ref, rule=DEFAULT_RULE, workers=6):
+def solve(scene, ref, rule=DEFAULT_RULE, workers=6, budget_s=None):
     """Returns dict: ok, taps [(x,y)...], verdict {signal: set|None}, ms.
+
+    budget_s: hard wall-clock cap on waiting for VLM signals (live path).
+    Signals run in parallel but a single straggler (4 retries with backoff
+    on a slow/erroring endpoint) used to hold the whole solve past the
+    bot's 43s bail window — the round then bails with NOTHING even though
+    every other signal had answered.  On timeout we keep every completed
+    signal, cancel the stragglers, and let the rule run on what we have
+    (missing cells degrade precision-safe, per the coverage rules below).
 
     Signal E is drawn E_SAMPLES times (identical grid image; the endpoint is
     nondeterministic even at temp=0) and combined per-cell by majority — this
@@ -235,7 +243,8 @@ def solve(scene, ref, rule=DEFAULT_RULE, workers=6):
         rng_order = np.random.default_rng().permutation(n).tolist()
 
     t1 = time.time()
-    with ThreadPoolExecutor(max_workers=workers) as pool:
+    pool = ThreadPoolExecutor(max_workers=workers)
+    try:
         futs = []
         if 'B' in need:
             futs.append(pool.submit(_sig_B, ref, scene, cands))
@@ -252,19 +261,44 @@ def solve(scene, ref, rule=DEFAULT_RULE, workers=6):
             if 'S' in need:
                 futs.append(pool.submit(_sig_S, j, ref, scene, cands, mode))
         grid = {}
-        for fu in as_completed(futs):
-            try:
-                r = fu.result()
-            except Exception:
-                r = None
+        pending = list(futs)
+
+        def _collect(r):
             if r is None:                          # hard failure: unknown signal
-                continue                           # (blocks set below via coverage)
+                return                             # (blocks set below via coverage)
             if len(r) == 3:                        # (tag, set|None, ms)
                 tag, s, _ms = r
                 grid[tag] = s
             else:                                  # ('P'|'P2'|'S', j, slots5|None, ms)
                 tag, j, s, _ms = r
                 slots[tag][j] = s
+
+        deadline_hit = False
+        try:
+            for fu in as_completed(futs, timeout=budget_s):
+                pending.remove(fu)
+                try:
+                    r = fu.result()
+                except Exception:
+                    r = None
+                _collect(r)
+        except TimeoutError:
+            deadline_hit = True   # keep completed signals, drop stragglers
+        for fu in pending[:]:     # done inside the timeout race window
+            if fu.done() and not fu.cancelled():
+                pending.remove(fu)
+                try:
+                    r = fu.result()
+                except Exception:
+                    r = None
+                _collect(r)
+        for fu in pending:
+            fu.cancel()
+        if deadline_hit:
+            print(f'v5solve: vlm budget {budget_s}s hit — '
+                  f'{len(pending)} straggler(s) dropped', file=sys.stderr)
+    finally:
+        pool.shutdown(wait=False, cancel_futures=True)
     if 'B' in need:
         verdict['B'] = grid.get('B')
     if 'E2' in need:
@@ -299,13 +333,13 @@ def solve(scene, ref, rule=DEFAULT_RULE, workers=6):
     if matched is None:
         missing = [k for k in need if verdict.get(k) is None]
         return {'ok': False, 'reason': f'signal-missing({",".join(missing)})',
-                'verdict': verdict,
+                'verdict': verdict, 'deadline_hit': deadline_hit,
                 'n': n, 'seg_ms': seg_ms, 'vlm_ms': vms}
     kept = dedupe(matched, cands)
     taps = [(int(c['cx']), int(c['cy'])) for c in kept]
     return {'ok': True, 'taps': taps, 'n': n, 'matched': sorted(matched),
             'verdict': verdict, 'seg_ms': seg_ms, 'vlm_ms': vms,
-            'failed_cells': failed_cells}
+            'failed_cells': failed_cells, 'deadline_hit': deadline_hit}
 
 
 def main():
@@ -319,13 +353,18 @@ def main():
         rule = sys.argv[4] if len(sys.argv) > 4 else DEFAULT_RULE
         try:
             t0 = time.time()
-            res = solve(scene, ref, rule=rule)
+            # Live budget: solve starts ~2-5s after the widget shows, the
+            # bot bails past 43s and taps+verify need ~5s before the 50s
+            # forceFail — 34s of VLM wait keeps every stage inside that.
+            res = solve(scene, ref, rule=rule, budget_s=34)
             res['wall_ms'] = int((time.time() - t0) * 1000)
         except Exception as e:
             res = {'ok': False, 'reason': f'exception: {e}'}
         res['verdict'] = {k: (sorted(s) if isinstance(s, set) else s)
                           for k, s in (res.get('verdict') or {}).items()}
         print(json.dumps(res))
+        if res.get('deadline_hit'):
+            os._exit(0)   # cancelled straggler threads would block exit
         return
     i = int(sys.argv[1])
     rule = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_RULE
