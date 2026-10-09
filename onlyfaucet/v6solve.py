@@ -64,8 +64,14 @@ All monsters share the same body — the body NEVER distinguishes them. Judge ON
 - legs: four little feet | two feet | long legs | spring legs | tentacle legs | no legs
 - wings: butterfly wings | bat wings | dragonfly wings | no wings
 
+HOW THE PARTS LOOK (match the shape you see, never the colour):
+- top: pointy ears = two short pointed upright ears; long bunny ears = two LONG upright ears; a spiky mohawk = a row of spikes along the top; one horn = a single horn; a propeller = rotor blades on a tiny mast; a little sprout = a small green sprout with leaves; antennae = thin feelers with knobs on top; nothing on top = a bare smooth head.
+- arms: arms with claws = SHORT arms ending in pointed claws; long arms with hands = LONG thin arms ending in round hands; tentacle arms = wavy, curly, tube-like arms hanging at the sides; crab pincers = wide flat lobster claws; no arms = the sides of the body are completely bare.
+- legs: four little feet = FOUR small feet (a front pair AND a rear pair of stubs — count all four, including tiny rear stubs); two feet = exactly TWO feet; long legs = long straight legs; spring legs = coil/spring-shaped legs (zigzag or spiral); tentacle legs = wavy curly tube legs; no legs = nothing below the body, it sits flat. Count the feet carefully.
+- wings: butterfly wings = large rounded wings; bat wings = angular triangular wings; dragonfly wings = long narrow wings; no wings = a bare back.
+
 RULES
-- KIND and COUNT matter: two horns vs one horn, four little feet vs two feet are different parts.
+- KIND and COUNT matter: one horn vs two horns, four little feet vs two feet are different parts. Look specifically at the SIDES (arms) and BELOW the body (legs) — they are easy to miss.
 - IGNORE colour, colour pattern, face (eyes and mouth), size, slight lean, pose, rotation, wing angle and background. The face is ALWAYS different from the reference on purpose — never use it.
 - A cell that shows only a fragment (part of a monster cut off, e.g. only wings or only legs), or debris/background with no complete monster centered, must be "incomplete".
 - Do not let other monsters partially visible at cell edges influence the classification of the centered monster.
@@ -87,14 +93,15 @@ Output a 4-character string per cell using:
 
 Examples: "SSSS" = identical parts. "SSDS" = legs differ.
 
-What counts per category:
-- top: whatever is on the head (pointy ears / long bunny ears / spiky mohawk / one horn / propeller / little sprout / antennae / nothing on top). Kind and count matter: two horns vs one horn differ.
-- arms: the arms (arms with claws / long arms with hands / tentacle arms / crab pincers / no arms).
-- legs: the legs (four little feet / two feet / long legs / spring legs / tentacle legs / no legs). Four feet vs two feet differ.
-- wings: the wings on the back (butterfly wings / bat wings / dragonfly wings / no wings).
+What counts per category (match the shape you see, never the colour):
+- top: whatever is on the head (pointy ears = two short pointed upright ears / long bunny ears = two LONG upright ears / spiky mohawk = a row of spikes / one horn = a single horn / propeller = rotor blades on a mast / little sprout = a small sprout with leaves / antennae = thin feelers with knobs / nothing on top = a bare smooth head). Kind and count matter.
+- arms: the arms at the sides (arms with claws = SHORT arms ending in pointed claws / long arms with hands = LONG thin arms ending in round hands / tentacle arms = wavy curly tube-like arms / crab pincers = wide flat lobster claws / no arms = sides completely bare).
+- legs: the legs below the body (four little feet = FOUR small feet including tiny rear stubs — count all four / two feet = exactly TWO / long legs = long straight legs / spring legs = coil/spring-shaped zigzag legs / tentacle legs = wavy curly tube legs / no legs = nothing below, sits flat). Count the feet carefully.
+- wings: the wings on the back (butterfly wings = large rounded wings / bat wings = angular triangular wings / dragonfly wings = long narrow wings / no wings = a bare back).
 
 The body is the same on every monster — never judge it.
 IGNORE colour, colour pattern, face (eyes and mouth), size, slight lean, pose, rotation, wing angle and background. The face is ALWAYS different from the reference on purpose — never use it.
+Look specifically at the SIDES (arms) and BELOW the body (legs) — they are easy to miss.
 
 Reply ONLY JSON: {"cells":{"1":"SSSS","2":"X","3":"DSSS",...}}
 Include EVERY cell index 1..N exactly once."""
@@ -103,14 +110,15 @@ PROMPT_P6 = """Image shows TWO cartoon monsters side by side.
 LEFT = the REFERENCE monster. RIGHT = the CANDIDATE monster.
 
 Compare them category by category: are the parts the same?
-Categories in order [top, arms, legs, wings]:
-- top: what's on the head (pointy ears / long bunny ears / spiky mohawk / one horn / propeller / little sprout / antennae / nothing on top). Kind and count matter: two horns vs one horn differ.
-- arms: arms with claws / long arms with hands / tentacle arms / crab pincers / no arms.
-- legs: four little feet / two feet / long legs / spring legs / tentacle legs / no legs. Four feet vs two feet differ.
-- wings: butterfly wings / bat wings / dragonfly wings / no wings.
+Categories in order [top, arms, legs, wings] (match the shape you see, never the colour):
+- top: what's on the head (pointy ears = two short pointed upright ears / long bunny ears = two LONG upright ears / spiky mohawk = a row of spikes / one horn = a single horn / propeller = rotor blades on a mast / little sprout = a small sprout with leaves / antennae = thin feelers with knobs / nothing on top = a bare smooth head). Kind and count matter.
+- arms: arms with claws = SHORT arms ending in pointed claws / long arms with hands = LONG thin arms ending in round hands / tentacle arms = wavy curly tube-like arms / crab pincers = wide flat lobster claws / no arms = sides completely bare.
+- legs: four little feet = FOUR small feet including tiny rear stubs — count all four / two feet = exactly TWO / long legs = long straight legs / spring legs = coil/spring-shaped zigzag legs / tentacle legs = wavy curly tube legs / no legs = nothing below, sits flat. Count the feet carefully.
+- wings: butterfly wings = large rounded wings / bat wings = angular triangular wings / dragonfly wings = long narrow wings / no wings = a bare back.
 
 The body is the same on every monster — never judge it.
 IGNORE colour, colour pattern, face (eyes and mouth), size, slight lean, pose, rotation, wing angle and background. The face is ALWAYS different from the reference on purpose — never use it.
+Look specifically at the SIDES (arms) and BELOW the body (legs) — they are easy to miss.
 If the candidate is cut off, a fragment, or background (no complete monster), still reply with the JSON: answer D for every category you cannot confirm to be the same. Never refuse and never omit the JSON.
 
 Reply ONLY JSON: {"slots":"...."} with exactly 4 chars: S = same parts in that category, D = differs."""
