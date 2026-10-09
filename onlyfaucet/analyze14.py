@@ -50,6 +50,10 @@ ROUNDS = [
     ('R3', 'rej', 1791538134062, [[87, 209], [73, 120], [325, 58]]),
     ('R4', 'rej', 1791539652917, [[122, 67], [58, 224], [312, 89], [217, 53]]),
     ('R5', 'rej', 1791540078616, [[56, 208], [292, 232], [206, 171], [277, 64], [115, 49]]),
+    # R6: 11:50 round — 7 taps submitted, all landed 1px, rejected.  Cap rule
+    # engaged on this one live (|SU|=7 >= 4) — the newest engaged-round test.
+    ('R6', 'rej', 1791543008141, [[313, 132], [73, 188], [246, 225], [157, 129],
+                                   [375, 82], [373, 194], [90, 87]]),
 ]
 
 # Visual ground truth for REJECTED rounds: cell-center indices (per cells[]
