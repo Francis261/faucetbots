@@ -66,7 +66,30 @@ Scenes are 450x280 webp (same canvas as v5), **8 monsters in a 2x4 grid**:
    actually serves v6 (DOM unknown until seen); v5 path stays untouched until then.
    Answer is always exactly 2 taps.
 
+## Live integration plan (bot.mjs) — pending a real v6 widget
+
+Widget facts from the saved v5 page (`v5/v5c-page.html`):
+
+- card detection: `getPageState().v5 = text.includes('Tap every creature')` (bot.mjs ~1238)
+  — a v6 card will NOT match this (tutorial wording = "Find its twins"), so a v6 card
+  would currently read as "card gone" churn. Detect `v6: text.includes('Find its twins')`
+  (or whatever the real card text turns out to be — capture a screenshot + `text`
+  dump the first time it appears) and treat `st.v5 || st.v6` as "card on screen".
+- version for solver choice: the card's tutorial link (`a.mc-tut` href =
+  `/mcaptchav5.html` on v5) → `/mcaptchav6.html` ⇒ spawn `v6solve.py --files ...`
+  instead of `v5solve.py` (bot.mjs ~1657).
+- payload capture: `/faucet/captcha_image` answering JSON `{scene, ref}` (bot.mjs ~244)
+  is expected to be unchanged; verify on first v6 round.
+- answer guard: v6 = exactly 2 taps. Keep `nT === 2` for v6 (skip Verify otherwise);
+  `ca_` per-tap registration and the untap radius (18px) carry over unchanged.
+
+Do NOT wire any of this until a live v6 card has been observed — the card text and
+DOM must come from the real widget, not from guesses.
+
 ## Status
 
-- 2026-10-09: study complete, battery extracted + committed. Bot stopped (user's "stop it"),
-  no live v6 observed yet. Solver build pending.
+- 2026-10-09: study complete, battery extracted + committed. Solver + harness built;
+  baseline battery (pre-diagnostic prompts): best rule B 5/12 strict, safe-union
+  2/12 — v5's rule zoo does not transfer (v6 answers are always exactly 2 taps).
+  Exhaustive 65,536-rule search + rerun with P2-refusal fix and ref/cell diagnostics
+  in progress. Bot stopped (user's "stop it"), no live v6 observed yet.

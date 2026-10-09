@@ -111,6 +111,7 @@ Categories in order [top, arms, legs, wings]:
 
 The body is the same on every monster — never judge it.
 IGNORE colour, colour pattern, face (eyes and mouth), size, slight lean, pose, rotation, wing angle and background. The face is ALWAYS different from the reference on purpose — never use it.
+If the candidate is cut off, a fragment, or background (no complete monster), still reply with the JSON: answer D for every category you cannot confirm to be the same. Never refuse and never omit the JSON.
 
 Reply ONLY JSON: {"slots":"...."} with exactly 4 chars: S = same parts in that category, D = differs."""
 
@@ -311,14 +312,17 @@ def _sig_B(ref, scene, cands):
                            valid=lambda p: norm4(p.get('ref')) is not None)
     rslots = norm4(parsed.get('ref'))
     if rslots is None:
-        return 'B', None, ms
+        return 'B', None, ms, None, None
     cells = parsed.get('cells') or {}
     out = set()
+    cell_parts = {}
     for j in range(len(cands)):
-        f = norm4(cells.get(str(j + 1), cells.get(j + 1)))
+        v = cells.get(str(j + 1), cells.get(j + 1))
+        f = norm4(v)
+        cell_parts[j] = f if f is not None else ('incomplete' if v == 'incomplete' else None)
         if f is not None and f == rslots:
             out.add(j)
-    return 'B', out, ms
+    return 'B', out, ms, rslots, cell_parts
 
 
 def _sig_E(ref, scene, cands, tag='E', shuffled_order=None):
@@ -355,6 +359,7 @@ def solve(scene, ref, rule=DEFAULT_RULE, workers=6, budget_s=None):
     fn, need = RULES[rule]
     verdict = {k: None for k in need}
     slots = {k: {} for k in need if k in ('P', 'P2')}
+    b_diag = {'ref': None, 'cells': None}
     rng_order = None
     if 'E2' in need and n:
         rng_order = np.random.default_rng().permutation(n).tolist()
@@ -382,6 +387,10 @@ def solve(scene, ref, rule=DEFAULT_RULE, workers=6, budget_s=None):
             if len(r) == 3:
                 tag, s, _ms = r
                 grid[tag] = s
+            elif len(r) == 5:                     # B with classification diagnostics
+                tag, s, _ms, rp, cp = r
+                grid[tag] = s
+                b_diag['ref'], b_diag['cells'] = rp, cp
             else:
                 tag, j, s, _ms = r
                 slots[tag][j] = s
@@ -436,16 +445,18 @@ def solve(scene, ref, rule=DEFAULT_RULE, workers=6, budget_s=None):
     vms = int((time.time() - t1) * 1000)
 
     matched = fn(verdict, n)
+    diag = {'ref_parts': b_diag['ref'], 'cell_parts': b_diag['cells'],
+            'p2_slots': {str(j): s for j, s in slots.get('P2', {}).items()}}
     if matched is None:
         missing = [k for k in need if verdict.get(k) is None]
         return {'ok': False, 'reason': f'signal-missing({",".join(missing)})',
                 'verdict': verdict, 'deadline_hit': deadline_hit,
-                'n': n, 'seg_ms': seg_ms, 'vlm_ms': vms}
+                'n': n, 'seg_ms': seg_ms, 'vlm_ms': vms, **diag}
     kept = dedupe(matched, cands)
     taps = [(int(c['cx']), int(c['cy'])) for c in kept]
     return {'ok': True, 'taps': taps, 'n': n, 'matched': sorted(matched),
             'verdict': verdict, 'seg_ms': seg_ms, 'vlm_ms': vms,
-            'failed_cells': failed_cells, 'deadline_hit': deadline_hit}
+            'failed_cells': failed_cells, 'deadline_hit': deadline_hit, **diag}
 
 
 def main():

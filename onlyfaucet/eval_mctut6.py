@@ -165,6 +165,62 @@ def cmd_traps():
             print(f"     officialTrap: {ex['trap']}")
 
 
+def cmd_refacc():
+    """B-signal diagnostics vs official hints: did the model read the REF right,
+    and how do zone cells classify? (needs runs made with the diagnostics
+    upgrade — older battery files store only the matched sets.)"""
+    data = json.load(open(OUT))
+    ref_ok = ref_tot = 0
+    cell_ok = cell_tot = 0
+    inc_zone = 0
+    for i in range(len(R)):
+        ex = R[i]
+        e = data.get(str(i))
+        if not e:
+            continue
+        hint = [h.lower() for h in ex['hint']]
+        scene, ref, cands = load(i)
+        zone_cells = [j for j, c in enumerate(cands)
+                      if any(math.hypot(c['cx'] - z[0], c['cy'] - z[1]) <= z[2]
+                             for z in ex['zones'])]
+        near_cells = [j for j, c in enumerate(cands)
+                      if any(math.hypot(c['cx'] - n[0], c['cy'] - n[1]) <= n[2]
+                             for n in ex.get('near', []))]
+        for k, r in enumerate(e['runs']):
+            rp = r.get('ref_parts')
+            if rp is None:
+                continue
+            a = sum(1 for cat, h in zip(('top', 'arms', 'legs', 'wings'), hint)
+                    if str(rp.get(cat, '')).lower() == h)
+            ref_ok += a
+            ref_tot += 4
+            line = [f'{"OK" if str(rp.get(cat, "")).lower() == h else "XX"}:{rp.get(cat)}'
+                    for cat, h in zip(('top', 'arms', 'legs', 'wings'), hint)]
+            cp = r.get('cell_parts') or {}
+            cline = []
+            for j in sorted(set(zone_cells) | set(near_cells)):
+                v = cp.get(str(j), cp.get(j))
+                if isinstance(v, dict):
+                    aa = sum(1 for cat, h in zip(('top', 'arms', 'legs', 'wings'), hint)
+                             if str(v.get(cat, '')).lower() == h)
+                    cell_ok += aa
+                    cell_tot += 4
+                    tag = 'Z' if j in zone_cells else 'n'
+                    cline.append(f'{tag}{j + 1}:{aa}/4')
+                    if j in zone_cells and aa == 0:
+                        inc_zone += 0
+                else:
+                    cline.append(f'{"Z" if j in zone_cells else "n"}{j + 1}:{v}')
+                    if j in zone_cells:
+                        inc_zone += 1
+            if k == 0:
+                print(f'scene {i} hint={hint}')
+                print(f'   ref {" ".join(line)}  ({a}/4)')
+                print(f'   {" ".join(cline)}')
+    print(f'\nref accuracy {ref_ok}/{ref_tot}   zone/near-cell accuracy '
+          f'{cell_ok}/{cell_tot}   zone cells marked incomplete/None: {inc_zone}')
+
+
 if __name__ == '__main__':
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'run'
     if cmd == 'run':
@@ -173,5 +229,7 @@ if __name__ == '__main__':
         cmd_score()
     elif cmd == 'traps':
         cmd_traps()
+    elif cmd == 'refacc':
+        cmd_refacc()
     else:
         print(__doc__)
