@@ -1667,7 +1667,7 @@ async function handlePuzzleV5(page, attempt = 0) {
     log(`v5 solve error (${solverScript}): ${String(e.message).slice(0, 180)}`);
   }
   const nT = out && out.taps ? out.taps.length : 0;
-  log(`v5 solve: ok=${!!(out && out.ok)} taps=${nT} reason=${(out && out.reason) || '-'} seg=${(out && out.seg_ms) != null ? out.seg_ms : '?'}ms vlm=${(out && out.vlm_ms) != null ? out.vlm_ms : '?'}ms wall=${(out && out.wall_ms) != null ? out.wall_ms : '?'}ms failedCells=${(out && out.failed_cells) || 0}`);
+  log(`v5 solve: ok=${!!(out && out.ok)} taps=${nT} reason=${(out && out.reason) || '-'} seg=${(out && out.seg_ms) != null ? out.seg_ms : '?'}ms vlm=${(out && out.vlm_ms) != null ? out.vlm_ms : '?'}ms wall=${(out && out.wall_ms) != null ? out.wall_ms : '?'}ms failedCells=${(out && out.failed_cells) || 0} matched=${JSON.stringify((out && out.matched) || [])} verdict=${JSON.stringify((out && out.verdict) || {})} ref=${JSON.stringify((out && out.ref_parts) || null)}`);
   if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 solve past bail window');
   // v6 = exactly 2 taps (a 3+ answer is guaranteed-rejected; skip the Verify).
   const tapsOk = st.v6 ? nT === 2 : (nT > 0 && nT <= 8);

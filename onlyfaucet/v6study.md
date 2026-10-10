@@ -66,25 +66,31 @@ Scenes are 450x280 webp (same canvas as v5), **8 monsters in a 2x4 grid**:
    actually serves v6 (DOM unknown until seen); v5 path stays untouched until then.
    Answer is always exactly 2 taps.
 
-## Live integration plan (bot.mjs) — pending a real v6 widget
+## Live integration plan (bot.mjs) — DONE, live-confirmed 2026-10-10
 
-Widget facts from the saved v5 page (`v5/v5c-page.html`):
+(Wiring landed in commit `9fdbade`; the live widget really is v6.)
 
-- card detection: `getPageState().v5 = text.includes('Tap every creature')` (bot.mjs ~1238)
-  — a v6 card will NOT match this (tutorial wording = "Find its twins"), so a v6 card
-  would currently read as "card gone" churn. Detect `v6: text.includes('Find its twins')`
-  (or whatever the real card text turns out to be — capture a screenshot + `text`
-  dump the first time it appears) and treat `st.v5 || st.v6` as "card on screen".
-- version for solver choice: the card's tutorial link (`a.mc-tut` href =
-  `/mcaptchav5.html` on v5) → `/mcaptchav6.html` ⇒ spawn `v6solve.py --files ...`
-  instead of `v5solve.py` (bot.mjs ~1657).
-- payload capture: `/faucet/captcha_image` answering JSON `{scene, ref}` (bot.mjs ~244)
-  is expected to be unchanged; verify on first v6 round.
-- answer guard: v6 = exactly 2 taps. Keep `nT === 2` for v6 (skip Verify otherwise);
-  `ca_` per-tap registration and the untap radius (18px) carry over unchanged.
+Live facts observed 2026-10-10 morning:
 
-Do NOT wire any of this until a live v6 card has been observed — the card text and
-DOM must come from the real widget, not from guesses.
+- card text: live card matches `Find its twins` — detection via
+  `getPageState().v5 || .v6` works as planned (the `v5` flag was widened to
+  "tap-widget card present" so every existing check covers both versions).
+- payload capture: `/faucet/captcha_image` answering JSON `{scene, ref}` unchanged
+  (450×280 scene, 150×110 ref) — captured + solved live.
+- solver routing: `solve via v6solve.py (safe-union-cap2)` logged; the exactly-2
+  guard bails on 0/1/3+ answers before Verify (7 safe abandons, zero pre-verify
+  burns in the session).
+- first live Verify: 2 taps landed 2/2 → site `Verification failed` (reject).
+  Post-mortem: ref = green body, **nothing on top**, side arms, butterfly wings;
+  both tapped monsters had prominent top decorations (purple ears / top-knob) —
+  the known kind-misread failure mode. A 60-min TEMPORARILY BLOCKED banner
+  followed the reject + morning churn; 20-min retries + session recovery engaged
+  per policy.
+- live forensics: solve log line now includes `matched`, `verdict` (B/E/E2/P2
+  cell sets) and `ref_parts`, so every future reject can be diagnosed offline.
+- contention: running the battery (6 VLM workers) concurrently with a live solve
+  causes 429/broken-pipe storms that exhaust the 34s budget → safe bails.
+  Keep battery runs off while the bot is live (or vice versa).
 
 ## Status
 
@@ -93,3 +99,16 @@ DOM must come from the real widget, not from guesses.
   2/12 — v5's rule zoo does not transfer (v6 answers are always exactly 2 taps).
   Exhaustive 65,536-rule search + rerun with P2-refusal fix and ref/cell diagnostics
   in progress. Bot stopped (user's "stop it"), no live v6 observed yet.
+- 2026-10-09: prompt v2 (visual kind definitions in B/E/P2) committed `fe213ae`;
+  exhaustive search ceiling on baseline = 11/24 (46%) → signal quality, not rule
+  choice, is the bottleneck; oracle-ref experiment (2/12) proved ref+cell must stay
+  in one call; cross-run cell flips 0–3.6% → errors are stable knowledge gaps.
+- 2026-10-10 (live test): **live widget IS v6** — wiring committed `9fdbade`,
+  end-to-end cycle proven (detect → solve → tap ×2 → Verify → site verdict).
+  Battery r3 final (v2 prompts, 12 scenes × 2): refacc 82/96 = 85% (v1: 83%),
+  cell acc 282/428 = 66%, safe-union-cap2 5/12 unchanged; rulesearch ceiling
+  9/24 with fp=10 (loose rules the 2-tap guard would bail anyway). On 2-tap
+  proposals only: **cap2 = 8 pass / 1 reject**, B = 7/7 but proposes less often
+  → safe-union-cap2 stays the live rule. First live Verify rejected (top-category
+  misread), 60-min banner → 20-min retry loop (policy), 14+ claims accrued while
+  verification was off. Battery/endpoint contention lesson documented above.
