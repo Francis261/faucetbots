@@ -1235,7 +1235,8 @@ async function getPageState(page) {
         success: text.includes('has been sent'),
         verification: text.includes('Verification Required'),
         puzzle: text.includes('Drag the shape'),
-        v5: text.includes('Tap every creature'),   // v5 tap-widget challenge card
+        v5: text.includes('Tap every creature') || text.includes('Find its twins'),   // tap-widget challenge card (v5 or v6 wording)
+        v6: text.includes('Find its twins'),   // v6 variant: 4 part categories, exactly 2 taps
         captchaError: text.includes('Please complete the captcha'),
         verificationFailed: /verification failed/i.test(text),
         cooldown: waitSec !== null && !temporarilyBlocked,
@@ -1249,7 +1250,7 @@ async function getPageState(page) {
       };
     });
   } catch (e) {
-    return { text: '', success: false, verification: false, puzzle: false, v5: false, captchaError: false, verificationFailed: false, cooldown: false, waitSec: null, temporarilyBlocked: false, blockSec: null, claimBtn: false, captchaAnswer: '', hRect: null, cbRect: null, verifyRect: null, hasForm: false, navError: true };
+    return { text: '', success: false, verification: false, puzzle: false, v5: false, v6: false, captchaError: false, verificationFailed: false, cooldown: false, waitSec: null, temporarilyBlocked: false, blockSec: null, claimBtn: false, captchaAnswer: '', hRect: null, cbRect: null, verifyRect: null, hasForm: false, navError: true };
   }
 }
 
@@ -1615,7 +1616,7 @@ async function handlePuzzleV5(page, attempt = 0) {
     await sleep(400);
   }
   if (!cardReady) {
-    log('v5 challenge card did not appear after capture');
+    log(`v5 challenge card did not appear after capture: ${(st.text || '').slice(0, 160).replace(/\s+/g, ' ')}`);
     await page.screenshot({ path: `${SHOT_DIR}/v5-card-gone-${ts()}.png`, fullPage: true }).catch(() => {});
     return bailOutOfPuzzle(page, 'v5-card-gone');
   }
@@ -1648,22 +1649,29 @@ async function handlePuzzleV5(page, attempt = 0) {
   // --- Phase C: solve (segment -> parallel VLM majority -> safe-union taps) ---
   if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 pre-solve past bail window');
   let out = null;
+  // v6 card (st.v6 from the cardReady poll): 4 part categories, always exactly
+  // 2 twins -> v6solve + cap2. v5 keeps v5solve + safe-union-cap4 unchanged.
+  const solverScript = st.v6 ? 'v6solve.py' : 'v5solve.py';
+  const solverRule = st.v6 ? 'safe-union-cap2' : 'safe-union-cap4';
+  log(`solve via ${solverScript} (${solverRule})`);
   try {
   // safe-union-cap4: identical to safe-union unless it proposes >=4 taps,
   // where it takes the arm intersection instead (analyze14: all observed >=4
   // answers were rejected; dormancy proven on official mcaptchav5 labels).
   // Revert = change this string to 'safe-union'.
   const buf = execFileSync('python3',
-      [join(import.meta.dirname, 'v5solve.py'), '--files', ch.scenePath, ch.refPath, 'safe-union-cap4'],
+      [join(import.meta.dirname, solverScript), '--files', ch.scenePath, ch.refPath, solverRule],
       { encoding: 'utf8', timeout: 48000, maxBuffer: 1 << 24 });
     out = parseJSON(buf);
   } catch (e) {
-    log(`v5 solve error: ${String(e.message).slice(0, 180)}`);
+    log(`v5 solve error (${solverScript}): ${String(e.message).slice(0, 180)}`);
   }
   const nT = out && out.taps ? out.taps.length : 0;
   log(`v5 solve: ok=${!!(out && out.ok)} taps=${nT} reason=${(out && out.reason) || '-'} seg=${(out && out.seg_ms) != null ? out.seg_ms : '?'}ms vlm=${(out && out.vlm_ms) != null ? out.vlm_ms : '?'}ms wall=${(out && out.wall_ms) != null ? out.wall_ms : '?'}ms failedCells=${(out && out.failed_cells) || 0}`);
   if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 solve past bail window');
-  if (!out || !out.ok || nT === 0 || nT > 8) {
+  // v6 = exactly 2 taps (a 3+ answer is guaranteed-rejected; skip the Verify).
+  const tapsOk = st.v6 ? nT === 2 : (nT > 0 && nT <= 8);
+  if (!out || !out.ok || !tapsOk) {
     // No strict-confidence solution: NEVER Verify.  Reload is free this side
     // of the submit (no attempt recorded) and the loop retries after its
     // short breather — no floor since the 2026-10-09 policy change.
