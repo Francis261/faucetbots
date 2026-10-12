@@ -39,7 +39,7 @@ from eval_cv5 import b64img, CELL  # noqa: E402
 
 FAMILY = {
     'twins': 'ref', 'wings': 'ref', 'missing': 'ref', 'extra': 'ref',
-    'no-wings': 'presence', 'arms-legs': 'presence',
+    'no-wings': 'presence', 'arms-legs': 'presence', 'arms-wings': 'presence',
     '2-eyes': 'detail', 'stripes': 'detail', 'upside-down': 'detail',
     'side': 'detail', 'body-shape': 'detail',
     'biggest-smallest': 'size',
@@ -52,6 +52,7 @@ HINT_TITLES = {
     'extra':      'Tap the 2 monsters that are copies of the reference with EXACTLY ONE PART ADDED (the reference does NOT have that part: e.g. reference "nothing on top" vs monster "antennae"). Everything else must match the reference.',
     'no-wings':   'Tap the 2 monsters with NO WINGS (bare back — every other monster in the scene has wings).',
     'arms-legs':  'Tap the 2 monsters that have BOTH arms AND legs (arms at the sides AND legs/feet below the body).',
+    'arms-wings': 'Tap the 2 monsters that have BOTH arms AND wings (they have both).',
     '2-eyes':     'Tap the 2 monsters with EXACTLY 2 EYES (count carefully; the other monsters have 1 or 3+ eyes).',
     'stripes':    'Tap the 2 monsters with STRIPES on the body (striped body pattern — the others are plain).',
     'upside-down': 'Tap the 2 monsters standing UPSIDE DOWN (head pointing down, feet/antenna pointing up).',
@@ -60,27 +61,34 @@ HINT_TITLES = {
     'body-shape': 'Tap the 2 monsters whose BODY SHAPE is different from the other monsters (e.g. round vs rectangular). Judge only the body outline — not parts, colour or face.',
 }
 
-# ordered: specific checks BEFORE generic 'wings'
+# ordered: specific checks BEFORE generic — live 2026-10-12 showed the site
+# serves task kinds BEYOND the tutorial's 12 ("Tap the 2 with ARMS and WINGS").
+# Anything not recognized must RAISE -> bot bails free (never guess a task).
 _PARSE_ORDER = [
     ('no wings', 'no-wings'),
-    ('arms and legs', 'arms-legs'),
     ('2 eyes', '2-eyes'), ('two eyes', '2-eyes'),
     ('biggest', 'biggest-smallest'),
     ('different body', 'body-shape'),
-    ('twin', 'twins'),
     ('missing', 'missing'),
     ('extra', 'extra'),
     ('stripes', 'stripes'),
     ('upside', 'upside-down'),
     ('lying', 'side'), ('on their side', 'side'),
-    ('wings', 'wings'),
 ]
 
 
 def parse_task(title, sub=''):
     t = re.sub(r'[{}]', '', (title or '')).lower()
+    # combination checks first ('twin' before arms/legs: the twins prompt text
+    # itself lists "arms, legs, wings" and would otherwise misparse)
+    if 'twin' in t:
+        return 'twins'
     if 'arms' in t and 'legs' in t:
         return 'arms-legs'
+    if 'arms' in t and 'wings' in t:
+        return 'arms-wings'
+    if 'same' in t and 'wings' in t:
+        return 'wings'
     for key, kind in _PARSE_ORDER:
         if key in t:
             return kind
@@ -271,7 +279,7 @@ def b7_cell_set(kind, b7val, n):
     cells = b7val.get('cells') or {}
     ref = b7val.get('ref')
     out = set()
-    if kind in ('no-wings', 'arms-legs'):
+    if kind in ('no-wings', 'arms-legs', 'arms-wings'):
         for j in range(n):
             f = cells.get(j)
             if not isinstance(f, dict):
@@ -279,6 +287,8 @@ def b7_cell_set(kind, b7val, n):
             if kind == 'no-wings' and f['wings'] == 'no wings':
                 out.add(j)
             elif kind == 'arms-legs' and f['arms'] != 'no arms' and f['legs'] != 'no legs':
+                out.add(j)
+            elif kind == 'arms-wings' and f['arms'] != 'no arms' and f['wings'] != 'no wings':
                 out.add(j)
         return out
     if ref is None:
@@ -497,6 +507,7 @@ TASK_RULE = {
     'extra': 'G0B-contain',
     'no-wings': 'maj2GB-exact2',
     'arms-legs': 'maj2GB-exact2',
+    'arms-wings': 'maj2GB-exact2',
     '2-eyes': 'G-inter-exact2',
     'stripes': 'C-inter-exact2',
     'upside-down': 'never',
@@ -513,6 +524,7 @@ TASK_SIGS = {
     'extra': ('G', 'B7'),
     'no-wings': ('G', 'B7'),
     'arms-legs': ('G', 'B7'),
+    'arms-wings': ('G', 'B7'),
     '2-eyes': ('G',),
     'stripes': ('G', 'C', 'C2'),
     'upside-down': ('G',),

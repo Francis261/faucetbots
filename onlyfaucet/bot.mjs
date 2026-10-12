@@ -252,12 +252,13 @@ function attachGeomCapture(page) {
         try {
           const txt = await res.text();
           const j = JSON.parse(txt);
-          if (j && j.scene && j.ref) {
+          const refData = j && (j.ref || j.hint);   // v7 payloads may name it 'hint'
+          if (j && j.scene && refData) {
             const at = Date.now();
             const scenePath = `${SHOT_DIR}/v5-scene-${at}.png`;
             const refPath = `${SHOT_DIR}/v5-ref-${at}.png`;
             writeFileSync(scenePath, Buffer.from(String(j.scene).replace(/^data:image\/[\w+]+;base64,/, ''), 'base64'));
-            writeFileSync(refPath, Buffer.from(String(j.ref).replace(/^data:image\/[\w+]+;base64,/, ''), 'base64'));
+            writeFileSync(refPath, Buffer.from(String(refData).replace(/^data:image\/[\w+]+;base64,/, ''), 'base64'));
             v5Challenge = { scenePath, refPath, at };
             const furl = (() => { try { return res.frame().url(); } catch { return '?'; } })();
             let caller = '?';
@@ -271,7 +272,7 @@ function attachGeomCapture(page) {
               const gc = await res.frame().evaluate(() => (window.__gateClicks || []).slice(-1)[0] || null);
               if (gc) caller += ` | gate ${gc.kind} trusted=${gc.trusted}${gc.key ? ' key=' + gc.key : ''}`;
             } catch { /* page gone */ }
-            log(`v5 challenge: ${scenePath} (frame: ${furl.slice(0, 110)})\n    caller: ${caller}`);
+            log(`v5 challenge: ${scenePath} (frame: ${furl.slice(0, 110)}) keys=${Object.keys(j).join(',')}\n    caller: ${caller}`);
           }
         } catch (e) { log(`v5 capture failed: ${e.message}`); }
         return;
@@ -1237,6 +1238,7 @@ async function getPageState(page) {
         puzzle: text.includes('Drag the shape'),
         v5: text.includes('Tap every creature') || text.includes('Find its twins'),   // tap-widget challenge card (v5 or v6 wording)
         v6: text.includes('Find its twins'),   // v6 variant: 4 part categories, exactly 2 taps
+        v7: /Tap (?:the|its) 2\b|Tap the BIGGEST/i.test(text),   // v7: 12 task kinds ("Tap the 2 ..."/"Tap the BIGGEST ..."), exactly 2 taps
         captchaError: text.includes('Please complete the captcha'),
         verificationFailed: /verification failed/i.test(text),
         cooldown: waitSec !== null && !temporarilyBlocked,
@@ -1250,7 +1252,7 @@ async function getPageState(page) {
       };
     });
   } catch (e) {
-    return { text: '', success: false, verification: false, puzzle: false, v5: false, v6: false, captchaError: false, verificationFailed: false, cooldown: false, waitSec: null, temporarilyBlocked: false, blockSec: null, claimBtn: false, captchaAnswer: '', hRect: null, cbRect: null, verifyRect: null, hasForm: false, navError: true };
+    return { text: '', success: false, verification: false, puzzle: false, v5: false, v6: false, v7: false, captchaError: false, verificationFailed: false, cooldown: false, waitSec: null, temporarilyBlocked: false, blockSec: null, claimBtn: false, captchaAnswer: '', hRect: null, cbRect: null, verifyRect: null, hasForm: false, navError: true };
   }
 }
 
@@ -1549,7 +1551,7 @@ async function handlePuzzleV5(page, attempt = 0) {
   if (st.success || st.cooldown) return true;
   let gateClickAt = 0;
 
-  if (!st.v5) {
+  if (!st.v5 && !st.v7) {
     // --- Phase A: gate click = the captcha_image REQUEST = round event #1 ---
     let gate = null;
     for (let i = 0; i < 8 && !gate; i++) {
@@ -1564,10 +1566,10 @@ async function handlePuzzleV5(page, attempt = 0) {
       if (gate) break;
       const s2 = await getPageState(page);
       if (s2.success || s2.cooldown) return true;
-      if (s2.v5) { st = s2; break; }   // card appeared without our click
+      if (s2.v5 || s2.v7) { st = s2; break; }   // card appeared without our click
       await sleep(1000);
     }
-    if (!gate && !st.v5) {
+    if (!gate && !st.v5 && !st.v7) {
       log('v5 gate not found');
       await page.screenshot({ path: `${SHOT_DIR}/v5-no-gate-${ts()}.png`, fullPage: true }).catch(() => {});
       return 'aborted';   // nothing was opened: no event, no attempt
@@ -1612,7 +1614,7 @@ async function handlePuzzleV5(page, attempt = 0) {
   for (let i = 0; i < 8 && !cardReady; i++) {
     st = await getPageState(page);
     if (st.success || st.cooldown) return true;
-    if (st.v5) { cardReady = true; break; }
+    if (st.v5 || st.v7) { cardReady = true; break; }
     await sleep(400);
   }
   if (!cardReady) {
@@ -1649,18 +1651,36 @@ async function handlePuzzleV5(page, attempt = 0) {
   // --- Phase C: solve (segment -> parallel VLM majority -> safe-union taps) ---
   if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 pre-solve past bail window');
   let out = null;
-  // v6 card (st.v6 from the cardReady poll): 4 part categories, always exactly
-  // 2 twins -> v6solve + cap2. v5 keeps v5solve + safe-union-cap4 unchanged.
-  const solverScript = st.v6 ? 'v6solve.py' : 'v5solve.py';
-  const solverRule = st.v6 ? 'safe-union-cap2' : 'safe-union-cap4';
+  // v7 card (st.v7): 12 task kinds — the TITLE selects the task; v7solve's
+  // per-task exact-2 gate (TASK_RULE) decides propose-vs-bail internally
+  // (bail = ok:false, taps:0 -> we skip Verify and retry with a fresh scene).
+  // v6 card: 4 part categories, always exactly 2 twins -> v6solve + cap2.
+  // v5: v5solve + safe-union-cap4 unchanged.
+  let solverScript, solverRule, solverArgs;
+  if (st.v7) {
+    solverScript = 'v7solve.py';
+    solverRule = 'task-gates';
+    const cardTitle = await page.evaluate(() => {
+      const t = document.body?.innerText || '';
+      const m = t.search(/Tap (?:the|its) (?:2|BIGGEST)/i);
+      return m >= 0 ? t.slice(m, m + 250) : '';
+    }).catch(() => '');
+    log(`v7 card title: ${JSON.stringify(cardTitle.slice(0, 140))}`);
+    solverArgs = [join(import.meta.dirname, 'v7solve.py'), '--files',
+                  ch.scenePath, ch.refPath, cardTitle];
+  } else {
+    solverScript = st.v6 ? 'v6solve.py' : 'v5solve.py';
+    solverRule = st.v6 ? 'safe-union-cap2' : 'safe-union-cap4';
+    solverArgs = [join(import.meta.dirname, solverScript), '--files',
+                  ch.scenePath, ch.refPath, solverRule];
+  }
   log(`solve via ${solverScript} (${solverRule})`);
   try {
   // safe-union-cap4: identical to safe-union unless it proposes >=4 taps,
   // where it takes the arm intersection instead (analyze14: all observed >=4
   // answers were rejected; dormancy proven on official mcaptchav5 labels).
   // Revert = change this string to 'safe-union'.
-  const buf = execFileSync('python3',
-      [join(import.meta.dirname, solverScript), '--files', ch.scenePath, ch.refPath, solverRule],
+  const buf = execFileSync('python3', solverArgs,
       { encoding: 'utf8', timeout: 48000, maxBuffer: 1 << 24 });
     out = parseJSON(buf);
   } catch (e) {
@@ -1669,14 +1689,14 @@ async function handlePuzzleV5(page, attempt = 0) {
   const nT = out && out.taps ? out.taps.length : 0;
   log(`v5 solve: ok=${!!(out && out.ok)} taps=${nT} reason=${(out && out.reason) || '-'} seg=${(out && out.seg_ms) != null ? out.seg_ms : '?'}ms vlm=${(out && out.vlm_ms) != null ? out.vlm_ms : '?'}ms wall=${(out && out.wall_ms) != null ? out.wall_ms : '?'}ms failedCells=${(out && out.failed_cells) || 0} matched=${JSON.stringify((out && out.matched) || [])} verdict=${JSON.stringify((out && out.verdict) || {})} ref=${JSON.stringify((out && out.ref_parts) || null)}`);
   if (pastBailWindow()) return bailOutOfPuzzle(page, 'v5 solve past bail window');
-  // v6 = exactly 2 taps (a 3+ answer is guaranteed-rejected; skip the Verify).
-  const tapsOk = st.v6 ? nT === 2 : (nT > 0 && nT <= 8);
+  // v6/v7 = exactly 2 taps (a 3+ answer is guaranteed-rejected; skip the Verify).
+  const tapsOk = (st.v6 || st.v7) ? nT === 2 : (nT > 0 && nT <= 8);
   if (!out || !out.ok || !tapsOk) {
     // No strict-confidence solution: NEVER Verify.  Reload is free this side
     // of the submit (no attempt recorded) and the loop retries after its
     // short breather — no floor since the 2026-10-09 policy change.
     await page.screenshot({ path: `${SHOT_DIR}/v5-nosolve-${ts()}.png`, fullPage: true }).catch(() => {});
-    return bailOutOfPuzzle(page, 'v5-solve-unsafe');
+    return bailOutOfPuzzle(page, st.v7 ? 'v7-gate-bail' : 'v5-solve-unsafe');
   }
   try { await page.screenshot({ path: `${SHOT_DIR}/v5-pre-verify-${Date.now()}.png` }); } catch {}
 
@@ -2726,7 +2746,7 @@ async function waitForFaucetReady(page, timeout = 10000) {
   let st = await getPageState(page);
   while (Date.now() < end) {
     if (st.navError || st.claimBtn || st.hasForm || st.verification || st.puzzle
-      || st.v5 || st.success || st.cooldown || st.temporarilyBlocked) return st;
+      || st.v5 || st.v7 || st.success || st.cooldown || st.temporarilyBlocked) return st;
     await sleep(700);
     st = await getPageState(page);
   }
@@ -2830,7 +2850,7 @@ async function claimFaucet(page, email, retried = false) {
     }
   }
 
-  if (st.puzzle || st.verification || st.v5) {
+  if (st.puzzle || st.verification || st.v5 || st.v7) {
     // A widget already on screen means its countdown is already running.
     if (st.puzzle) markWidgetShown();
     log('Verification/puzzle present — solving...');
@@ -2919,7 +2939,7 @@ async function claimFaucet(page, email, retried = false) {
       log(`Claim successful! Claims=${n}`);
       return 'success';
     }
-    if (st.puzzle || st.verification || st.v5) {
+    if (st.puzzle || st.verification || st.v5 || st.v7) {
       const ok = await handlePuzzle(page);
       if (ok === 'aborted') return 'aborted'; // bailed pre-submit: no attempt burned
       st = await getPageState(page);
