@@ -1,0 +1,230 @@
+[
+ {
+  "i": 0,
+  "title": "Tap its 2 {{TWINS}}",
+  "sub": "Same parts as this one. Colour and face don't count.",
+  "answers": [
+   [
+    54.3,
+    74
+   ],
+   [
+    381.4,
+    195.2
+   ]
+  ],
+  "radii": [
+   29.9,
+   32.6
+  ]
+ },
+ {
+  "i": 1,
+  "title": "Tap the 2 with the same {{WINGS}} as this one",
+  "sub": "Only the wings count.",
+  "answers": [
+   [
+    389.6,
+    57.4
+   ],
+   [
+    173.7,
+    70.9
+   ]
+  ],
+  "radii": [
+   30.3,
+   32.7
+  ]
+ },
+ {
+  "i": 2,
+  "title": "Tap the 2 copies with a part {{MISSING}}",
+  "sub": "Copies of this monster with one part gone.",
+  "answers": [
+   [
+    56.8,
+    62
+   ],
+   [
+    165.4,
+    190.2
+   ]
+  ],
+  "radii": [
+   35.2,
+   33.3
+  ]
+ },
+ {
+  "i": 3,
+  "title": "Tap the 2 copies with an {{EXTRA PART}}",
+  "sub": "Copies of this monster with one part added.",
+  "answers": [
+   [
+    169.2,
+    201.2
+   ],
+   [
+    273.3,
+    210.6
+   ]
+  ],
+  "radii": [
+   31.5,
+   31.5
+  ]
+ },
+ {
+  "i": 4,
+  "title": "Tap the 2 monsters with {{NO WINGS}}",
+  "sub": "All the others have wings.",
+  "answers": [
+   [
+    58.5,
+    191.6
+   ],
+   [
+    278.8,
+    203
+   ]
+  ],
+  "radii": [
+   27.9,
+   26.9
+  ]
+ },
+ {
+  "i": 5,
+  "title": "Tap the 2 with {{ARMS}} and {{LEGS}}",
+  "sub": "They have both.",
+  "answers": [
+   [
+    63.3,
+    69.9
+   ],
+   [
+    385.5,
+    81.1
+   ]
+  ],
+  "radii": [
+   34.7,
+   35.3
+  ]
+ },
+ {
+  "i": 6,
+  "title": "Tap the 2 monsters with {{2 EYES}}",
+  "sub": "Count the eyes.",
+  "answers": [
+   [
+    385.6,
+    75.3
+   ],
+   [
+    169.9,
+    76.6
+   ]
+  ],
+  "radii": [
+   34.5,
+   36.2
+  ]
+ },
+ {
+  "i": 7,
+  "title": "Tap the 2 monsters with {{STRIPES}}",
+  "sub": "Only the pattern on the body counts.",
+  "answers": [
+   [
+    385.5,
+    84.2
+   ],
+   [
+    58.8,
+    79.7
+   ]
+  ],
+  "radii": [
+   33.2,
+   34.5
+  ]
+ },
+ {
+  "i": 8,
+  "title": "Tap the 2 monsters {{UPSIDE DOWN}}",
+  "sub": "Standing on their heads.",
+  "answers": [
+   [
+    173.4,
+    70.1
+   ],
+   [
+    282.4,
+    73
+   ]
+  ],
+  "radii": [
+   30.8,
+   32.1
+  ]
+ },
+ {
+  "i": 9,
+  "title": "Tap the 2 monsters {{LYING ON THEIR SIDE}}",
+  "sub": "Not standing up.",
+  "answers": [
+   [
+    62,
+    57.9
+   ],
+   [
+    282.9,
+    92.4
+   ]
+  ],
+  "radii": [
+   31.1,
+   35
+  ]
+ },
+ {
+  "i": 10,
+  "title": "Tap the {{BIGGEST}} and the {{SMALLEST}}",
+  "sub": "One big, one small.",
+  "answers": [
+   [
+    388.5,
+    63.5
+   ],
+   [
+    280.5,
+    212.7
+   ]
+  ],
+  "radii": [
+   40.8,
+   20.6
+  ]
+ },
+ {
+  "i": 11,
+  "title": "Tap the 2 with a {{DIFFERENT BODY}}",
+  "sub": "Their body shape is not like the others.",
+  "answers": [
+   [
+    387.3,
+    68.7
+   ],
+   [
+    279.8,
+    196.9
+   ]
+  ],
+  "radii": [
+   33.9,
+   34.9
+  ]
+ }
+]
