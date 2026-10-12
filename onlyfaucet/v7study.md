@@ -135,8 +135,24 @@ When the live card is observed (expected: task title + hint img + scene in
   - A bail is FREE live: no Verify, no attempt burned; the standing retry
     policy (immediate retry, fresh scene, 20-min backoff only on ban banners)
     absorbs it.
-- Next: wire live integration (`st.v7`, `v7solve.py --files` route, title-pattern
-  detection, exactly-2 guard — mirror of v6 commit `9fdbade`) **only after user
-  approval**; run K≥3 stability batteries after any prompt/rule change.
+- **LIVE TEST 2026-10-12 (user approved "test it live"; wiring commit `43fd7e5`):**
+  - wiring: `st.v7` detection regex (`Tap (the|its) 2` / `Tap the BIGGEST`),
+    title extracted from card innerText → `v7solve.py --files scene ref TITLE`,
+    exactly-2-taps guard, bail reason `v7-gate-bail`, capture accepts `ref|hint`.
+  - Round results: v6 card → claim ✓; v7 *upside-down* → gate bail, 0 attempts,
+    immediate retry ✓ (bail is free live); v7 *BIGGEST/SMALLEST* → G0==G1
+    `[1,5]` → 2 taps → Verify → **claim ✓ Claims=362**; block banners handled
+    by the standing 20-min ladder ✓.
+  - **Gap found live, hotfixed in `43fd7e5`:** the live site serves task kinds
+    BEYOND the tutorial's 12 — `Tap the 2 with ARMS and WINGS` was seen; the
+    old generic `'wings'` fallback misrouted it → wrong Verify → site block.
+    Fix: `parse_task` is now STRICT (unknown title RAISES → bot bails free,
+    never guesses) + new deterministic kind `arms-wings` (presence family,
+    B7 4-cat rule `arms≠none ∧ wings≠none`, gate `maj2GB-exact2`,
+    `TASK_SIGS=('G','B7')`). Verified offline: 14/14 parse cases, unknown
+    titles raise; G0/G1/B7 self-consistent `[6,7]` on tut5.
+  - Any future unseen title = free bail + exact text in `bot-loop.log`
+    (`v7 card title: ...`) → add kind → re-run K=3 battery before/after rule
+    changes as before.
 - Push blocked: GitHub SSH key `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINgTl30egFRFz8FHptcrFU1twdxDY0ZFvjLIGoX40jHM vps-admin`
   still unregistered by the user (all commits stay local).
