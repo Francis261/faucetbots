@@ -147,12 +147,109 @@ def cmd_search():
         print(f"{name:22s} {st:3d}/12 {hits:4d}/24 {fp:4d}")
 
 
+# Candidate gates per scene index (12 tutorial tasks, i=0 twins .. i=11 body).
+# Evaluated over EVERY cached run (not just run1) — endpoint varies between
+# battery invocations, so precision must hold across all runs.
+CANDS7 = {
+    0:  ['B7-exact2', 'V-exact2', 'BV-agree', 'BV-subset'],               # twins
+    1:  ['G-inter-exact2'],                                             # wings
+    2:  ['GB-agree', 'G-inter-exact2', 'GEBeq', 'maj2GB-exact2'],       # missing
+    3:  ['G0B-contain', 'G-inter-exact2', 'GEBeq'],                     # extra
+    4:  ['maj2GB-exact2', 'G-inter-exact2', 'GEBeq', 'GEC-equal',
+         'GB-agree', 'G4-equal'],                                       # no-wings
+    5:  ['maj2GB-exact2', 'G-inter-exact2', 'GEBeq', 'G4-equal'],       # arms-legs
+    6:  ['G-inter-exact2', 'GEC-equal', 'C-exact2', 'GC-contain'],      # 2-eyes
+    7:  ['C-inter-exact2'],                                             # stripes
+    8:  ['never'],                                                      # upside-down
+    9:  ['G-inter-exact2'],                                             # side
+    10: ['G-inter-exact2', 'GS-equal', 'S2'],                           # size
+    11: ['G-inter-exact2'],                                             # body
+}
+
+
+def cmd_scoreall():
+    """Per task × candidate gate over ALL cached runs: precision + coverage."""
+    data = load()
+    print(f"{'task':16s} {'rule':16s} {'runs':>4s} {'prop':>4s} {'ok':>3s} "
+          f"{'WRONG':>5s} {'cov%':>5s}   fails")
+    summary = []
+    for i in range(len(LABELS)):
+        e = data.get(str(i))
+        if not e or not e['runs']:
+            continue
+        t = set(TRUTH[i])
+        for rule in CANDS7.get(i, []):
+            fn, _n = V7_RULES[rule]
+            runs = prop = ok = wrong = 0
+            fails = []
+            for ri, run in enumerate(e['runs']):
+                runs += 1
+                v = {k: _v(run, k) for k in ('G0', 'G1', 'B7', 'V', 'S2', 'C', 'C2')}
+                try:
+                    m = fn(v, N_BLOCKS)
+                except Exception:
+                    m = None
+                if m is None:
+                    continue
+                prop += 1
+                if set(m) == t and len(m) == 2:
+                    ok += 1
+                else:
+                    wrong += 1
+                    fails.append(f"r{ri + 1}:{sorted(m)}")
+            cov = round(100 * prop / runs) if runs else 0
+            name = KIND_NAME[i]
+            print(f"{name:16s} {rule:16s} {runs:4d} {prop:4d} {ok:3d} "
+                  f"{wrong:5d} {cov:4d}%   {' '.join(fails)}")
+            summary.append((name, rule, wrong, cov))
+    bad = [s for s in summary if s[2]]
+    print(f"\nTOTAL: {len(summary)} (task,rule) combos, "
+          f"{len(bad)} with WRONG proposes")
+    for b in bad:
+        print(f"  WRONG: {b[0]} {b[1]}")
+
+
+KIND_NAME = ['twins', 'wings', 'missing', 'extra', 'no-wings', 'arms-legs',
+             '2-eyes', 'stripes', 'upside-down', 'side', 'size', 'body']
+
+
+def cmd_task(i):
+    """Forensic dump of one scene: truth + every run's signals + gate outcomes."""
+    data = load()
+    e = data.get(str(i))
+    if not e:
+        print(f"scene {i}: no data")
+        return
+    print(f"scene {i} '{LABELS[i]['title']}'  TRUTH={TRUTH[i]}  "
+          f"{len(e['runs'])} runs")
+    for ri, run in enumerate(e['runs']):
+        v = run.get('verdict') or {}
+        bits = ' '.join(f"{k}={v.get(k)}" for k in ('G0', 'G1', 'B7', 'V', 'S2', 'C', 'C2'))
+        outs = []
+        for rule in CANDS7.get(i, []):
+            fn, _n = V7_RULES[rule]
+            try:
+                m = fn({k: _v(run, k) for k in ('G0', 'G1', 'B7', 'V', 'S2', 'C', 'C2')},
+                       N_BLOCKS)
+            except Exception:
+                m = None
+            if m is not None:
+                outs.append(f"{rule}={'OK' if set(m) == set(TRUTH[i]) else 'WRONG' + str(sorted(m))}")
+        print(f"  run{ri + 1}: {bits}")
+        if outs:
+            print(f"          -> {'; '.join(outs)}")
+
+
 if __name__ == '__main__':
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'score'
     if cmd == 'run':
         cmd_run(int(sys.argv[2]) if len(sys.argv) > 2 else 1)
     elif cmd == 'score':
         cmd_score()
+    elif cmd == 'scoreall':
+        cmd_scoreall()
+    elif cmd == 'task':
+        cmd_task(int(sys.argv[2]))
     elif cmd == 'search':
         cmd_search()
     else:

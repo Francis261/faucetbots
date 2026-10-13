@@ -199,6 +199,59 @@ Reply ONLY JSON with exactly that one object. {guard}"""
 
 # ---------------------------------------------------------------- signals
 
+PROMPT_V7 = """Image 1 = grid of numbered cells; each cell is a crop of ONE monster (index drawn top-left).
+Image 2 = REFERENCE monster cut-out.
+
+TASK: a cell is "same" when the monster has EXACTLY the same top, arms, legs and wings as the REFERENCE monster (same KIND of part — ignore colour, face, size, lean, pose). Otherwise it is "different".
+
+Reply ONLY JSON: {{"cells":{{"1":"same"|"different","2":"same"|"different", ...}}}}
+Include EVERY cell index. {guard}"""
+
+PROMPT_S7 = """Image 1 = a SCENE of 8 cartoon monsters. Each monster is marked with a number 1-8 in its top-left corner (1-4 = top row left to right, 5-8 = bottom row left to right).
+TASK: SIZE — answer the two questions SEPARATELY:
+- "big": the number of the single LARGEST monster
+- "small": the number of the single SMALLEST monster
+Judge overall body bulk, not headgear or wingspan. Reply ONLY JSON: {{"big":<number>,"small":<number>}}.{guard}"""
+
+
+_SAME_VOCAB = ('sam', 'yes', 'ide', 'mat', 'twi', 'tru')
+
+
+def _V(kind, scene, cands, hint, order=None):
+    """twins: direct same/different vs reference (different question format
+    than B7's 4-cat classification -> independent error modes).
+    Images MUST be [grid, hint] to match PROMPT_V7's Image 1/Image 2."""
+    prompt = PROMPT_V7.format(guard=_GUARD)
+    images = [b64img(build_grid6(scene, cands, order=order)), b64img(hint_img(hint))]
+    parsed, raw, ms = _ask(prompt, images, max_tokens=2600,
+                           valid=lambda p: isinstance(p.get('cells'), dict))
+    cells = parsed.get('cells') or {}
+    classif = {}
+    for j in range(len(cands)):
+        v = cells.get(str(j + 1), cells.get(j + 1))
+        classif[j] = bool(v) and str(v).strip().lower().startswith(_SAME_VOCAB)
+    return 'V', classif, ms
+
+
+def _S(scene):
+    """size: decomposed biggest/smallest questions (not the joint match list)."""
+    prompt = PROMPT_S7.format(guard=_GUARD)
+    parsed, raw, ms = _ask(prompt, [b64img(label_scene(scene, None))],
+                           max_tokens=150,
+                           valid=lambda p: _svals(p) is not None)
+    return 'S2', _svals(parsed), ms
+
+
+def _svals(parsed):
+    try:
+        a, b = int(parsed.get('big')), int(parsed.get('small'))
+    except (TypeError, ValueError):
+        return None
+    if not (1 <= a <= N_BLOCKS and 1 <= b <= N_BLOCKS) or a == b:
+        return None
+    return {a - 1, b - 1}
+
+
 def _G(kind, scene, hint, tag, perm=None):
     pos_note = (' (1-4 = top row left to right, 5-8 = bottom row left to right)'
                 if perm is None else ' — the numbers are NOT in reading order, match them exactly as drawn')
@@ -233,7 +286,7 @@ def _gvals(parsed, perm=None):
     return set(labs)
 
 
-def _B7(family, kind, scene, cands, hint):
+def _B7(family, kind, scene, cands, hint, order=None):
     with_ref = family == 'ref'
     reply = ('{"ref":{"top":"...","arms":"...","legs":"...","wings":"..."},'
              '"cells":{"1":{"top":"...","arms":"...","legs":"...","wings":"..."},'
@@ -249,10 +302,11 @@ def _B7(family, kind, scene, cands, hint):
                   if with_ref else ''),
         reply=reply,
         guard=_GUARD)
-    images = []
+    # PROMPT_B7: Image 1 = grid, Image 2 = REFERENCE — send in THAT order
+    # (was swapped; coped on tutorial scenes but correlates misreads live).
+    images = [b64img(build_grid6(scene, cands, order=order))]
     if with_ref:
         images.append(b64img(hint_img(hint)))
-    images.append(b64img(build_grid6(scene, cands)))
     parsed, raw, ms = _ask(prompt, images, max_tokens=2600,
                            valid=lambda p: isinstance(p.get('cells'), dict)
                            and (not with_ref or norm4(p.get('ref')) is not None))
@@ -314,6 +368,34 @@ def b7_cell_set(kind, b7val, n):
                     and f[diffs[0]] != NOTHING[diffs[0]]:
                 out.add(j)
     return out
+
+
+def _body_xy(scene, c):
+    """Tap target = body-core centroid of the candidate, not its bbox center.
+
+    Live 2026-10-13 r10 (size): seg merged a tiny 34x28 monster into a 96x40
+    bbox -> bbox-center tap landed 19px off the body, registered on-sprite but
+    outside the widget's answer circle -> CORRECT blocks failed Verify.  The
+    saturation centroid sits on the body heart for every size; falls back to
+    bbox center when no saturated core is found (pale/black bodies)."""
+    x, y, w, h = c['x'], c['y'], c['w'], c['h']
+    roi = scene[y:y + h, x:x + w]
+    hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+    S, V = hsv[:, :, 1].astype(int), hsv[:, :, 2].astype(int)
+    for t in (110, 60):
+        m = ((S > t) & (V > 70) & (V < 248)).astype(np.uint8)
+        if m.any():
+            break
+    else:
+        return int(c['cx']), int(c['cy'])
+    m = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    n, lab, stats, _ = cv2.connectedComponentsWithStats(m)
+    if n <= 1:
+        return int(c['cx']), int(c['cy'])
+    best = 1 + int(np.argmax(stats[1:, cv2.CC_STAT_AREA]))
+    bx = stats[best, cv2.CC_STAT_LEFT] + stats[best, cv2.CC_STAT_WIDTH] // 2
+    by = stats[best, cv2.CC_STAT_TOP] + stats[best, cv2.CC_STAT_HEIGHT] // 2
+    return int(bx + x), int(by + y)
 
 
 def champions(cands):
@@ -461,11 +543,73 @@ def _g0_b7_contain(v, n):
     return s if s.issubset(set(b)) else None
 
 
+def _bv_agree(v, n):
+    """twins: B7 (4-cat classification) and V (direct same/different) must both
+    be exact-2 and identical.  Live 2026-10-13: B7 alone was wrong 2/2."""
+    b, vv = v.get('B7'), v.get('V')
+    if b is None or vv is None:
+        return None
+    b, vv = set(b), set(vv)
+    return b if len(b) == 2 and b == vv else None
+
+
+def _bv_subset(v, n):
+    """twins: B7 must be exact-2 AND one of B7/V must be a subset of the other.
+
+    Live forensics 2026-10-13: V over-finds on hard scenes (3 cells) and
+    under-finds on easy ones (1 cell), but when B7 is WRONG its pick and V's
+    set are never nested (r19: B7={1,5} V={3,4,5} -> bail); when B7 is RIGHT
+    the sets nest either way (r27: V={1,2,7} superset; tut0: V={7} subset)."""
+    b, vv = v.get('B7'), v.get('V')
+    if b is None or vv is None:
+        return None
+    b, vv = set(b), set(vv)
+    if len(b) != 2:
+        return None
+    return b if (vv.issubset(b) or b.issubset(vv)) else None
+
+
+def _gc_contain(v, n):
+    """2-eyes: G-inter exact-2 AND C (per-crop eye count) must contain it.
+
+    Live forensics: r01 claim G={3,5} C={3,5,6} -> propose; r29 wrong
+    G={5,7} C={1,2,4,5} (blk8 has 1 eye, not in C) -> bail."""
+    gi = _ginter(v, n)
+    c = v.get('C')
+    if gi is None or c is None or len(gi) != 2:
+        return None
+    return gi if set(gi).issubset(set(c)) else None
+
+
+def _g_eq(key):
+    """G-inter must be exact-2 AND the second signal must equal it exactly."""
+    def fn(v, n):
+        gi = _ginter(v, n)
+        x = v.get(key)
+        if gi is None or x is None or len(gi) != 2 or set(x) != gi:
+            return None
+        return gi
+    return fn, ('G0', 'G1', key)
+
+
+def _g4(v, n):
+    """all four signals (G0, G1, B7, C) must be exact-2 and identical."""
+    sets = [v.get(k) for k in ('G0', 'G1', 'B7', 'C')]
+    if any(s is None for s in sets):
+        return None
+    s0 = set(sets[0])
+    if len(s0) != 2 or any(set(s) != s0 for s in sets[1:]):
+        return None
+    return s0
+
+
 V7_RULES = {
     # exploratory (battery diagnostics / rule search)
     'G0':               _solo('G0'),
     'G1':               _solo('G1'),
     'B7':               _solo('B7'),
+    'V':                _solo('V'),
+    'S2':               _solo('S2'),
     'C':                _solo('C'),
     'G-inter':          (_ginter, ('G0', 'G1')),
     'G-union':          (_gunion, ('G0', 'G1')),
@@ -475,6 +619,7 @@ V7_RULES = {
     'B72-else-maj2':    _prefer('B7', 'maj2(G0,G1,B7)'),
     # LIVE gates: propose ONLY on exactly-2, never fall back (bail = free retry)
     'B7-exact2':        (lambda v, n: _exact2(v.get('B7')), ('B7',)),
+    'V-exact2':         (lambda v, n: _exact2(v.get('V')), ('V',)),
     'G-inter-exact2':   (lambda v, n: _exact2(_ginter(v, n)), ('G0', 'G1')),
     'maj2GB-exact2':    (lambda v, n: _exact2(_maj([v.get('G0'), v.get('G1'),
                                                     v.get('B7')], 2, n)),
@@ -483,6 +628,13 @@ V7_RULES = {
     'C-inter-exact2':    (_c_inter_exact2, ('C', 'C2')),
     'G0B-contain':       (_g0_b7_contain, ('G0', 'B7')),
     'GB-agree':         (_g_b7_equal, ('G0', 'G1', 'B7')),
+    'BV-agree':         (_bv_agree, ('B7', 'V')),
+    'BV-subset':        (_bv_subset, ('B7', 'V')),
+    'GC-contain':       (_gc_contain, ('G0', 'G1', 'C')),
+    'GEBeq':            _g_eq('B7'),
+    'GEC-equal':        _g_eq('C'),
+    'GS-equal':         _g_eq('S2'),
+    'G4-equal':         (_g4, ('G0', 'G1', 'B7', 'C')),
     'never':            (lambda v, n: None, ()),
 }
 DEFAULT_RULE7 = 'G-inter-exact2'
@@ -501,35 +653,37 @@ DEFAULT_RULE7 = 'G-inter-exact2'
 #                                        nondeterministic and its exact-2 outcomes were
 #                                        wrong — no discriminator exists -> always bail)
 TASK_RULE = {
-    'twins': 'B7-exact2',
+    'twins': 'BV-subset',
     'wings': 'G-inter-exact2',
     'missing': 'GB-agree',
     'extra': 'G0B-contain',
-    'no-wings': 'maj2GB-exact2',
-    'arms-legs': 'maj2GB-exact2',
-    'arms-wings': 'maj2GB-exact2',
-    '2-eyes': 'G-inter-exact2',
+    'no-wings': 'G4-equal',
+    'arms-legs': 'GEBeq',
+    'arms-wings': 'never',
+    '2-eyes': 'GC-contain',
     'stripes': 'C-inter-exact2',
     'upside-down': 'never',
     'side': 'G-inter-exact2',
-    'biggest-smallest': 'G-inter-exact2',
+    'biggest-smallest': 'GS-equal',
     'body-shape': 'G-inter-exact2',
 }
 
 # Which signals each task computes (G = G0+G1 scene calls, C2 = stripes wording-B)
+# Enriched 2026-10-13 after live failures: twins B7 wrong 2/2, size G wrong 2/4,
+# 2-eyes G0/G1 disagreement bails — collect an independent second signal each.
 TASK_SIGS = {
-    'twins': ('B7',),
+    'twins': ('B7', 'V'),
     'wings': ('G',),
     'missing': ('G', 'B7'),
     'extra': ('G', 'B7'),
-    'no-wings': ('G', 'B7'),
-    'arms-legs': ('G', 'B7'),
-    'arms-wings': ('G', 'B7'),
-    '2-eyes': ('G',),
+    'no-wings': ('G', 'B7', 'C'),
+    'arms-legs': ('G', 'B7', 'C'),
+    'arms-wings': (),   # rule='never' -> collect nothing, bail instantly
+    '2-eyes': ('G', 'C'),
     'stripes': ('G', 'C', 'C2'),
-    'upside-down': ('G',),
+    'upside-down': (),  # rule='never' -> no calls
     'side': ('G',),
-    'biggest-smallest': ('G',),
+    'biggest-smallest': ('G', 'S2'),
     'body-shape': ('G',),
 }
 
@@ -550,6 +704,7 @@ def solve(scene, hint, title, sub='', rule=None, workers=6, budget_s=None):
     cellsets, shapes = {}, {}
     need = TASK_SIGS[kind]
     perm_g1 = np.random.default_rng().permutation(N_BLOCKS).tolist()
+    rng = np.random.default_rng()
     ch = champions(cands)
     try:
         futs = []
@@ -557,19 +712,26 @@ def solve(scene, hint, title, sub='', rule=None, workers=6, budget_s=None):
             futs += [pool.submit(_G, kind, scene, hint, 'G0', None),
                      pool.submit(_G, kind, scene, hint, 'G1', perm_g1)]
         if 'B7' in need:
-            futs.append(pool.submit(_B7, family, kind, scene, cands, hint))
+            futs.append(pool.submit(_B7, family, kind, scene, cands, hint,
+                                    rng.permutation(n)))
+        if 'V' in need:
+            futs.append(pool.submit(_V, kind, scene, cands, hint,
+                                    rng.permutation(n)))
+        if 'S2' in need:
+            futs.append(pool.submit(_S, scene))
         if 'C' in need:
             for b in sorted(ch):
                 futs.append(pool.submit(_C, b, ch[b], kind, scene, cands, hint))
         if 'C2' in need:
             for b in sorted(ch):
                 futs.append(pool.submit(_C, b, ch[b], kind, scene, cands, hint, 'B'))
-        blocks = {'G0': None, 'G1': None, 'B7': None, 'C': None, 'C2': None}
-        b7raw, diag = None, {}
+        blocks = {'G0': None, 'G1': None, 'B7': None, 'V': None, 'S2': None,
+                  'C': None, 'C2': None}
+        b7raw, vraw, diag = None, None, {}
         pending = list(futs)
 
         def _collect(r):
-            nonlocal b7raw
+            nonlocal b7raw, vraw
             if r is None:
                 return
             tag = r[0]
@@ -579,6 +741,10 @@ def solve(scene, hint, title, sub='', rule=None, workers=6, budget_s=None):
                 b7raw = r[1]
                 diag['B7cells'] = {str(k): v for k, v in (r[1].get('cells') or {}).items()}
                 diag['B7ref'] = r[1].get('ref')
+            elif tag == 'V':
+                vraw = r[1]
+            elif tag == 'S2':
+                blocks['S2'] = r[1]
             elif tag in ('C', 'C2'):
                 _, b, p, _ms = r
                 cellsets.setdefault('Craw' if tag == 'C' else 'CrawB', {})[b] = p
@@ -618,6 +784,8 @@ def solve(scene, hint, title, sub='', rule=None, workers=6, budget_s=None):
     # derive cell sets per needed signal
     if 'B7' in need:
         blocks['B7'] = _to_blocks(b7_cell_set(kind, b7raw, n))
+    if 'V' in need and vraw is not None:
+        blocks['V'] = _to_blocks({j for j, s in vraw.items() if s})
     if 'C' in need:
         # C runs on block champions -> verdict keys are already blocks
         blocks['C'] = c_cell_set(kind, cellsets.get('Craw', {}), N_BLOCKS)
@@ -639,7 +807,7 @@ def solve(scene, hint, title, sub='', rule=None, workers=6, budget_s=None):
             inb = [c for c in cands if block_of(c['cx'], c['cy']) == b]
             if inb:
                 best = max(inb, key=lambda c: c['area'])
-                taps.append((int(best['cx']), int(best['cy'])))
+                taps.append(_body_xy(scene, best))
             else:
                 taps.append((int((b % 4) * BW + BW / 2), int((b // 4) * BH + BH / 2)))
 
