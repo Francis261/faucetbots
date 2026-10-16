@@ -11,16 +11,25 @@ services:
       - "5901:5901"   # raw VNC (optional)
     environment:
       - RESOLUTION=1280x800
-      - VNC_PASSWORD=rosecrypto
+      - VNC_PASSWORD=rosecry
       - START_BOT=1
       - TZ=Europe/London
       - CHROME_PATH=/usr/bin/chromium-browser
       - CHROME_CHANNEL=chromium
+      # xvfb = bot under xvfb-run (virtual display, no windows, no VNC).
+      # vnc  = Xfce desktop + noVNC web UI for watching (heavier, but CF
+      #        Turnstile passes more reliably with a real WM/compositor).
+      - DISPLAY_MODE=xvfb
+      # - HEADLESS=1   # uncomment: native headless Chrome (not even xvfb)
     volumes:
-      # Persist Chrome profile (login session) across rebuilds
+      # Persist per-account Chrome profiles (login sessions) across rebuilds
+      - rosecrypto-profiles:/home/bot/.rosecrypto-profiles
+      # Legacy shared profile (kept, no longer used)
       - rosecrypto-profile:/home/bot/.rosecrypto-chrome-profile
-      # Persist accounts + live log on host
+      # Persist accounts + live log + ollama config on host (config edits
+      # apply on container restart; vision.mjs reads it at startup)
       - ../accounts.json:/app/accounts.json
+      - ../config.json:/app/config.json
       - rosecrypto-log:/app/log
       # Bot writes log to stdout too; bind host log file if desired
       - ../bot.log:/app/bot.log
@@ -30,4 +39,5 @@ services:
 
 volumes:
   rosecrypto-profile:
+  rosecrypto-profiles:
   rosecrypto-log:

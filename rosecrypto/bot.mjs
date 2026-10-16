@@ -5,7 +5,18 @@ import { askVision, parseJSON } from './vision.mjs';
 
 const BASE_URL = 'https://rosecrypto.space';
 const FAUCET_URL = `${BASE_URL}/faucet`;
-const PROFILE = join(process.env.HOME, '.rosecrypto-chrome-profile');
+// Chrome profile is PER ACCOUNT: each username gets its own persistent
+// profile directory (cookies, CF clearance, session), created lazily the
+// first time that account is processed.  Editing accounts.json (add,
+// remove, reorder, or env-selected account) automatically switches the
+// browser to the matching profile — new accounts get a fresh profile and
+// a normal login.
+const PROFILES_ROOT = join(process.env.HOME, '.rosecrypto-profiles');
+
+function profileDirFor(username) {
+  const safe = String(username).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 64) || 'default';
+  return join(PROFILES_ROOT, safe);
+}
 const LOCKFILE = '/tmp/rosecrypto.lock';
 const ACCOUNTS_FILE = join(import.meta.dirname, 'accounts.json');
 
@@ -68,15 +79,26 @@ function updateAccount(username, data) {
   }
 }
 
-async function launchBrowser() {
-  mkdirSync(PROFILE, { recursive: true });
+async function launchBrowser(profileDir) {
+  mkdirSync(profileDir, { recursive: true });
+  // Stale Chromium singleton locks (left when a container/process is killed)
+  // make every subsequent launch fail with "browser has been closed" — clear
+  // them; a genuinely running browser on this profile cannot exist here
+  // because the bot lockfile guarantees single instance.
+  for (const f of ['SingletonLock', 'SingletonSocket', 'SingletonCookie']) {
+    try { unlinkSync(join(profileDir, f)); } catch {}
+  }
   const opts = {
-    headless: false,
+    // HEADLESS=1 runs Chrome natively headless (no X/VNC needed, lighter);
+    // default stays headed because Cloudflare challenges are stricter on
+    // headless — flip back with HEADLESS=0 if logins start stalling.
+    headless: process.env.HEADLESS === '1' || process.env.HEADLESS === 'true',
     args: [
       '--no-sandbox',
       '--disable-blink-features=AutomationControlled',
       '--disable-dev-shm-usage',
-      '--disable-gpu',
+      // NOTE: no --disable-gpu — software GL (SwiftShader) keeps WebGL
+      // available, which Cloudflare fingerprinting expects to see.
     ],
   };
   if (process.env.CHROME_PATH) {
@@ -84,7 +106,7 @@ async function launchBrowser() {
   } else {
     opts.channel = process.env.CHROME_CHANNEL || 'chrome';
   }
-  const ctx = await chromium.launchPersistentContext(PROFILE, opts);
+  const ctx = await chromium.launchPersistentContext(profileDir, opts);
   await ctx.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => undefined }));
   return ctx;
 }
@@ -337,31 +359,70 @@ async function clickChallengeBody(page) {
 async function solveTurnstile(page) {
   log('Solving Turnstile...');
 
-  // Click the turnstile container area multiple times to trigger token generation
-  const tb = await page.evaluate(() => {
-    const el = document.querySelector('.cf-turnstile');
-    if (!el) return null;
-    const r = el.getBoundingClientRect();
-    return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
-  });
+  // Locate the checkbox via the CF frame itself — the same geometry the
+  // working clickChallengeBody() helper uses.  Measuring the .cf-turnstile
+  // DIV instead gave clicks ~117px right of the real iframe (div x=309 vs
+  // iframe x=192), i.e. dead widget area, never the checkbox.
+  const locate = async () => {
+    for (const frame of page.frames()) {
+      try {
+        const url = frame.url() || '';
+        if (!url.includes('challenges.cloudflare.com') && !url.includes('turnstile') &&
+            !url.includes('cloudflare') && !url.includes('cf-')) continue;
+        const el = await frame.frameElement().catch(() => null);
+        if (!el) continue;
+        await el.scrollIntoViewIfNeeded().catch(() => {});
+        const box = await el.boundingBox().catch(() => null);
+        if (!box || box.width <= 0 || box.height <= 0) continue;
+        const local = await frame.evaluate(() => {
+          const input = document.querySelector('input[type="checkbox"]');
+          if (input) {
+            const r = input.getBoundingClientRect();
+            if (r.width > 0) return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+          }
+          const body = document.body?.getBoundingClientRect();
+          const h = body && body.height > 10 ? body.height : 65;
+          return { x: 25, y: h / 2 };
+        }).catch(() => ({ x: 25, y: 32 }));
+        return { x: box.x + local.x, y: box.y + local.y };
+      } catch {}
+    }
+    return null;
+  };
 
-  if (!tb) {
-    log('No turnstile found');
-    return false;
-  }
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    let pos = await locate();
+    if (!pos) {
+      // Frame not enumerated yet — nudge the widget into view and retry
+      await page.evaluate(() =>
+        document.querySelector('.cf-turnstile')?.scrollIntoView({ block: 'center' })
+      ).catch(() => {});
+      await sleep(1200);
+      pos = await locate();
+    }
+    if (!pos) {
+      log('Turnstile widget not found');
+      await sleep(1500);
+      continue;
+    }
 
-  for (let i = 0; i < 10; i++) {
-    await page.mouse.click(tb.x, tb.y);
-    await sleep(1500);
+    log(`Turnstile attempt ${attempt}: checkbox at (${Math.round(pos.x)}, ${Math.round(pos.y)})`);
+    await page.mouse.move(pos.x, pos.y, { steps: 8 });
+    await sleep(300);
+    await page.mouse.click(pos.x, pos.y);
 
-    const token = await page.evaluate(() => {
-      const input = document.querySelector('input[name="cf-turnstile-response"]');
-      return input?.value || '';
-    });
-
-    if (token.length > 10) {
-      log(`Turnstile solved (token: ${token.slice(0, 20)}...)`);
-      return true;
+    // Token generation takes a few seconds after the click; poll before
+    // re-clicking (rapid re-clicks reset the widget).
+    for (let t = 0; t < 10; t++) {
+      await sleep(2000);
+      const token = await page.evaluate(() => {
+        const input = document.querySelector('input[name="cf-turnstile-response"]');
+        return input?.value || '';
+      });
+      if (token.length > 10) {
+        log(`Turnstile solved (token: ${token.slice(0, 20)}...)`);
+        return true;
+      }
     }
   }
 
@@ -1273,35 +1334,49 @@ async function waitForTimerAndClaim(page, context, account) {
 async function run() {
   log('=== RoseCrypto Faucet Bot Started ===');
 
-  const accounts = loadAccounts();
-  if (accounts.length === 0) {
+  if (loadAccounts().length === 0) {
     log('No accounts found. Run: node bot.mjs add <username> <password>');
     process.exit(0);
   }
 
   let ctx = null;
   let page = null;
+  let activeProfile = null;
 
-  const ensureBrowser = async () => {
-    if (ctx && page && !page.isClosed()) {
+  const ensureBrowser = async (account) => {
+    const want = profileDirFor(account.username);
+    const sameProfile = activeProfile === want;
+    if (ctx && page && !page.isClosed() && sameProfile) {
       try {
         // Quick sanity check
         await page.evaluate(() => 1);
         return page;
       } catch {}
     }
-    // Relaunch — keep profile so session persists
+    // Account changed (or browser died): close the old browser and open THIS
+    // account's own profile.  A missing dir is created here, so every account
+    // keeps an isolated session and the "already on faucet" shortcut can only
+    // ever be that account's own login.
     try { if (ctx) await ctx.close().catch(() => {}); } catch {}
-    ctx = await launchBrowser();
+    if (!sameProfile) {
+      const isNew = !existsSync(want);
+      log(`${isNew ? 'Creating new profile' : 'Switching to profile'} for ${account.username}: ${want}`);
+    }
+    ctx = await launchBrowser(want);
+    activeProfile = want;
     page = ctx.pages()[0] || (await ctx.newPage());
     return page;
   };
 
   // Main loop: keep browser open forever, claim when ready
   while (true) {
+    // Re-read accounts.json every round — edits (add/remove/reorder or a new
+    // env-selected account) take effect live; each account's browser switches
+    // to its own profile, created on first use.
+    const accounts = loadAccounts();
     for (const account of accounts) {
       try {
-        const p = await ensureBrowser();
+        const p = await ensureBrowser(account);
         log(`\n--- Processing: ${account.username} ---`);
 
         // Login/navigate only if not already on faucet
