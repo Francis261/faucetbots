@@ -99,10 +99,16 @@ jobs:
           fi
           google-chrome --version || google-chrome-stable --version
 
+      # npm FIRST: npx playwright must resolve the repo's pinned playwright
+      # version, otherwise it downloads a different Chromium revision than the
+      # one the bots' launchPersistentContext expects (bot dies at launch)
+      - name: npm install
+        run: npm ci || npm install
+
       - name: Install Chromium (Playwright + system fallback)
         run: |
           set -euo pipefail
-          # Playwright's Chromium (bots default to channel: chrome, this is backup)
+          # Playwright's Chromium for the pinned playwright version
           npx playwright install --with-deps chromium || npx playwright install chromium || true
           # Ubuntu chromium may be snap; try deb package only if available
           if ! command -v chromium-browser >/dev/null 2>&1 && ! command -v chromium >/dev/null 2>&1; then
@@ -114,9 +120,6 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install pillow numpy opencv-python-headless
-
-      - name: npm install
-        run: npm ci || npm install
 
       - name: Install cloudflared
         run: |
@@ -434,6 +437,11 @@ jobs:
               echo "CHROME_PATH=$CHROME_BIN" >> "$GITHUB_ENV"
               echo "CHROME_CHANNEL=chromium" >> "$GITHUB_ENV"
             fi
+          fi
+          # moonptc: use the system Google Chrome (same as the other bots) —
+          # avoids depending on Playwright's bundled browser revision
+          if [ "$BOT" = "moonptc" ] && command -v google-chrome >/dev/null 2>&1; then
+            echo "MOONPTC_CHANNEL=chrome" >> "$GITHUB_ENV"
           fi
           echo "DISPLAY=:99" >> "$GITHUB_ENV"
           # Clear any stale bot locks from the runner image

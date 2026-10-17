@@ -38,6 +38,9 @@ const ACCOUNTS_FILE = process.env.MOONPTC_ACCOUNTS_FILE || join(import.meta.dirn
 const PROFILES_ROOT = process.env.MOONPTC_PROFILES_ROOT || join(process.env.HOME, '.moonptc-profiles');
 const SHOT_ROOT = process.env.MOONPTC_SHOTS || '/tmp/moonptc-shots';
 const HEADLESS = process.env.HEADLESS === '1';
+// optional: use a system browser channel instead of Playwright's bundled
+// chromium (e.g. MOONPTC_CHANNEL=chrome on CI where Google Chrome is installed)
+const CHANNEL = process.env.MOONPTC_CHANNEL || '';
 const WITHDRAW_MIN = 100; // site minimum, also the user-set trigger
 
 // stdout is redirected to bot.log by the launcher — single writer, no dupes
@@ -367,6 +370,7 @@ async function openBrowser(acc) {
   }
   acc.context = await chromium.launchPersistentContext(acc.profileDir, {
     headless: HEADLESS,
+    ...(CHANNEL ? { channel: CHANNEL } : {}),
     viewport: { width: 1280, height: 800 },
     args: [
       '--no-sandbox',
@@ -470,7 +474,18 @@ async function claimOnce(acc) {
 // ---------- per-account main loop ----------
 
 async function runAccount(acc) {
-  await openBrowser(acc);
+  // browser launch can fail transiently on a cold VM (browser download races,
+  // X server not up yet) — retry forever with logging instead of letting the
+  // whole process exit silently
+  for (;;) {
+    try {
+      await openBrowser(acc);
+      break;
+    } catch (e) {
+      acc.log(`Browser launch failed: ${e?.message || e} — retrying in 10s`);
+      await sleep(10000);
+    }
+  }
 
   for (;;) {
     try {
@@ -519,8 +534,11 @@ async function main() {
   }
   console.log(`[${ts()}] === MoonPTC Faucet Bot started — ${emails.length} account(s) ===`);
   const accounts = emails.map(makeAccount);
-  // one independent loop per account; runAccount never resolves
-  await Promise.allSettled(accounts.map((a) => runAccount(a)));
+  // one independent loop per account; runAccount never resolves — and if it
+  // somehow rejects, log it loudly instead of exiting silently
+  await Promise.allSettled(accounts.map((a) => runAccount(a).catch((e) => {
+    console.log(`[${ts()}] [${a.tag}] account loop crashed: ${e?.stack || e}`);
+  })));
 }
 
 main().catch((e) => { console.log(`[${ts()}] Fatal: ${e}`); process.exit(1); });
