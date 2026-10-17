@@ -8,16 +8,17 @@ on:
         required: true
         type: choice
         options:
+          - moonptc
           - onlyfaucet
           - rosecrypto
           - 1xfaucet
-        default: onlyfaucet
+        default: moonptc
       email:
-        description: Login email / FaucetPay email / 1xfaucet email
+        description: "Login email / FaucetPay email (moonptc: comma-separated list = multiple accounts, no password needed)"
         required: true
         type: string
       password:
-        description: Password (required for rosecrypto and 1xfaucet; leave blank for onlyfaucet)
+        description: Password (required for rosecrypto and 1xfaucet; leave blank for onlyfaucet and moonptc)
         required: false
         type: string
         default: ""
@@ -82,7 +83,7 @@ jobs:
           set -euo pipefail
           sudo apt-get update -y
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            xvfb x11vnc xterm novnc websockify dbus-x11 \
+            xvfb x11vnc xterm novnc websockify dbus-x11 xfce4 xfce4-terminal \
             wget curl ca-certificates gnupg \
             libnss3 libatk-bridge2.0-0 libgtk-3-0 libgbm1 libasound2 \
             libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libpangocairo-1.0-0 \
@@ -162,6 +163,19 @@ jobs:
           # Committed account stores from the repo must not win over dispatch inputs.
           # Always REPLACE the selected bot's store with only this run's credentials.
           case "$BOT" in
+            moonptc)
+              if [ -z "$EMAIL" ]; then echo "moonptc requires at least one email"; exit 1; fi
+              export LOGIN_EMAIL="$EMAIL"
+              node -e '
+                const fs = require("fs");
+                const p = "moonptc/moonptc-accounts.json";
+                const emails = [...new Set((process.env.LOGIN_EMAIL || "")
+                  .split(/[,;\s]+/).map((s) => s.trim()).filter(Boolean))];
+                if (!emails.length) { console.error("no emails parsed"); process.exit(1); }
+                fs.writeFileSync(p, JSON.stringify(emails.map((email) => ({ email })), null, 2) + "\n");
+                console.log("moonptc-accounts.json ->", emails.length, "account(s):", emails.join(", "));
+              '
+              ;;
             onlyfaucet)
               if [ -z "$EMAIL" ]; then echo "onlyfaucet requires email"; exit 1; fi
               export LOGIN_EMAIL="$EMAIL"
@@ -355,6 +369,17 @@ jobs:
           [ "$NOVNC_OK" = 1 ] || fail "noVNC/websockify not responding on :6080"
           echo "noVNC local OK (web=$NOVNC_WEB)"
 
+          # desktop environment so the bots' Chrome windows sit in a real
+          # xfce session viewable via noVNC (best-effort — bots run without it)
+          setsid nohup dbus-run-session -- startxfce4 >/tmp/xfce.log 2>&1 < /dev/null &
+          echo $! > /tmp/xfce.pid
+          sleep 6
+          if pgrep -x xfce4-session >/dev/null 2>&1; then
+            echo "xfce4 session up"
+          else
+            echo "WARNING: xfce4 did not start (see /tmp/xfce.log) — continuing without a desktop"
+          fi
+
       - name: Start Cloudflare quick tunnel
         run: |
           set -euo pipefail
@@ -474,6 +499,10 @@ jobs:
           echo "Starting $BOT with LOGIN_EMAIL=${LOGIN_EMAIL:-} LOGIN_USERNAME=${LOGIN_USERNAME:-}"
           mkdir -p /tmp/bot-logs
           case "$BOT" in
+            moonptc)
+              setsid nohup node moonptc/bot.mjs > /tmp/bot-logs/moonptc.log 2>&1 < /dev/null &
+              echo $! > /tmp/bot.pid
+              ;;
             onlyfaucet)
               setsid nohup node onlyfaucet/bot.mjs > /tmp/bot-logs/onlyfaucet.log 2>&1 < /dev/null &
               echo $! > /tmp/bot.pid
@@ -513,6 +542,9 @@ jobs:
           start_bot() {
             rm -f /tmp/onlyfaucet.lock /tmp/rosecrypto.lock /tmp/1xfaucet_bot.lock 2>/dev/null || true
             case "$BOT" in
+              moonptc)
+                setsid nohup node moonptc/bot.mjs >> /tmp/bot-logs/moonptc.log 2>&1 < /dev/null &
+                ;;
               onlyfaucet)
                 setsid nohup node onlyfaucet/bot.mjs >> /tmp/bot-logs/onlyfaucet.log 2>&1 < /dev/null &
                 ;;
@@ -621,6 +653,8 @@ jobs:
           cp -a /tmp/x11vnc.log artifacts/ 2>/dev/null || true
           cp -a /tmp/websockify.log artifacts/ 2>/dev/null || true
           cp -a /tmp/xvfb.log artifacts/ 2>/dev/null || true
+          cp -a /tmp/xfce.log artifacts/ 2>/dev/null || true
+          cp -a /tmp/moonptc-shots/. artifacts/moonptc-shots/ 2>/dev/null || true
           cp -a /tmp/onlyfaucet-shots/. artifacts/shots/ 2>/dev/null || true
           ls -la artifacts || true
 
