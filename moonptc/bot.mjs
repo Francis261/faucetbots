@@ -25,7 +25,8 @@
 // Notes:
 //   - anti_adblock is ENABLED on the site: ad requests must succeed or the
 //     faucet refuses to claim, so ads are never blocked — popup tabs they
-//     open are just closed.
+//     open are just closed.  If the site's ad-health check shows "Ads could
+//     not be loaded", the page is refreshed until the ads come back.
 //   - errors retry immediately; a 429 waits out locked_until.
 
 import { chromium } from 'playwright';
@@ -205,6 +206,23 @@ async function defuseOverlay(acc) {
     }
     document.querySelectorAll('[data-cc-id]').forEach((d) => { d.style.pointerEvents = 'none'; });
   }).catch(() => {});
+}
+
+// anti_adblock: the site probes its ad slots on mount ("checking" ->
+// "allowed"/"blocked"); when blocked it renders the amber "Ads could not be
+// loaded" panel and the faucet refuses to claim.  Refresh the page until the
+// ads come back (up to 3 reloads) — losing nothing, nothing is mid-flight.
+async function ensureAds(acc) {
+  const blocked = () => acc.page.evaluate(() =>
+    /ads could not be loaded/i.test(document.body.innerText)).catch(() => false);
+  if (!(await blocked())) return true;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    acc.log(`Ads could not be loaded — refreshing the page (${attempt}/3)`);
+    await acc.page.reload({ waitUntil: 'commit', timeout: 45000 }).catch(() => {});
+    await sleep(7000); // ad-health check runs twice on mount before deciding
+    if (!(await blocked())) { acc.log('Ads are loading again'); return true; }
+  }
+  return false;
 }
 
 async function solveTurnstile(acc) {
@@ -434,6 +452,12 @@ async function claimOnce(acc) {
   const page = acc.page;
   await page.goto(SITE + '/faucet', { waitUntil: 'commit', timeout: 45000 });
   await sleep(3000);
+
+  // ads down = claims refused — refresh until they load again
+  if (!(await ensureAds(acc))) {
+    acc.log('Ads still failing after refreshes — retrying later');
+    return { retryIn: 20 };
+  }
 
   const status = await page.evaluate(async () =>
     (await fetch('/api/faucet/status', { credentials: 'include' })).json().catch(() => null));
